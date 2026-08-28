@@ -725,7 +725,32 @@ function b64dec(b64){
   for(let i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);
   return new TextDecoder().decode(b);
 }
-const payload=()=>JSON.stringify(S,null,1);
+/* ── Desking (asm_desk_v1) ──
+   Vive en su propia clave porque desking.html la lee tal cual y no se toca.
+   El CRM la adjunta al subir y la devuelve a su sitio al bajar. */
+const DK='asm_desk_v1';
+function leerDesk(){try{const r=localStorage.getItem(DK);return r?JSON.parse(r):null;}catch(e){return null;}}
+function escribirDesk(d){
+  try{ if(d==null)localStorage.removeItem(DK); else localStorage.setItem(DK,JSON.stringify(d)); return true; }
+  catch(e){return false;}
+}
+/* Huella barata para saber si Desking escribió desde la última sincronización */
+function deskSig(){
+  let s='';try{s=localStorage.getItem(DK)||'';}catch(e){}
+  let h=2166136261>>>0;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+  return s.length+':'+h.toString(36);
+}
+const nDesk=d=>(d&&d.cotizaciones&&d.cotizaciones.length)||0;
+
+/* Lo que viaja a la nube: el CRM + las cotizaciones de Desking */
+function snapshot(){
+  const o=Object.assign({},S);
+  const d=leerDesk();
+  if(d)o.desk=d;
+  return o;
+}
+const payload=()=>JSON.stringify(snapshot(),null,1);
 
 /* ═══ GITHUB ═══ */
 async function ghFetch(ruta,opts){
@@ -840,15 +865,15 @@ async function sincronizar(manual){
 
     /* Dispositivo nuevo estrenando la conexión: aquí no hay nada que perder,
        así que se adopta la nube sin molestar con un conflicto. */
-    if(vacio(S)&&!vacio(rem.datos)){
+    if(vacio(snapshot())&&!vacio(rem.datos)){
       adoptar(rem.datos);
       if(SYNC.modo==='github')SYNC.gh.sha=rem.sha;
-      SYNC.baseRev=rRev; SYNC.ultima=nowISO(); saveSync();
+      SYNC.baseRev=rRev; SYNC.ultima=nowISO(); SYNC.deskSig=deskSig(); saveSync();
       sincronizando=false; setEstado('ok'); render();
       toast('Datos recuperados de la nube');
       return;
     }
-    if(rRev>base&&lRev>base&&!iguales(rem.datos,S)){
+    if(rRev>base&&lRev>base&&!iguales(rem.datos,snapshot())){
       sincronizando=false;
       setEstado('conflicto');
       modalConflicto(rem);
@@ -857,7 +882,7 @@ async function sincronizar(manual){
     if(rRev>base){                         /* la nube va adelante: la adoptamos */
       adoptar(rem.datos);
       if(SYNC.modo==='github')SYNC.gh.sha=rem.sha;
-      SYNC.baseRev=rRev; SYNC.ultima=nowISO(); saveSync();
+      SYNC.baseRev=rRev; SYNC.ultima=nowISO(); SYNC.deskSig=deskSig(); saveSync();
       sincronizando=false; setEstado('ok'); render();
       if(manual)toast('Actualizado desde la nube');
       return;
@@ -865,7 +890,7 @@ async function sincronizar(manual){
     if(lRev>base){ await enviar(rem.sha); sincronizando=false; if(manual)toast('Guardado en la nube'); return; }
 
     if(SYNC.modo==='github')SYNC.gh.sha=rem.sha;
-    SYNC.ultima=nowISO(); saveSync();
+    SYNC.ultima=nowISO(); SYNC.deskSig=deskSig(); saveSync();
     sincronizando=false; setEstado('ok');
     if(manual)toast('Todo al día');
   }catch(e){
@@ -878,14 +903,15 @@ async function sincronizar(manual){
 }
 async function enviar(sha){
   if(SYNC.modo==='github')await ghPush(sha); else await fsEscribir();
-  SYNC.baseRev=S.meta.rev; SYNC.ultima=nowISO(); saveSync();
+  SYNC.baseRev=S.meta.rev; SYNC.ultima=nowISO(); SYNC.deskSig=deskSig(); saveSync();
   setEstado('ok');
 }
-/* "Vacío" = sin nada que perder: solo el perfil del onboarding. */
+/* "Vacío" = sin nada que perder: solo el perfil del onboarding.
+   Un dispositivo con cotizaciones de Desking NO está vacío. */
 function vacio(d){
   if(!d)return true;
   return !((d.clientes||[]).length||(d.leads||[]).length||
-           (d.promos||[]).length||(d.tareas||[]).length);
+           (d.promos||[]).length||(d.tareas||[]).length||nDesk(d.desk));
 }
 function iguales(a,b){
   try{
@@ -894,15 +920,18 @@ function iguales(a,b){
   }catch(e){return false;}
 }
 function adoptar(d){
-  S=Object.assign(BLANK(),d);
-  S.cfg=Object.assign(BLANK().cfg,d.cfg||{});
+  if(d&&d.desk)escribirDesk(d.desk);      /* las cotizaciones vuelven a su clave */
+  const limpio=Object.assign({},d); delete limpio.desk;
+  S=Object.assign(BLANK(),limpio);
+  S.cfg=Object.assign(BLANK().cfg,(d&&d.cfg)||{});
   ['clientes','leads','promos','tareas'].forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];});
   if(!S.meta)S.meta={rev:0,updatedAt:'',device:''};
   saveLocal();
 }
 function resumen(d){
-  const m=(d&&d.meta)||{};
+  const m=(d&&d.meta)||{}, q=nDesk(d&&d.desk);
   return `${(d.clientes||[]).length} clientes · ${(d.leads||[]).length} leads · ${(d.promos||[]).length} programas`+
+    (q?` · ${q} negocio${q>1?'s':''}`:'')+
     (m.updatedAt?`<br><span style="color:var(--tx3)">${fDateTime(m.updatedAt)}${m.device?' · '+esc(m.device):''}</span>`:'');
 }
 function modalConflicto(rem){
@@ -918,20 +947,20 @@ function modalConflicto(rem){
     <div class="card" style="background:var(--bg3)">
       <div style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12.5px;margin-bottom:6px">
         ${ic('HardDrive',14,C.p)}En este dispositivo (${esc(SYNC.device)})</div>
-      <div style="font-size:12px;color:var(--tx2);line-height:1.6">${resumen(S)}</div></div>`,
+      <div style="font-size:12px;color:var(--tx2);line-height:1.6">${resumen(snapshot())}</div></div>`,
    `<button class="btn sec" onclick="resolver('nube')">${ic('Cloud')}Usar la nube</button>
     <button class="btn" onclick="resolver('local')">${ic('HardDrive')}Usar este</button>`);
 }
 async function resolver(cual){
   const rem=window.__CONF; if(!rem)return;
   closeModal();
-  bajarJSON(cual==='nube'?S:rem.datos, 'respaldo-descartado-'+today()+'.json');
+  bajarJSON(cual==='nube'?snapshot():rem.datos, 'respaldo-descartado-'+today()+'.json');
   try{
     if(cual==='nube'){
       adoptar(rem.datos);
       if(SYNC.modo==='github')SYNC.gh.sha=rem.sha;
       SYNC.baseRev=(rem.datos.meta&&rem.datos.meta.rev)||0;
-      SYNC.ultima=nowISO(); saveSync(); setEstado('ok'); render();
+      SYNC.ultima=nowISO(); SYNC.deskSig=deskSig(); saveSync(); setEstado('ok'); render();
       toast('Se quedó la versión de la nube');
     }else{
       S.meta.rev=Math.max(S.meta.rev||0,(rem.datos.meta&&rem.datos.meta.rev)||0)+1;
@@ -950,6 +979,28 @@ function bajarJSON(obj,nombre){
   }catch(e){}
 }
 
+/* ── Cambios hechos por Desking ──
+   Desking guarda en su pestaña y no llama a save() del CRM, así que
+   comparamos su huella y, si cambió, marcamos el estado como pendiente. */
+function revisarDesk(){
+  if(SYNC.modo==='local')return false;
+  const sig=deskSig();
+  if(SYNC.deskSig===undefined||SYNC.deskSig===null){SYNC.deskSig=sig;saveSync();return false;}
+  if(sig===SYNC.deskSig)return false;
+  S.meta.rev=(S.meta.rev||0)+1;
+  S.meta.updatedAt=nowISO();
+  S.meta.device=SYNC.device;
+  saveLocal();
+  programarPush();
+  return true;
+}
+/* El evento 'storage' llega a las OTRAS pestañas del mismo origen:
+   cuando Desking guarda, el CRM se entera aquí. */
+window.addEventListener('storage',e=>{
+  if(!e||e.key!==DK)return;
+  if(revisarDesk()&&TAB==='nube')render();
+});
+
 /* ── Arranque y disparadores automáticos ── */
 async function iniciarSync(){
   if(SYNC.modo==='archivo'){
@@ -957,16 +1008,21 @@ async function iniciarSync(){
     if(!FH){SYNC.modo='local';saveSync();setEstado('local');return;}
     if(!await fsPermiso(false)){setEstado('permiso');return;}
   }
-  if(SYNC.modo!=='local')sincronizar();
+  if(SYNC.modo!=='local'){revisarDesk();sincronizar();}
 }
 document.addEventListener('visibilitychange',()=>{
   if(SYNC.modo==='local')return;
-  if(document.visibilityState==='hidden'){ if(S.meta.rev>SYNC.baseRev)sincronizar(); }
-  else if(Date.now()-ultimoPull>20000){ ultimoPull=Date.now(); sincronizar(); }
+  if(document.visibilityState==='hidden'){ revisarDesk(); if(S.meta.rev>SYNC.baseRev)sincronizar(); }
+  else{
+    /* Al volver de la pestaña de Desking, recogemos lo que haya guardado */
+    revisarDesk();
+    if(Date.now()-ultimoPull>20000){ ultimoPull=Date.now(); sincronizar(); }
+  }
 });
 window.addEventListener('online',()=>{if(SYNC.modo!=='local')sincronizar();});
 setInterval(()=>{
   if(SYNC.modo!=='local'&&document.visibilityState==='visible'&&!sincronizando){
+    revisarDesk();
     ultimoPull=Date.now(); sincronizar();
   }
 },120000);
@@ -1789,6 +1845,8 @@ VIEWS.nube=function(){
           <span style="color:${pend?C.warn:C.tx2}">${pend?pend+' cambio'+(pend>1?'s':''):'ninguno'}</span></div>
         <div class="sumrow"><span style="color:var(--tx3)">Este dispositivo</span>
           <span style="color:var(--tx2)">${esc(SYNC.device)}</span></div>
+        <div class="sumrow"><span style="color:var(--tx3)">Incluye</span>
+          <span style="color:var(--tx2)">${S.clientes.length} clientes · ${S.leads.length} leads · ${nDesk(leerDesk())} negocios</span></div>
         <div style="display:flex;gap:8px;margin-top:12px">
           <button class="btn sm" style="flex:1" onclick="sincronizar(true)">${ic('RefreshCw')}Sincronizar ahora</button>
           <button class="btn sec sm" onclick="desconectar()">Desconectar</button>
@@ -1856,7 +1914,7 @@ VIEWS.nube=function(){
 
   out+=`<div class="card pad0">
     <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('Download',15,C.tx)}Respaldo manual</div>
-      <div class="s">Siempre disponible, con o sin nube.</div></div>
+      <div class="s">Siempre disponible, con o sin nube. Incluye el libro, el pipeline, los programas, las tareas y los negocios armados en Desking.</div></div>
     <div style="padding:15px 16px">
       <button class="btn sec full" onclick="exportar()">${ic('Download')}Exportar respaldo JSON</button>
       <div style="height:8px"></div>
@@ -1982,7 +2040,7 @@ function saveCfg(){
   save();toast('Guardado');render();
 }
 function exportar(){
-  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify(snapshot(),null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download='autosolution-crm-'+today()+'.json';
@@ -1997,10 +2055,12 @@ function importar(ev){
     try{
       const d=JSON.parse(r.result);
       if(!d||(!Array.isArray(d.clientes)&&!Array.isArray(d.leads))){alert('Archivo no válido.');return;}
-      const n=(d.clientes||[]).length, m=(d.leads||[]).length;
-      if(!confirm(`Importar ${n} cliente(s) y ${m} lead(s)? Reemplaza todo lo que hay ahora.`))return;
+      const n=(d.clientes||[]).length, m=(d.leads||[]).length, q=nDesk(d.desk);
+      if(!confirm(`Importar ${n} cliente(s), ${m} lead(s)${q?` y ${q} negocio(s) de Desking`:''}? Reemplaza todo lo que hay ahora.`))return;
       const revPrev=S.meta.rev||0;
-      S=Object.assign(BLANK(),d);
+      if(d.desk)escribirDesk(d.desk);
+      const limpio=Object.assign({},d); delete limpio.desk;
+      S=Object.assign(BLANK(),limpio);
       S.cfg=Object.assign(BLANK().cfg,d.cfg||{});
       S.cfg.onboarded=true;
       ['clientes','leads','promos','tareas'].forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];});
@@ -2015,9 +2075,12 @@ function importar(ev){
   ev.target.value='';
 }
 function borrarTodo(){
-  if(!confirm('¿Borrar TODO? Exporta un respaldo primero.'))return;
+  const q=nDesk(leerDesk());
+  if(!confirm('¿Borrar TODO?\n\nClientes, leads, programas, tareas'+
+    (q?` y ${q} negocio(s) armados en Desking`:'')+'.\n\nExporta un respaldo primero.'))return;
   if(!confirm('¿Seguro? Esto no se puede deshacer.'))return;
   const nombre=S.cfg.nombre, wa=S.cfg.wa, dealer=S.cfg.dealer;
+  escribirDesk(null);
   S=BLANK(); S.cfg={nombre,wa,dealer,onboarded:true};
   save();toast('Todo borrado');go('dashboard');
 }
