@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#080808"/>
+<title>AutoSolution — Desking</title>
+<style>
+:root{
+  --bg:#080808;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;
+  --bd:#2a2a2a;--bd2:#363636;
+  --tx:#efefef;--tx2:#999;--tx3:#555;
+  --p:#e31c1c;--ps:rgba(227,28,28,.1);
+  --ok:#22c55e;--warn:#eab308;--info:#3b82f6;--wa:#25D366;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);font-size:14px;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom)}
+.mono{font-family:'JetBrains Mono','SFMono-Regular',Consolas,monospace;font-feature-settings:'tnum'}
+button{cursor:pointer;font-family:inherit;font-size:inherit}
+input,select{font-family:inherit;font-size:inherit}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+
+header{position:sticky;top:0;z-index:50;background:#070707;border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;align-items:center;gap:10px}
+.logo{font-weight:900;letter-spacing:.5px;font-size:16px}.logo b{color:var(--p)}
+.sub{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.1em}
+
+.tabs{position:sticky;top:49px;z-index:49;display:flex;background:#0b0b0b;border-bottom:1px solid var(--bd);overflow-x:auto}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1;min-width:90px;padding:11px 8px;text-align:center;font-size:12px;font-weight:700;color:var(--tx3);background:none;border:none;border-bottom:2px solid transparent;white-space:nowrap}
+.tab.on{color:var(--p);border-bottom-color:var(--p)}
+
+main{max-width:860px;margin:0 auto;padding:16px}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:520px){.grid3{grid-template-columns:1fr 1fr}}
+.f label{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-bottom:4px}
+.f input,.f select{width:100%;padding:9px 11px;border-radius:9px;border:1.5px solid var(--bd);background:var(--bg3);color:var(--tx);outline:none}
+.f input:focus,.f select:focus{border-color:var(--p)}
+.span2{grid-column:span 2}
+h2{font-size:16px;font-weight:900;margin-bottom:2px}
+.hint{font-size:11px;color:var(--tx3);margin-bottom:12px;line-height:1.5}
+.seg{display:flex;gap:6px;margin-bottom:14px}
+.seg button{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--bd);background:var(--bg3);color:var(--tx3);font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.seg button.on{border-color:var(--p);background:var(--ps);color:var(--p)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:10px;border:none;background:var(--p);color:#fff;font-weight:700;font-size:13px}
+.btn.sec{background:transparent;border:1px solid var(--bd2);color:var(--tx2)}
+.btn.wa{background:rgba(37,211,102,.14);border:1px solid rgba(37,211,102,.4);color:var(--wa)}
+.btn.dan{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444}
+.btn.sm{padding:6px 11px;font-size:11px;border-radius:8px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+.numero{background:#0c0c0c;border:1px solid var(--bd2);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+.numero:before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,var(--p) 0 14px,transparent 14px 24px)}
+.numero .big{font-size:40px;font-weight:900;color:var(--p);letter-spacing:-.04em;line-height:1}
+.numero .lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3)}
+.klist{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.klist div .v{font-size:15px;font-weight:800}
+.desglose{margin-top:12px;border-top:1px solid var(--bd);padding-top:10px}
+.dl{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:var(--tx2)}
+.dl b{color:var(--tx)}
+.dl.neg span:last-child{color:#ef4444}
+.dl.tot{border-top:1px solid var(--bd);margin-top:4px;padding-top:7px;font-weight:800;color:var(--tx)}
+
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);text-align:left;padding:8px 8px;border-bottom:1px solid var(--bd)}
+td{padding:9px 8px;border-bottom:1px solid var(--bd);vertical-align:middle}
+td input{width:64px;padding:5px 7px;border-radius:7px;border:1px solid var(--bd);background:var(--bg3);color:var(--tx);text-align:right}
+.gtag{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:99px;white-space:nowrap}
+a{color:var(--info);text-decoration:none;font-size:11px}
+.empty{text-align:center;color:var(--tx3);padding:30px 16px;font-size:13px;line-height:1.6}
+.pill{font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;background:var(--ps);color:var(--p);text-transform:uppercase;letter-spacing:.05em}
+.qrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--bd)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid rgba(34,197,94,.35);color:var(--ok);padding:11px 18px;border-radius:10px;font-weight:700;font-size:13px;z-index:99;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.note{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:10px 13px;font-size:11px;color:var(--tx2);line-height:1.6;margin-bottom:12px}
+.tblwrap{overflow-x:auto}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="logo">AUTOSOLUTION<b>.</b> <span style="font-weight:400;color:var(--tx3)">Desking</span></div>
+    <div class="sub">Arma el negocio · número completo · sin conexión a nada</div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab on" data-t="desk" onclick="go('desk')">🧮 Desk</button>
+  <button class="tab" data-t="plantillas" onclick="go('plantillas')">Plantillas</button>
+  <button class="tab" data-t="bancos" onclick="go('bancos')">Bancos</button>
+  <button class="tab" data-t="cotizaciones" onclick="go('cotizaciones')">Guardadas</button>
+</div>
+
+<main id="main"></main>
+
+<script>
+/* ═══ ESTADO ═══ */
+const K='asm_desk_v1';
+const BANCOS_BASE=[
+ /* Comunes en RouteOne / DealerTrack */
+ {n:'Chase Auto',g:'RouteOne',an:'6.5',au:'8.9',w:'chase.com',nota:''},
+ {n:'Capital One Auto Finance',g:'RouteOne',an:'6.9',au:'9.5',w:'capitalone.com',nota:'Amplio en subprime'},
+ {n:'Ally Financial',g:'RouteOne',an:'6.8',au:'9.4',w:'ally.com',nota:''},
+ {n:'Wells Fargo Auto',g:'RouteOne',an:'6.7',au:'9.2',w:'wellsfargo.com',nota:''},
+ {n:'TD Auto Finance',g:'RouteOne',an:'6.6',au:'9.0',w:'td.com',nota:''},
+ {n:'Bank of America',g:'RouteOne',an:'6.4',au:'8.8',w:'bankofamerica.com',nota:''},
+ {n:'US Bank',g:'RouteOne',an:'6.6',au:'9.0',w:'usbank.com',nota:''},
+ {n:'Truist',g:'RouteOne',an:'6.7',au:'9.1',w:'truist.com',nota:''},
+ {n:'Fifth Third',g:'RouteOne',an:'6.8',au:'9.2',w:'53.com',nota:''},
+ {n:'Huntington',g:'RouteOne',an:'6.8',au:'9.2',w:'huntington.com',nota:''},
+ {n:'PNC',g:'RouteOne',an:'6.7',au:'9.1',w:'pnc.com',nota:''},
+ {n:'Santander Consumer',g:'RouteOne',an:'8.5',au:'12.5',w:'santanderconsumerusa.com',nota:'Subprime'},
+ {n:'Westlake Financial',g:'RouteOne',an:'9.5',au:'14.0',w:'westlakefinancial.com',nota:'Subprime / deep'},
+ {n:'Exeter Finance',g:'RouteOne',an:'10.0',au:'15.0',w:'exeterfinance.com',nota:'Subprime'},
+ {n:'Global Lending Services',g:'RouteOne',an:'10.5',au:'15.5',w:'glsllc.com',nota:'Subprime'},
+ {n:'American Credit Acceptance',g:'RouteOne',an:'12.0',au:'17.0',w:'americancreditacceptance.com',nota:'Deep subprime'},
+ /* Cautivas de marca */
+ {n:'GM Financial',g:'Cautiva',an:'6.2',au:'8.5',w:'gmfinancial.com',nota:'Chevrolet · GMC · Cadillac'},
+ {n:'Ford Credit',g:'Cautiva',an:'6.2',au:'8.5',w:'fordcredit.com',nota:''},
+ {n:'Toyota Financial / SETF',g:'Cautiva',an:'5.9',au:'8.0',w:'toyotafinancial.com',nota:'En FL: Southeast Toyota Finance'},
+ {n:'Honda Financial',g:'Cautiva',an:'5.9',au:'8.0',w:'hondafinancialservices.com',nota:''},
+ {n:'Hyundai Motor Finance',g:'Cautiva',an:'6.0',au:'8.3',w:'hmfusa.com',nota:''},
+ {n:'Kia Finance America',g:'Cautiva',an:'6.0',au:'8.3',w:'kiafinance.com',nota:''},
+ {n:'Nissan NMAC',g:'Cautiva',an:'6.3',au:'8.6',w:'nissanfinance.com',nota:''},
+ {n:'VW Credit / Audi FS',g:'Cautiva',an:'6.3',au:'8.6',w:'vwcredit.com',nota:''},
+ {n:'BMW Financial',g:'Cautiva',an:'6.4',au:'8.7',w:'bmwusa.com',nota:''},
+ {n:'Mercedes-Benz FS',g:'Cautiva',an:'6.4',au:'8.7',w:'mbfs.com',nota:''},
+ {n:'Chrysler Capital',g:'Cautiva',an:'6.5',au:'8.9',w:'chryslercapital.com',nota:'Stellantis: Jeep · RAM · Dodge · Chrysler'},
+ {n:'Subaru Motors Finance',g:'Cautiva',an:'6.1',au:'8.4',w:'subarumotorsfinance.com',nota:'Operada por Chase'},
+ {n:'Mazda Financial',g:'Cautiva',an:'6.1',au:'8.4',w:'mazdafinancialservices.com',nota:'Operada por Toyota FS'},
+ {n:'Acura Financial',g:'Cautiva',an:'5.9',au:'8.0',w:'acurafinancialservices.com',nota:''},
+ {n:'Lexus Financial',g:'Cautiva',an:'5.9',au:'8.0',w:'lexusfinancial.com',nota:''},
+ {n:'Infiniti Financial (IFS)',g:'Cautiva',an:'6.3',au:'8.6',w:'infinitifinance.com',nota:''},
+ {n:'Volvo Car Financial',g:'Cautiva',an:'6.3',au:'8.6',w:'volvocarfinancialservices.com',nota:''},
+ {n:'Porsche Financial',g:'Cautiva',an:'6.5',au:'8.8',w:'porschefinancialservices.com',nota:''},
+ {n:'Jaguar Land Rover FS',g:'Cautiva',an:'6.5',au:'8.8',w:'landroverusa.com',nota:'Operada por Chase'},
+ {n:'Tesla Financing',g:'Cautiva',an:'6.0',au:'0',w:'tesla.com',nota:'Solo directo en tesla.com'},
+ /* Credit unions — tasas PÚBLICAS en sus webs */
+ {n:'Navy Federal CU',g:'Credit Union',an:'5.3',au:'6.3',w:'navyfederal.org',nota:'Militares y familia'},
+ {n:'PenFed CU',g:'Credit Union',an:'5.5',au:'6.7',w:'penfed.org',nota:'Abierta a todos'},
+ {n:'Suncoast CU',g:'Credit Union',an:'5.7',au:'6.9',w:'suncoastcreditunion.com',nota:'La mayor de FL'},
+ {n:'Space Coast CU',g:'Credit Union',an:'5.8',au:'7.0',w:'sccu.com',nota:''},
+ {n:'Tropical FCU',g:'Credit Union',an:'6.0',au:'7.3',w:'tropicalfcu.com',nota:'Miami'},
+ {n:'Dade County FCU',g:'Credit Union',an:'6.0',au:'7.3',w:'dcfcu.org',nota:'Miami'},
+ {n:'Power Financial CU',g:'Credit Union',an:'6.0',au:'7.3',w:'powerfi.org',nota:'Sur de FL'},
+ {n:'We Florida Financial',g:'Credit Union',an:'6.1',au:'7.5',w:'weflorida.org',nota:''},
+ {n:'Jetstream FCU',g:'Credit Union',an:'6.2',au:'7.6',w:'jetstreamfcu.org',nota:'Miami Lakes'}
+];
+const BLANK=()=>({
+  plantillas:[],cotizaciones:[],bancos:JSON.parse(JSON.stringify(BANCOS_BASE)),
+  bancosFecha:'agosto 2026',cfg:{vendedor:'',wa:''}
+});
+let S=BLANK();
+try{const r=localStorage.getItem(K);if(r){const d=JSON.parse(r);S=Object.assign(BLANK(),d);
+  if(!Array.isArray(S.bancos)||!S.bancos.length)S.bancos=JSON.parse(JSON.stringify(BANCOS_BASE));}}catch(e){}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+
+/* ═══ WORKSHEET (vivo, no persiste hasta guardar) ═══ */
+let W={
+  tipo:'lease', cliente:'', tel:'',
+  ano:'', marca:'', modelo:'', stock:'', cond:'Nuevo',
+  msrp:'', precio:'', rebates:0,
+  docFee:999, tagFee:399, otros:0, taxPct:7,
+  tradeAllow:0, tradePayoff:0, down:0,
+  apr:6.9, plazoF:72,
+  residPct:57, mf:0.0028, plazoL:36, millas:10000, acqFee:695
+};
+let TAB='desk';
+const $=id=>document.getElementById(id);
+const num=v=>Number(v)||0;
+const fm=(v,d=0)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:d}).format(Number(v)||0);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tel10=t=>{let d=String(t||'').replace(/\D/g,'');if(d.length===10)d='1'+d;return d};
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+
+/* ═══ CÁLCULO ═══ */
+function calc(){
+  const precio=num(W.precio), msrp=num(W.msrp)||precio;
+  const fees=num(W.docFee)+num(W.tagFee)+num(W.otros);
+  const allow=num(W.tradeAllow), payoff=num(W.tradePayoff), equity=allow-payoff;
+  const rebates=num(W.rebates), down=num(W.down), taxR=num(W.taxPct)/100;
+  if(W.tipo==='finance'||W.tipo==='cash'){
+    /* FL: el trade-in allowance reduce la base imponible */
+    const taxBase=Math.max(0,precio-allow);
+    const tax=taxBase*taxR;
+    const otd=precio+fees+tax-rebates;
+    const financiar=Math.max(0,otd-equity-down);
+    let pago=0;
+    if(W.tipo==='finance'){
+      const r=num(W.apr)/100/12, n=num(W.plazoF)||60;
+      pago=r>0?financiar*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1):financiar/n;
+    }
+    return {precio,msrp,fees,tax,otd,financiar,pago,equity,down,rebates,allow,payoff,
+      alFirmar:W.tipo==='cash'?Math.max(0,otd-equity):down};
+  }
+  /* LEASE */
+  const residual=msrp*num(W.residPct)/100;
+  const capRed=down+Math.max(0,equity)+rebates;
+  const capCost=precio+num(W.acqFee)-capRed+Math.max(0,-equity); /* equity negativo se capitaliza */
+  const n=num(W.plazoL)||36, mf=num(W.mf);
+  const dep=(capCost-residual)/n;
+  const renta=(capCost+residual)*mf;
+  const base=dep+renta;
+  const pago=base*(1+taxR); /* FL cobra tax sobre cada pago */
+  const alFirmar=pago+down+fees; /* primer pago + down + fees al firmar */
+  return {precio,msrp,fees,residual,capCost,pago,base,alFirmar,down,rebates,equity,allow,payoff,
+    aprEq:(mf*2400)};
+}
+
+/* ═══ TEXTO DE COTIZACIÓN — el número completo, siempre ═══ */
+function quoteText(){
+  const c=calc(), veh=[W.ano,W.marca,W.modelo].filter(Boolean).join(' ');
+  const firma=S.cfg.vendedor?` — ${S.cfg.vendedor}, AutoSolution Miami`:' — AutoSolution Miami';
+  if(W.tipo==='lease')
+    return `🚗 ${veh} (${W.cond})\n`+
+      `LEASE: ${fm(c.pago)}/mes CON TAX\n`+
+      `${fm(c.alFirmar)} al firmar (1er pago + entrada + fees)\n`+
+      `${W.plazoL} meses · ${Number(W.millas).toLocaleString()} millas/año\n`+
+      `Incluye doc fee ${fm(W.docFee)} y tag ${fm(W.tagFee)} — el número COMPLETO, sin sorpresas${firma}`;
+  if(W.tipo==='finance')
+    return `🚗 ${veh} (${W.cond})\n`+
+      `FINANCIADO: ${fm(c.pago)}/mes\n`+
+      `${W.plazoF} meses · ${W.apr}% APR · ${fm(c.down)} de entrada\n`+
+      `Out-the-door: ${fm(c.otd)} (precio + fees + tax, todo incluido)\n`+
+      `A financiar: ${fm(c.financiar)} — el número COMPLETO, sin sorpresas${firma}`;
+  return `🚗 ${veh} (${W.cond})\n`+
+    `DE CONTADO — Out-the-door: ${fm(c.alFirmar)}\n`+
+    `(precio + fees + tax − rebates${c.equity?` − equity del trade ${fm(c.equity)}`:''}, todo incluido)${firma}`;
+}
+
+/* ═══ NAV ═══ */
+function go(t){TAB=t;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));render()}
+function inp(k,v){W[k]=v;renderResultado()}
+
+/* ═══ RENDER ═══ */
+function render(){
+  const m=$('main');
+  if(TAB==='desk')m.innerHTML=rDesk();
+  else if(TAB==='plantillas')m.innerHTML=rPlantillas();
+  else if(TAB==='bancos')m.innerHTML=rBancos();
+  else m.innerHTML=rCotizaciones();
+  if(TAB==='desk')renderResultado();
+}
+const F=(l,k,type,ph,step)=>`<div class="f"><label>${l}</label><input type="${type||'text'}" ${step?`step="${step}"`:''} value="${esc(W[k])}" placeholder="${ph||''}" oninput="inp('${k}',this.value)"></div>`;
+
+function rDesk(){
+  return `
+  <div class="card">
+    <h2>Armar el negocio</h2>
+    <div class="hint">Como el desking de Tekion/DealerTrack pero tuyo: sin conexión, bajo cualquier condición. Guarda plantillas por dealer en la pestaña Plantillas.</div>
+    <div class="seg">
+      <button class="${W.tipo==='lease'?'on':''}" onclick="W.tipo='lease';render()">Lease</button>
+      <button class="${W.tipo==='finance'?'on':''}" onclick="W.tipo='finance';render()">Financiado</button>
+      <button class="${W.tipo==='cash'?'on':''}" onclick="W.tipo='cash';render()">Contado</button>
+    </div>
+    <div class="grid">
+      ${F('Cliente','cliente','text','Nombre')}${F('Teléfono (WhatsApp)','tel','tel','305 000 0000')}
+    </div>
+    <div style="height:10px"></div>
+    <div class="grid3">
+      ${F('Año','ano','number','2026')}${F('Marca','marca','text','Toyota')}${F('Modelo','modelo','text','Corolla LE')}
+      ${F('# Stock','stock','text','')}
+      <div class="f"><label>Condición</label><select onchange="inp('cond',this.value)">
+        <option ${W.cond==='Nuevo'?'selected':''}>Nuevo</option><option ${W.cond==='Usado'?'selected':''}>Usado</option><option ${W.cond==='CPO'?'selected':''}>CPO</option></select></div>
+      ${F('MSRP $','msrp','number','')}
+      ${F('Precio de venta $','precio','number','')}
+      ${F('Rebates $','rebates','number','0')}
+      ${F('Entrada / Down $','down','number','0')}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:13px">Fees y tax <span class="pill" style="margin-left:6px">plantilla del dealer</span></h2>
+    <div style="height:8px"></div>
+    <div class="grid3">
+      ${F('Doc fee $','docFee','number','999')}
+      ${F('Tag / título $','tagFee','number','399')}
+      ${F('Otros fees $','otros','number','0')}
+      ${F('Tax %','taxPct','number','7','0.1')}
+      ${W.tipo==='lease'?F('Acquisition fee $','acqFee','number','695'):''}
+    </div>
+    ${S.plantillas.length?`<div class="row" style="margin-top:10px"><span style="font-size:11px;color:var(--tx3)">Aplicar plantilla:</span>${S.plantillas.map((p,i)=>`<button class="btn sec sm" onclick="aplicarP(${i})">${esc(p.nombre)}</button>`).join('')}</div>`:''}
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:13px">Trade-in</h2>
+    <div style="height:8px"></div>
+    <div class="grid">
+      ${F('Allowance (lo que ofreces) $','tradeAllow','number','0')}
+      ${F('Payoff (lo que debe) $','tradePayoff','number','0')}
+    </div>
+  </div>
+
+  ${W.tipo==='finance'?`<div class="card">
+    <h2 style="font-size:13px">Financiamiento</h2>
+    <div style="height:8px"></div>
+    <div class="grid">
+      ${F('APR %','apr','number','6.9','0.1')}
+      <div class="f"><label>Plazo (meses)</label><select onchange="inp('plazoF',this.value)">
+        ${[36,48,60,66,72,75,84].map(x=>`<option ${W.plazoF==x?'selected':''}>${x}</option>`).join('')}</select></div>
+    </div>
+    <div class="hint" style="margin:8px 0 0">💡 Toca un banco en la pestaña Bancos para traer su tasa de referencia aquí.</div>
+  </div>`:''}
+
+  ${W.tipo==='lease'?`<div class="card">
+    <h2 style="font-size:13px">Estructura del lease</h2>
+    <div style="height:8px"></div>
+    <div class="grid3">
+      ${F('Residual % del MSRP','residPct','number','57','0.5')}
+      ${F('Money factor','mf','number','0.0028','0.0001')}
+      <div class="f"><label>Plazo (meses)</label><select onchange="inp('plazoL',this.value)">
+        ${[24,27,30,33,36,39,42,48].map(x=>`<option ${W.plazoL==x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div class="f"><label>Millas/año</label><select onchange="inp('millas',this.value)">
+        ${[7500,10000,12000,15000].map(x=>`<option ${W.millas==x?'selected':''}>${x.toLocaleString()}</option>`).join('')}</select></div>
+    </div>
+    <div class="hint" style="margin:8px 0 0">MF × 2400 = APR equivalente. El residual y el MF salen del programa del mes de cada marca (pestaña Programas del CRM).</div>
+  </div>`:''}
+
+  <div id="resultado"></div>
+
+  <div class="row" style="margin:14px 0 30px">
+    <button class="btn" onclick="guardarCot()">💾 Guardar cotización</button>
+    <button class="btn sec" onclick="copiarCot()">📋 Copiar</button>
+    <button class="btn wa" onclick="waCot()">Enviar por WhatsApp</button>
+  </div>`;
+}
+
+function renderResultado(){
+  const el=$('resultado');if(!el)return;
+  const c=calc();
+  if(!num(W.precio)){el.innerHTML='<div class="card empty">Pon el precio de venta y aquí aparece el negocio armado en vivo.</div>';return}
+  let k='',d='';
+  if(W.tipo==='lease'){
+    k=`<div><div class="lbl">Al firmar</div><div class="v mono">${fm(c.alFirmar)}</div></div>
+       <div><div class="lbl">Plazo</div><div class="v mono">${W.plazoL} m</div></div>
+       <div><div class="lbl">Millas/año</div><div class="v mono">${Number(W.millas).toLocaleString()}</div></div>
+       <div><div class="lbl">APR equiv.</div><div class="v mono">${c.aprEq.toFixed(2)}%</div></div>`;
+    d=`<div class="dl"><span>Cap cost (precio + acq − reducciones)</span><b class="mono">${fm(c.capCost)}</b></div>
+       <div class="dl"><span>Residual (${W.residPct}% de ${fm(c.msrp)})</span><b class="mono">${fm(c.residual)}</b></div>
+       <div class="dl"><span>Pago base</span><b class="mono">${fm(c.base,2)}</b></div>
+       <div class="dl"><span>+ Tax ${W.taxPct}% sobre el pago</span><b class="mono">${fm(c.pago-c.base,2)}</b></div>
+       ${c.equity<0?`<div class="dl neg"><span>⚠ Equity negativo capitalizado</span><span class="mono">${fm(-c.equity)}</span></div>`:''}
+       <div class="dl tot"><span>Pago mensual CON tax</span><span class="mono">${fm(c.pago)}</span></div>`;
+  }else if(W.tipo==='finance'){
+    k=`<div><div class="lbl">Out-the-door</div><div class="v mono">${fm(c.otd)}</div></div>
+       <div><div class="lbl">A financiar</div><div class="v mono">${fm(c.financiar)}</div></div>
+       <div><div class="lbl">Plazo</div><div class="v mono">${W.plazoF} m</div></div>
+       <div><div class="lbl">APR</div><div class="v mono">${W.apr}%</div></div>`;
+    d=`<div class="dl"><span>Precio de venta</span><b class="mono">${fm(c.precio)}</b></div>
+       <div class="dl"><span>+ Fees (doc + tag + otros)</span><b class="mono">${fm(c.fees)}</b></div>
+       <div class="dl"><span>+ Tax (base ${fm(Math.max(0,c.precio-c.allow))} × ${W.taxPct}%)</span><b class="mono">${fm(c.tax)}</b></div>
+       <div class="dl neg"><span>− Rebates</span><span class="mono">${fm(c.rebates)}</span></div>
+       ${c.allow?`<div class="dl neg"><span>− Equity del trade (${fm(c.allow)} − payoff ${fm(c.payoff)})</span><span class="mono">${fm(c.equity)}</span></div>`:''}
+       <div class="dl neg"><span>− Entrada</span><span class="mono">${fm(c.down)}</span></div>
+       <div class="dl tot"><span>A financiar</span><span class="mono">${fm(c.financiar)}</span></div>`;
+  }else{
+    k=`<div><div class="lbl">Precio</div><div class="v mono">${fm(c.precio)}</div></div>
+       <div><div class="lbl">Fees</div><div class="v mono">${fm(c.fees)}</div></div>
+       <div><div class="lbl">Tax</div><div class="v mono">${fm(c.tax)}</div></div>`;
+    d=`<div class="dl tot"><span>Out-the-door de contado</span><span class="mono">${fm(c.alFirmar)}</span></div>`;
+  }
+  el.innerHTML=`<div class="numero">
+    <div class="lbl">${W.tipo==='cash'?'Total out-the-door':'Pago mensual'}${W.tipo==='lease'?' · con tax':''}</div>
+    <div class="big mono">${fm(W.tipo==='cash'?c.alFirmar:c.pago)}</div>
+    <div class="klist">${k}</div>
+    <div class="desglose">${d}</div>
+  </div>`;
+}
+
+/* ═══ ACCIONES ═══ */
+function copiarCot(){
+  const t=quoteText();
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>toast('Cotización copiada — el número completo'));
+  else prompt('Copia:',t);
+}
+function waCot(){
+  const tel=tel10(W.tel);
+  if(!tel){toast('Pon el teléfono del cliente arriba');return}
+  window.open(`https://wa.me/${tel}?text=${encodeURIComponent(quoteText())}`,'_blank');
+}
+function guardarCot(){
+  if(!num(W.precio)){toast('Arma el negocio primero');return}
+  S.cotizaciones.unshift({id:Date.now(),fecha:new Date().toLocaleDateString('es-US'),w:JSON.parse(JSON.stringify(W)),texto:quoteText()});
+  save();toast('Cotización guardada');
+}
+function abrirCot(id){const q=S.cotizaciones.find(x=>x.id===id);if(!q)return;W=JSON.parse(JSON.stringify(q.w));go('desk')}
+function delCot(id){S.cotizaciones=S.cotizaciones.filter(x=>x.id!==id);save();render()}
+
+/* ═══ PLANTILLAS ═══ */
+function rPlantillas(){
+  return `<div class="card">
+    <h2>Plantillas por dealer</h2>
+    <div class="hint">Cada dealer tiene sus fees. Guarda una plantilla por dealer y aplícala en el Desk con un toque — así el número sale bien a la primera.</div>
+    <div class="grid">
+      <div class="f span2"><label>Nombre del dealer</label><input id="pNom" placeholder="Ej. Toyota of Doral"></div>
+      <div class="f"><label>Doc fee $</label><input id="pDoc" type="number" value="${esc(W.docFee)}"></div>
+      <div class="f"><label>Tag/título $</label><input id="pTag" type="number" value="${esc(W.tagFee)}"></div>
+      <div class="f"><label>Otros fees $</label><input id="pOtr" type="number" value="${esc(W.otros)}"></div>
+      <div class="f"><label>Tax %</label><input id="pTax" type="number" step="0.1" value="${esc(W.taxPct)}"></div>
+    </div>
+    <div style="margin-top:12px"><button class="btn" onclick="addP()">Guardar plantilla</button></div>
+  </div>
+  <div class="card">
+    ${S.plantillas.length?S.plantillas.map((p,i)=>`<div class="qrow">
+      <div style="flex:1"><b>${esc(p.nombre)}</b><div style="font-size:11px;color:var(--tx3)">Doc ${fm(p.docFee)} · Tag ${fm(p.tagFee)} · Otros ${fm(p.otros)} · Tax ${p.taxPct}%</div></div>
+      <button class="btn sec sm" onclick="aplicarP(${i});go('desk')">Usar</button>
+      <button class="btn dan sm" onclick="delP(${i})">✕</button>
+    </div>`).join(''):'<div class="empty">Sin plantillas todavía.<br>Guarda la primera con los fees del dealer donde más trabajas.</div>'}
+  </div>
+  <div class="card">
+    <h2 style="font-size:13px">Tu firma en las cotizaciones</h2>
+    <div style="height:8px"></div>
+    <div class="grid">
+      <div class="f"><label>Tu nombre</label><input id="cfgNom" value="${esc(S.cfg.vendedor)}" placeholder="Carlos"></div>
+      <div class="f"><label>Tu WhatsApp</label><input id="cfgWa" value="${esc(S.cfg.wa)}" placeholder="305 000 0000"></div>
+    </div>
+    <div style="margin-top:10px"><button class="btn sec sm" onclick="S.cfg.vendedor=$('cfgNom').value;S.cfg.wa=$('cfgWa').value;save();toast('Guardado')">Guardar</button></div>
+  </div>
+  <div class="card">
+    <h2 style="font-size:13px">Respaldo</h2>
+    <div class="hint">Plantillas, bancos y cotizaciones viven en este dispositivo. Descarga el respaldo cada semana.</div>
+    <div class="row">
+      <button class="btn sec sm" onclick="expJson()">⬇ Descargar respaldo</button>
+      <label class="btn sec sm" style="cursor:pointer">⬆ Restaurar<input type="file" accept=".json" style="display:none" onchange="impJson(this)"></label>
+    </div>
+  </div>`;
+}
+function addP(){
+  const nombre=$('pNom').value.trim();if(!nombre){toast('Nombre del dealer');return}
+  S.plantillas.push({nombre,docFee:num($('pDoc').value),tagFee:num($('pTag').value),otros:num($('pOtr').value),taxPct:num($('pTax').value)});
+  save();render();toast('Plantilla guardada');
+}
+function aplicarP(i){const p=S.plantillas[i];if(!p)return;W.docFee=p.docFee;W.tagFee=p.tagFee;W.otros=p.otros;W.taxPct=p.taxPct;toast('Plantilla: '+p.nombre);if(TAB==='desk')render()}
+function delP(i){S.plantillas.splice(i,1);save();render()}
+
+/* ═══ BANCOS ═══ */
+function rBancos(){
+  const G={'RouteOne':'#3b82f6','Cautiva':'#8b5cf6','Credit Union':'#22c55e'};
+  const grupos=['Credit Union','Cautiva','RouteOne'];
+  return `<div class="card">
+    <h2>Bancos y tasas de referencia</h2>
+    <div class="hint">Los comunes de <b>RouteOne/DealerTrack</b> (para cuando tengas tu dealer, la conexión va aquí), las cautivas de marca, y las credit unions — que publican sus tasas GRATIS en sus webs. Las tasas son <b>referencia (${esc(S.bancosFecha)})</b>: edítalas con la del día. Toca <b>Usar</b> para llevar la tasa al Desk.</div>
+    <div class="note">📌 Referencia del mercado: el promedio nacional de APR nuevo ronda 6.5-7% y usado 10-11%; las credit unions suelen estar 1-2 puntos por debajo de los bancos. Buen crédito baja de ahí, subprime sube.<br>🔄 <b>Rutina diaria del equipo:</b> antes del primer desking del día, abre el link del banco que vas a usar y actualiza su tasa aquí — 60 segundos y trabajas con el número real. (Cuando el backend esté vivo, esto se actualizará solo todos los días.)</div>
+    <div class="row" style="margin-bottom:6px">
+      <div class="f" style="flex:1"><label>Fecha de estas tasas</label><input value="${esc(S.bancosFecha)}" onchange="S.bancosFecha=this.value;save()"></div>
+    </div>
+  </div>
+  ${grupos.map(g=>`<div class="card">
+    <div class="row" style="margin-bottom:8px"><span class="gtag" style="background:${G[g]}20;color:${G[g]}">${g==='RouteOne'?'Comunes en RouteOne':g==='Cautiva'?'Cautivas de marca':'Credit Unions (tasas públicas)'}</span></div>
+    <div class="tblwrap"><table>
+      <tr><th>Banco</th><th>APR nuevo</th><th>APR usado</th><th></th><th></th></tr>
+      ${S.bancos.map((b,i)=>b.g!==g?'':`<tr>
+        <td><b>${esc(b.n)}</b>${b.nota?`<div style="font-size:10px;color:var(--tx3)">${esc(b.nota)}</div>`:''}<a href="https://www.${esc(b.w)}" target="_blank" rel="noopener">${esc(b.w)} ↗</a></td>
+        <td><input type="number" step="0.1" value="${esc(b.an)}" onchange="S.bancos[${i}].an=this.value;save()">%</td>
+        <td><input type="number" step="0.1" value="${esc(b.au)}" onchange="S.bancos[${i}].au=this.value;save()">%</td>
+        <td><button class="btn sec sm" onclick="usarBanco(${i})">Usar</button></td>
+        <td></td>
+      </tr>`).join('')}
+    </table></div>
+  </div>`).join('')}`;
+}
+function usarBanco(i){
+  const b=S.bancos[i];if(!b)return;
+  W.apr=num(W.cond==='Nuevo'?b.an:b.au);W.tipo='finance';
+  toast(`${b.n}: ${W.apr}% al Desk`);go('desk');
+}
+
+/* ═══ COTIZACIONES ═══ */
+function rCotizaciones(){
+  return `<div class="card">
+    <h2>Cotizaciones guardadas</h2>
+    <div class="hint">Cada negocio que armas se puede guardar y reabrir. Al cerrar de verdad, pásalo al CRM.</div>
+    ${S.cotizaciones.length?S.cotizaciones.map(q=>`<div class="qrow">
+      <div style="flex:1;min-width:0">
+        <b>${esc(q.w.cliente||'Sin nombre')}</b> <span class="pill">${q.w.tipo}</span>
+        <div style="font-size:11px;color:var(--tx3)">${esc([q.w.ano,q.w.marca,q.w.modelo].filter(Boolean).join(' '))} · ${q.fecha}</div>
+      </div>
+      <button class="btn sec sm" onclick="abrirCot(${q.id})">Abrir</button>
+      <button class="btn dan sm" onclick="delCot(${q.id})">✕</button>
+    </div>`).join(''):'<div class="empty">Sin cotizaciones guardadas.<br>Arma un negocio en el Desk y tócale 💾.</div>'}
+  </div>`;
+}
+
+/* ═══ RESPALDO ═══ */
+function expJson(){
+  const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='autosolution-desking-respaldo.json';a.click();
+}
+function impJson(el){
+  const f=el.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{try{const d=JSON.parse(e.target.result);
+    if(!d.bancos&&!d.plantillas){toast('Archivo no válido');return}
+    S=Object.assign(BLANK(),d);save();render();toast('Respaldo restaurado');
+  }catch(err){toast('No se pudo leer')}};
+  r.readAsText(f);
+}
+
+render();
+</script>
+</body>
+</html>
