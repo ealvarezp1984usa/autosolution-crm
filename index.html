@@ -1,0 +1,2371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#080808"/>
+<title>AutoSolution Miami — CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#080808;--bg2:#111111;--bg3:#1a1a1a;--bg4:#222222;
+  --bd:#2a2a2a;--bd2:#363636;
+  --tx:#efefef;--tx2:#999999;--tx3:#555555;
+  --p:#e31c1c;--pd:#b91c1c;--ps:rgba(227,28,28,.1);
+  --ok:#22c55e;--warn:#eab308;--info:#3b82f6;--dan:#ef4444;
+  --vio:#8b5cf6;--ora:#f97316;--wa:#25D366;
+  --r:9px;--r2:13px;
+  --sb:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);
+  font-size:13px;-webkit-font-smoothing:antialiased;overflow:hidden}
+.mono{font-family:'JetBrains Mono','SFMono-Regular',Consolas,monospace;font-feature-settings:'tnum'}
+.bebas{font-family:'Bebas Neue','Archivo Black',sans-serif;letter-spacing:.04em}
+button{cursor:pointer;font-family:inherit;font-size:inherit}
+input,select,textarea{font-family:inherit;font-size:inherit}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:#333;border-radius:99px}
+::-webkit-scrollbar-track{background:transparent}
+.sh{-ms-overflow-style:none;scrollbar-width:none}
+.sh::-webkit-scrollbar{display:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{transform:translateY(20px);opacity:.4}to{transform:none;opacity:1}}
+.fi{animation:fadeUp .16s ease forwards}
+.spin{display:inline-block;width:5px;height:5px;border-radius:50%;background:currentColor;
+  margin-left:-3px;vertical-align:top;animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+svg.ic{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ═══ SHELL ═══ */
+.app{display:flex;height:100%;overflow:hidden}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:80;display:none}
+.scrim.on{display:block}
+aside{position:fixed;top:0;left:0;bottom:0;width:230px;background:#070707;border-right:1px solid var(--bd);
+  display:flex;flex-direction:column;z-index:90;transform:translateX(-100%);transition:transform .2s ease}
+aside.on{transform:none}
+.sbhead{padding:14px 12px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--bd);min-height:54px}
+.sbuser{padding:10px}
+.sbuser .pill{display:flex;align-items:center;gap:8px;padding:8px;border-radius:9px;background:var(--bg3)}
+.sbav{width:28px;height:28px;border-radius:50%;background:var(--p);display:flex;align-items:center;
+  justify-content:center;color:#fff;font-weight:700;font-size:10px;flex-shrink:0;letter-spacing:-.02em}
+.sbnav{flex:1;overflow-y:auto;padding:6px}
+.nvi{width:100%;display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;font-size:12px;
+  border:none;background:transparent;color:var(--tx3);text-align:left;margin-bottom:1px;position:relative}
+.nvi.on{background:var(--ps);color:var(--p);font-weight:700}
+.nvi .lb{flex:1}
+.nvi .bdg{font-size:9px;font-weight:800;background:var(--p);color:#fff;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center}
+.nvi .soon{font-size:8px;font-weight:800;color:var(--tx3);border:1px solid var(--bd2);border-radius:99px;padding:1px 5px;letter-spacing:.04em}
+.nvsec{font-size:9px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.09em;padding:12px 10px 5px}
+.sbfoot{padding:8px;border-top:1px solid var(--bd)}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0;height:100%}
+.topbar{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--bd);
+  background:var(--bg2);flex-shrink:0;min-height:52px}
+.tbtitle{font-size:13px;font-weight:700;color:var(--tx);flex:1;min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.iconbtn{background:none;border:none;color:var(--tx3);padding:6px;border-radius:7px;line-height:0;display:flex}
+.content{flex:1;overflow-y:auto;padding:16px 14px calc(78px + var(--sb));}
+.content.flush{padding:0}
+.inner{max-width:1180px;margin:0 auto}
+
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,.96);backdrop-filter:blur(14px);
+  border-top:1px solid var(--bd);display:flex;z-index:70;padding-bottom:var(--sb)}
+.bn{flex:1;background:none;border:none;color:var(--tx3);font-size:9px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;padding:9px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.bn svg.ic{width:19px;height:19px}
+.bn.on{color:var(--tx)}
+.bn.on svg.ic{stroke:var(--p)}
+.bn .dot{position:absolute;top:6px;right:calc(50% - 16px);width:6px;height:6px;border-radius:50%;background:var(--p)}
+
+/* ═══ PRIMITIVES ═══ */
+h2.vh{font-size:18px;font-weight:800;color:var(--tx);letter-spacing:-.02em}
+.vsub{font-size:12px;color:var(--tx3);margin-top:3px;line-height:1.5}
+.stack{display:flex;flex-direction:column;gap:14px}
+.rowb{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:15px 16px}
+.card.pad0{padding:0;overflow:hidden}
+.chead{padding:13px 16px;border-bottom:1px solid var(--bd);font-weight:700;font-size:13px;color:var(--tx)}
+.chead .s{font-size:11px;color:var(--tx3);font-weight:400;margin-top:2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid1{display:grid;grid-template-columns:1fr;gap:10px}
+.divider{height:1px;background:var(--bd);margin:12px 0}
+
+.btn{border-radius:8px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  letter-spacing:.01em;white-space:nowrap;font-size:12px;padding:9px 16px;background:var(--p);color:#fff;border:none;transition:opacity .12s}
+.btn:active{opacity:.75}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn.sec{background:transparent;color:var(--tx2);border:1px solid var(--bd2)}
+.btn.ghost{background:transparent;color:var(--tx3);border:none}
+.btn.ok{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.25)}
+.btn.dan{background:rgba(239,68,68,.1);color:var(--dan);border:1px solid rgba(239,68,68,.25)}
+.btn.wa{background:var(--wa);color:#07130A;font-weight:700}
+.btn.sm{font-size:11px;padding:6px 12px;gap:5px}
+.btn.xs{font-size:10px;padding:5px 9px;gap:4px}
+.btn.lg{font-size:13px;padding:12px 22px}
+.btn.full{width:100%}
+.btn svg.ic{width:13px;height:13px}
+
+.bdg2{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:99px;font-size:10px;
+  font-weight:700;letter-spacing:.03em;white-space:nowrap;border:1px solid}
+label.f{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);
+  margin-bottom:5px;display:flex;gap:4px;align-items:center}
+label.f .h{color:var(--tx3);font-weight:400;text-transform:none;letter-spacing:normal;font-size:10px}
+.inp,select.inp,textarea.inp{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid var(--bd);
+  background:var(--bg3);color:var(--tx);font-size:14px;outline:none;line-height:1.4;transition:border-color .12s}
+.inp:focus{border-color:var(--p)}
+.inp::placeholder{color:var(--tx3)}
+textarea.inp{resize:vertical;min-height:88px;font-size:14px;line-height:1.55}
+select.inp{-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round'><path d='M3 5l4 4 4-4'/></svg>");
+  background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+.fr{display:flex;flex-direction:column}
+.check{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--tx2);padding:4px 0}
+.check input{accent-color:var(--p);width:16px;height:16px}
+
+.kpi{background:var(--bg2);border-radius:12px;padding:14px;display:flex;align-items:flex-start;gap:11px;border:1px solid var(--bd)}
+.kpi .ib{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kpi .v{font-size:21px;font-weight:800;color:var(--tx);line-height:1.1;letter-spacing:-.04em}
+.kpi .l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-top:3px}
+.kpi .s{font-size:10px;color:var(--tx3);margin-top:2px}
+
+.empty{display:flex;flex-direction:column;align-items:center;padding:40px 20px;text-align:center}
+.empty .eb{width:44px;height:44px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;
+  justify-content:center;margin-bottom:12px;color:var(--tx3)}
+.empty .t{font-weight:700;color:var(--tx2);font-size:13px}
+.empty .s{font-size:12px;color:var(--tx3);margin-top:5px;max-width:280px;line-height:1.55}
+
+/* ═══ LIST ROWS ═══ */
+.lrow{width:100%;display:flex;align-items:stretch;background:none;border:none;border-bottom:1px solid var(--bd);
+  text-align:left;padding:0;color:inherit}
+.lrow:last-child{border-bottom:none}
+.lrow .heat{width:3px;flex-shrink:0;align-self:stretch;opacity:.75}
+.lrow .body{flex:1;padding:12px 14px;min-width:0;display:flex;align-items:center;gap:10px}
+.lname{font-size:13px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lmeta{font-size:11px;color:var(--tx3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tagrow{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;align-items:center}
+
+/* ═══ ALERTAS ═══ */
+.arow{position:relative;padding-left:16px}
+.arow::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:3px;background:var(--warn)}
+.arow.hot::before{background:var(--p)}
+.atag{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--warn)}
+.arow.hot .atag{color:var(--p)}
+.aact{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+
+/* ═══ PIPELINE ═══ */
+.kan{display:flex;gap:11px;overflow-x:auto;padding-bottom:10px}
+.kcol{min-width:208px;flex-shrink:0}
+.khead{background:var(--bg2);border:1px solid var(--bd);border-radius:0 0 10px 10px;padding:9px 12px;margin-bottom:8px}
+.kcard{background:var(--bg2);border-radius:10px;border:1px solid var(--bd);overflow:hidden}
+.kcard .hb{height:3px;opacity:.75}
+
+/* ═══ DEAL ROOM ═══ */
+.steps{display:flex;gap:7px;overflow-x:auto;padding:11px 14px;border-bottom:1px solid var(--bd);background:#0d0d0d}
+.stp{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:99px;border:1px solid var(--bd);
+  background:transparent;color:var(--tx3);font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.stp.on{background:var(--ps);border-color:var(--p);color:var(--p)}
+.stp.done{border-color:rgba(34,197,94,.4);color:var(--ok)}
+.stp .n{width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;display:flex;
+  align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.fbar{border-top:1px solid var(--bd);background:#0a0a0a;padding:9px 0;
+  position:fixed;bottom:calc(56px + var(--sb));left:0;right:0;z-index:60;
+  display:flex;align-items:center;gap:14px;overflow-x:auto}
+.fbar .f{flex-shrink:0;padding-left:14px}
+.fbar .f:last-child{padding-right:14px}
+.fbar .fl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3)}
+.fbar .fv{font-size:14px;font-weight:800;letter-spacing:-.02em;margin-top:1px}
+.tl{padding-left:16px;border-left:2px solid var(--bd);margin-top:12px}
+.tli{position:relative;margin-bottom:12px}
+.tli .dot{position:absolute;left:-25px;top:2px;width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;border:1.5px solid}
+.tli .dot svg.ic{width:9px;height:9px}
+.actgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+.actbtn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:8px;
+  border:1px solid var(--bd);background:transparent;color:var(--tx3);font-size:9px;font-weight:700;text-transform:uppercase}
+.sumrow{display:flex;justify-content:space-between;padding:5px 0;font-size:12px}
+.sumrow.b{border-top:1px solid var(--bd);font-weight:700;color:var(--tx);margin-top:2px;padding-top:7px}
+
+/* ═══ PROGRAMAS ═══ */
+.promo{border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;background:var(--bg2)}
+.phead{background:linear-gradient(135deg,#1a1a1e,#141416);padding:14px 16px;border-bottom:1px solid var(--bd)}
+.pbrand{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--p)}
+.pmodel{font-weight:800;font-size:18px;letter-spacing:-.03em;margin-top:2px}
+.ppay{font-weight:800;font-size:15px;margin-top:3px}
+.ppay small{color:var(--tx3);font-weight:500;font-size:11px}
+.pfine{padding:10px 16px;color:var(--tx3);font-size:11.5px;line-height:1.55;border-bottom:1px solid var(--bd)}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;
+  border-bottom:1px solid var(--bd);font-size:12.5px;color:var(--tx2)}
+.mrow:last-child{border-bottom:none}
+.mlab{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);margin:12px 0 2px}
+
+/* ═══ MODAL ═══ */
+.mask{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);backdrop-filter:blur(3px);
+  display:none;align-items:flex-end;justify-content:center}
+.mask.on{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bd2);border-radius:16px 16px 0 0;width:100%;
+  max-width:560px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;animation:slideUp .2s ease}
+.mhead{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;
+  border-bottom:1px solid var(--bd);flex-shrink:0}
+.mhead b{font-weight:700;font-size:15px}
+.mbody{padding:16px 18px calc(16px + var(--sb));overflow-y:auto;flex:1}
+.mfoot{padding:12px 18px calc(12px + var(--sb));border-top:1px solid var(--bd);display:flex;gap:8px;flex-shrink:0}
+.mfoot .btn{flex:1}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;background:var(--bg2);
+  border:1px solid rgba(34,197,94,.35);color:var(--ok);font-size:12.5px;font-weight:600;padding:11px 20px;
+  border-radius:99px;z-index:300;opacity:0;pointer-events:none;transition:.22s;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:88vw;text-align:center}
+.toast.on{opacity:1;bottom:106px}
+
+/* ═══ ONBOARDING ═══ */
+.onb{position:fixed;inset:0;z-index:400;background:var(--bg);overflow-y:auto;display:flex;flex-direction:column}
+.onbhero{background:#0d0909;border-bottom:1px solid var(--bd);padding:34px 22px 30px;position:relative;overflow:hidden}
+.onbhero .glow{position:absolute;bottom:-90px;right:-60px;width:240px;height:240px;
+  background:rgba(227,28,28,.06);border-radius:50%}
+.onbtag{display:inline-flex;align-items:center;gap:6px;background:var(--ps);border:1px solid rgba(227,28,28,.19);
+  border-radius:99px;padding:4px 12px;margin:20px 0 16px;font-size:10px;font-weight:700;color:var(--p);
+  text-transform:uppercase;letter-spacing:.08em}
+.onbform{padding:26px 22px calc(30px + var(--sb));max-width:440px;width:100%;margin:0 auto}
+
+/* ═══ DESKTOP ═══ */
+@media(min-width:1000px){
+  aside{position:static;transform:none;width:212px}
+  .scrim{display:none!important}
+  .bottomnav{display:none}
+  .content{padding:20px 24px 30px}
+  .menubtn{display:none}
+  .grid2{grid-template-columns:repeat(4,1fr)}
+  .grid1{grid-template-columns:1fr 1fr}
+  .mask{align-items:center;padding:20px}
+  .modal{border-radius:16px;max-height:88vh}
+  .mfoot{justify-content:flex-end}
+  .mfoot .btn{flex:0 0 auto}
+  .fbar{left:212px;bottom:0}
+  .toast{left:auto;right:24px;transform:none;bottom:24px}
+  .onb{flex-direction:row}
+  .onbhero{width:44%;border-bottom:none;border-right:1px solid var(--bd);padding:48px;
+    display:flex;flex-direction:column;justify-content:space-between}
+  .onbwrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px}
+}
+@media(max-width:999px){ .dtonly{display:none!important} }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="scrim" id="scrim" onclick="drawer(false)"></div>
+
+  <aside id="aside">
+    <div class="sbhead">
+      <span id="sbLogo"></span>
+      <button class="iconbtn menubtn" onclick="drawer(false)" aria-label="Cerrar">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="sbuser">
+      <div class="pill">
+        <div class="sbav" id="sbAv">AS</div>
+        <div style="min-width:0;flex:1">
+          <div id="sbName" style="font-size:11.5px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Mi cartera</div>
+          <div style="font-size:9px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Vendedor</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sbnav sh" id="sbNav"></nav>
+    <div class="sbfoot">
+      <div style="font-size:9.5px;color:var(--tx3);line-height:1.6;padding:2px 4px">
+        AutoSolution Miami · v1.0<br>Tus datos viven solo en este dispositivo.
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="iconbtn menubtn" onclick="drawer(true)" aria-label="Menú">
+        <svg class="ic" viewBox="0 0 24 24" style="width:19px;height:19px"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div class="tbtitle" id="tbTitle">Hoy</div>
+      <button class="iconbtn" id="syncPill" onclick="go('nube')" aria-label="Estado de sincronización"></button>
+      <button class="btn sm" onclick="openQuick()">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+        <span>Lead</span>
+      </button>
+    </div>
+    <div class="content sh" id="content"><div class="inner" id="view"></div></div>
+  </div>
+</div>
+
+<nav class="bottomnav" id="bottomnav"></nav>
+
+<!-- MODALES -->
+<div class="mask" id="mask" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mhead"><b id="mTitle">—</b>
+      <button class="iconbtn" onclick="closeModal()" aria-label="Cerrar">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="mbody" id="mBody"></div>
+    <div class="mfoot" id="mFoot"></div>
+  </div>
+</div>
+
+<div class="onb" id="onb" style="display:none"></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="impFile" accept=".json,application/json" style="display:none" onchange="importar(event)">
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   AUTOSOLUTION MIAMI — CRM
+   Diseño: crm-diseno.html  ·  Motor: libro-app.html
+   Un solo archivo. Sin datos de demo. localStorage: asm_libro_v1
+═══════════════════════════════════════════════════════════ */
+
+/* ── TOKENS (espejo del CSS) ── */
+const C={bg:'#080808',bg2:'#111111',bg3:'#1a1a1a',bd:'#2a2a2a',bd2:'#363636',
+  tx:'#efefef',tx2:'#999999',tx3:'#555555',p:'#e31c1c',ps:'rgba(227,28,28,.1)',
+  ok:'#22c55e',warn:'#eab308',info:'#3b82f6',dan:'#ef4444',vio:'#8b5cf6',ora:'#f97316',wa:'#25D366'};
+
+const ETAPAS=['Nuevo','Contactado','Cita','Negociación','Vendido','Perdido'];
+const ETAPA_C={Nuevo:C.info,Contactado:C.vio,Cita:C.warn,'Negociación':C.ora,Vendido:C.ok,Perdido:C.tx3};
+const ORIGENES=['Walk-in','Landing Page','Google Ads','Facebook/Meta','Teléfono','Referido','Manual'];
+const BANCOS=['Ally Financial','Chase Auto','TD Auto Finance','Wells Fargo','Capital One','Southeast Toyota','Westlake Financial','Bank of America','Santander Consumer','Credit Union'];
+const FNI=['GAP Insurance','Garantía Extendida','LifeShield Protection','Tire & Wheel','Maintenance Plan','Key Replacement','Window Tint','Rust Protection'];
+
+const FLOW=[
+  {id:1,key:'capture',label:'Captación',icon:'Radio',color:C.info},
+  {id:2,key:'work',label:'Workspace',icon:'User',color:C.vio},
+  {id:3,key:'offer',label:'Oferta',icon:'Tag',color:C.warn},
+  {id:4,key:'trade',label:'Trade-In',icon:'RefreshCw',color:C.ora},
+  {id:5,key:'profile',label:'Perfil',icon:'UserCheck',color:C.ok},
+  {id:6,key:'close',label:'Cierre',icon:'Landmark',color:'#a78bfa'},
+  {id:7,key:'recap',label:'Recap',icon:'FileCheck',color:'#34d399'},
+  {id:8,key:'post',label:'Post-Venta',icon:'Bell',color:'#fb923c'},
+];
+
+const NAV=[
+  {id:'dashboard',icon:'LayoutDashboard',label:'Hoy',sec:'Operación'},
+  {id:'libro',icon:'BookOpen',label:'Libro'},
+  {id:'alertas',icon:'Bell',label:'Alertas'},
+  {id:'leads',icon:'Users',label:'Leads',sec:'Ventas'},
+  {id:'pipeline',icon:'Briefcase',label:'Pipeline'},
+  {id:'tasks',icon:'CheckSquare',label:'Tareas'},
+  {id:'tradeins',icon:'RefreshCw',label:'Trade-Ins'},
+  {id:'promos',icon:'Tag',label:'Programas'},
+  {id:'reports',icon:'BarChart2',label:'Reportes',sec:'Análisis'},
+  {id:'campaigns',icon:'Megaphone',label:'Campañas',soon:1},
+  {id:'performance',icon:'TrendingUp',label:'Rendimiento',soon:1},
+  {id:'connections',icon:'Share2',label:'Equipo',soon:1,sec:'Equipo'},
+  {id:'nextup',icon:'RotateCcw',label:'Next-Up',soon:1},
+  {id:'admin',icon:'Shield',label:'Admin',soon:1},
+  {id:'nube',icon:'Cloud',label:'Nube',sec:'Sistema'},
+  {id:'settings',icon:'Settings',label:'Config'},
+];
+const TABS=[
+  {id:'dashboard',icon:'LayoutDashboard',label:'Hoy'},
+  {id:'libro',icon:'BookOpen',label:'Libro'},
+  {id:'alertas',icon:'Bell',label:'Alertas'},
+  {id:'pipeline',icon:'Briefcase',label:'Pipeline'},
+  {id:'__more',icon:'MoreH',label:'Más'},
+];
+
+const SOON={
+  campaigns:{icon:'Megaphone',t:'Campañas y Marketing',
+    d:'Email blast, SMS masivo y correo postal con métricas de apertura.',
+    n:'Requiere un proveedor de envío conectado. Hoy los mensajes salen uno a uno por WhatsApp desde Alertas y Programas — sin riesgo de bloqueo.'},
+  performance:{icon:'TrendingUp',t:'Rendimiento Comercial',
+    d:'Tabla de posición, cuotas, comparativa entre asesores y objetivos por mes.',
+    n:'Necesita varios asesores y metas definidas. Mientras tanto, Reportes te da tus números reales.'},
+  connections:{icon:'Share2',t:'Conexiones de Equipo',
+    d:'Vincular asesores con un Team Leader y niveles de privacidad por cartera.',
+    n:'Requiere cuentas compartidas en servidor. Esta versión guarda todo solo en tu dispositivo.'},
+  nextup:{icon:'RotateCcw',t:'Cola Rotativa Next-Up',
+    d:'Reparto equitativo de walk-ins entre los asesores en turno.',
+    n:'Depende de Equipo: sin varios asesores conectados no hay cola que rotar.'},
+  admin:{icon:'Shield',t:'Consola de Administrador',
+    d:'Gestión de usuarios, carteras y permisos del concesionario.',
+    n:'Requiere cuentas de equipo. El respaldo y borrado de TUS datos están en Config.'},
+};
+
+/* ── ICONOS (lucide-style, inline) ── */
+const ICONS={
+LayoutDashboard:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+BookOpen:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 0 4 5.5v14z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+Bell:'<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+Users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+Briefcase:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+CheckSquare:'<path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+RefreshCw:'<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>',
+Tag:'<path d="M20.6 13.4 12 22l-8.6-8.6a2 2 0 0 1 0-2.8L11 3h9v9l-.4 1.4z"/><circle cx="15.5" cy="8.5" r="1.3"/>',
+BarChart2:'<path d="M18 20V10M12 20V4M6 20v-6"/>',
+Megaphone:'<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+TrendingUp:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+Share2:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>',
+RotateCcw:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+Shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+Settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.7l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.7-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.7.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.7 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.7.3 1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.7-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.7 1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>',
+MoreH:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
+Plus:'<path d="M12 5v14M5 12h14"/>',
+X:'<path d="M18 6 6 18M6 6l12 12"/>',
+Check:'<path d="M20 6 9 17l-5-5"/>',
+ChevronRight:'<path d="m9 18 6-6-6-6"/>',
+ChevronLeft:'<path d="m15 18-6-6 6-6"/>',
+ArrowLeft:'<path d="M19 12H5M12 19l-7-7 7-7"/>',
+Search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+Zap:'<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+Phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/>',
+Mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>',
+MessageSquare:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+FileText:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/>',
+FileCheck:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/>',
+Calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+Landmark:'<path d="M3 21h18M4 10v11M20 10v11M8 10v11M16 10v11M12 10v11M2 10l10-7 10 7z"/>',
+UserCheck:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/>',
+UserPlus:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>',
+Radio:'<circle cx="12" cy="12" r="2"/><path d="M4.9 19.1a10 10 0 0 1 0-14.2M19.1 4.9a10 10 0 0 1 0 14.2"/><path d="M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4"/>',
+User:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+Trash2:'<path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/>',
+Save:'<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
+Download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/>',
+Upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/>',
+AlertCircle:'<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>',
+CheckCircle2:'<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+Circle:'<circle cx="12" cy="12" r="10"/>',
+Trophy:'<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16M10 14.7V17c0 .6-.1 1.3-1 1.3H8v3h8v-3h-1c-.9 0-1-.7-1-1.3v-2.3"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>',
+DollarSign:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+Send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/>',
+Edit2:'<path d="M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>',
+Lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+Clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+Activity:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+Copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+Cloud:'<path d="M17.5 19a4.5 4.5 0 0 0 .5-8.97A6 6 0 0 0 6.3 9.6 4 4 0 0 0 7 19h10.5z"/>',
+CloudOff:'<path d="M22 15.5a4.5 4.5 0 0 0-4.5-4.5h-1.3A6 6 0 0 0 7.5 7.3"/><path d="M4.5 9.5A4 4 0 0 0 6 19h11"/><path d="m2 2 20 20"/>',
+HardDrive:'<path d="M22 12H2M5.5 5h13l3.5 7v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6l2.5-7z"/><path d="M6 16h.01M10 16h.01"/>',
+Github:'<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 20 5.4a4.9 4.9 0 0 0-.1-3.6s-1.1-.3-3.7 1.4a12.7 12.7 0 0 0-6.6 0C7 1.5 5.9 1.8 5.9 1.8A4.9 4.9 0 0 0 5.8 5.4 5.2 5.2 0 0 0 4.4 9c0 5.2 3.2 6.4 6.2 6.7a3.4 3.4 0 0 0-.9 2.6V22"/>',
+Loader:'<path d="M12 2v4M12 18v4M4.9 4.9l2.9 2.9M16.2 16.2l2.9 2.9M2 12h4M18 12h4M4.9 19.1l2.9-2.9M16.2 7.8l2.9-2.9"/>',
+History:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>',
+Wa:'<path d="M20.5 3.5A10 10 0 0 0 3.6 15.4L2.5 21.5l6.3-1.1A10 10 0 1 0 20.5 3.5z"/><path d="M8.5 8c.3-.6.6-.6.9-.6h.7c.2 0 .5 0 .8.6l.8 1.9c.1.3 0 .5-.1.7l-.5.6c-.2.2-.3.4-.1.7a7 7 0 0 0 3.1 3c.3.2.5.1.7-.1l.6-.6c.2-.2.4-.2.7-.1l1.9.9c.3.1.5.3.5.5v.7c0 .8-.7 1.5-1.5 1.6-.6.1-1.4 0-3.4-.9a11 11 0 0 1-5-5c-.9-2-1-2.8-.9-3.4"/>',
+Sparkle:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>'};
+
+function ic(n,size,color,style){
+  const p=ICONS[n]||ICONS.Circle;
+  const st=(size?`width:${size}px;height:${size}px;`:'')+(color?`stroke:${color};`:'')+(style||'');
+  return `<svg class="ic" viewBox="0 0 24 24"${st?` style="${st}"`:''}>${p}</svg>`;
+}
+const LOGO=`<svg width="136" height="21" viewBox="0 0 148 22" fill="none">
+  <path d="M2 17.5Q5.5 9.5 13 8.5L27 8.5Q32 8.5 34 13.5L36 17.5Z" fill="#e31c1c"/>
+  <path d="M4.5 16Q17 5 33 7" stroke="#fff" stroke-width="1.1" fill="none" opacity=".6"/>
+  <circle cx="9" cy="19" r="2.6" fill="#080808" stroke="#e31c1c" stroke-width="1.3"/>
+  <circle cx="28.5" cy="19" r="2.6" fill="#080808" stroke="#e31c1c" stroke-width="1.3"/>
+  <text x="41" y="16" font-family="'Bebas Neue',sans-serif" font-size="16" fill="#efefef" letter-spacing=".4">AUTOSOLUTION</text>
+  <text x="41.5" y="22" font-family="Inter,sans-serif" font-size="7" fill="#e31c1c" font-weight="800" letter-spacing="3.2">MIAMI</text>
+</svg>`;
+</script>
+<script>
+/* ═══════════ ESTADO Y PERSISTENCIA ═══════════ */
+const K='asm_libro_v1';
+const BLANK=()=>({cfg:{nombre:'',wa:'',dealer:'AutoSolution Miami',onboarded:false},
+  clientes:[],leads:[],promos:[],tareas:[],
+  meta:{rev:0,updatedAt:'',device:''}});
+let S=BLANK();
+try{
+  const raw=localStorage.getItem(K);
+  if(raw){const d=JSON.parse(raw); S=Object.assign(BLANK(),d); S.cfg=Object.assign(BLANK().cfg,d.cfg||{});}
+}catch(e){console.warn('Estado ilegible, se arranca vacío.',e);}
+['clientes','leads','promos','tareas'].forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];});
+if(!S.meta||typeof S.meta!=='object')S.meta={rev:0,updatedAt:'',device:''};
+
+let saveErr=false;
+function saveLocal(){
+  try{localStorage.setItem(K,JSON.stringify(S));saveErr=false;return true;}
+  catch(e){
+    if(!saveErr){saveErr=true;
+      alert('No se pudo guardar en este navegador (¿modo privado o disco lleno?). Conecta GitHub o un archivo desde Config › Nube para no perder nada.');}
+    return false;
+  }
+}
+/* save() = guarda ya en local (rápido) y agenda el envío a la nube (con retraso). */
+function save(opts){
+  if(!(opts&&opts.silent)){
+    S.meta.rev=(S.meta.rev||0)+1;
+    S.meta.updatedAt=nowISO();
+    S.meta.device=SYNC.device;
+  }
+  saveLocal();
+  if(SYNC.modo!=='local')programarPush();
+}
+
+/* ═══════════ HELPERS ═══════════ */
+const $=id=>document.getElementById(id);
+const uid=p=>(p||'x')+Math.random().toString(36).slice(2,7)+Date.now().toString(36).slice(-4);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nowISO=()=>new Date().toISOString();
+const today=()=>new Date().toISOString().slice(0,10);
+const thisMonth=()=>new Date().toISOString().slice(0,7);
+const num=v=>{const n=Number(String(v==null?'':v).replace(/[^0-9.\-]/g,''));return isNaN(n)?0:n;};
+const fm=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(num(n));
+const fmN=n=>new Intl.NumberFormat('en-US').format(Math.round(num(n)));
+const ini=s=>String(s||'').split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('')||'AS';
+function fDate(iso){if(!iso)return'—';const d=new Date(iso.length===10?iso+'T00:00:00':iso);
+  return isNaN(d)?iso:d.toLocaleDateString('es-US',{month:'short',day:'numeric',year:'numeric'});}
+function fDateTime(iso){const d=new Date(iso);return isNaN(d)?'—':
+  d.toLocaleDateString('es-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function fmtM(d){return d.toLocaleDateString('es-US',{month:'short',year:'numeric'});}
+function addMonths(ym,n){if(!ym)return null;const a=String(ym).split('-');const y=+a[0],m=+a[1];
+  if(!y||!m)return null;return new Date(y,(m-1)+n,1);}
+function hoy(){const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
+function dias(a,b){return Math.round((a-b)/864e5);}
+function tel10(t){let d=String(t||'').replace(/\D/g,'');
+  if(d.length===10)d='1'+d;
+  if(d.length===11&&d[0]==='1')return d;
+  return d;}
+const firma=()=>S.cfg.nombre?', soy '+S.cfg.nombre:'';
+function calcPmt(amt,apr,mo){if(!amt||!mo)return 0;const r=(apr/100)/12;
+  return r>0?amt*(r*Math.pow(1+r,mo))/(Math.pow(1+r,mo)-1):amt/mo;}
+function toast(m){const e=$('toast');e.textContent=m;e.classList.add('on');
+  clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2600);}
+const jsq=x=>esc(JSON.stringify(x));
+function badge(txt,color){return `<span class="bdg2" style="color:${color};background:${color}20;border-color:${color}30">${esc(txt)}</span>`;}
+function empty(icon,t,s){return `<div class="empty"><div class="eb">${ic(icon,19)}</div>
+  <div class="t">${esc(t)}</div>${s?`<div class="s">${s}</div>`:''}</div>`;}
+function kpi(icon,label,value,sub,accent){
+  return `<div class="kpi"><div class="ib" style="background:${accent}18;color:${accent}">${ic(icon,17,accent)}</div>
+    <div style="min-width:0;flex:1"><div class="v mono">${value}</div><div class="l">${esc(label)}</div>
+    ${sub?`<div class="s">${esc(sub)}</div>`:''}</div></div>`;}
+
+/* ── vehículo / etiquetas ── */
+const vehLead=l=>[l.veh&&l.veh.ano,l.veh&&l.veh.marca,l.veh&&l.veh.mod].filter(Boolean).join(' ')||'Sin vehículo';
+const vehCli=c=>[c.ano,c.marca,c.mod].filter(Boolean).join(' ')||'—';
+const tipoLbl=t=>t==='lease'?'Lease':t==='finance'?'Financiado':'Cash';
+const tipoCol=t=>t==='lease'?'#F87171':t==='finance'?C.warn:C.ok;
+
+/* ═══════════ MOTOR DE URGENCIA (del diseño) ═══════════ */
+function getUrgency(l){
+  const et=ETAPAS[l.etapa]||'Nuevo';
+  if(et==='Vendido'||et==='Perdido')return{score:0,color:C.bd2,label:'Cerrado'};
+  const dsU=(Date.now()-new Date(l.updatedAt||l.createdAt))/864e5;
+  const dsC=(Date.now()-new Date(l.createdAt))/864e5;
+  let s=30;
+  if(et==='Nuevo'){ if(dsC<.25)s+=45; else if(dsC<1)s+=30; else if(dsC<3)s+=10; else s-=10; }
+  else if(et==='Negociación')s+=40;
+  else if(et==='Cita')s+=30;
+  else if(et==='Contactado')s+=10;
+  if(dsU<.5)s+=15; else if(dsU<1)s+=5; else if(dsU>7)s-=25; else if(dsU>3)s-=12;
+  const b=num(l.veh&&l.veh.pres);
+  if(b>70000)s+=10; else if(b>35000)s+=5;
+  s=Math.max(0,Math.min(100,Math.round(s)));
+  if(s>=75)return{score:s,color:C.p,label:'🔴 Urgente'};
+  if(s>=55)return{score:s,color:C.warn,label:'🟡 Caliente'};
+  if(s>=35)return{score:s,color:C.info,label:'🔵 Tibio'};
+  return{score:s,color:C.tx3,label:'⚫ Frío'};
+}
+
+/* ═══════════ MOTOR DE ALERTAS (del libro) ═══════════ */
+function calcAlertas(){
+  const H=hoy(),out=[];
+  for(const c of S.clientes){
+    if(!c.fecha)continue;
+    const base=addMonths(c.fecha,0); if(!base)continue;
+
+    if(c.tipo==='lease'&&num(c.plazo)){
+      const fin=addMonths(c.fecha,num(c.plazo)),d=dias(fin,H);
+      if(d<=200){
+        let tag,hot=false;
+        if(d<0){tag='Lease vencido hace '+Math.abs(d)+' días';hot=true;}
+        else if(d<=60){tag='Lease vence en '+d+' días';hot=true;}
+        else if(d<=125){tag='Lease vence en ~'+Math.round(d/30)+' meses';}
+        else{tag='Lease vence en ~6 meses';}
+        out.push({cid:c.id,nom:c.nom,tel:c.tel,veh:vehCli(c),tag,hot,ord:d,tipo:'lease',
+          msg:`Hola ${c.nom}${firma()} 👋 Te aviso con tiempo: el lease de tu ${vehCli(c)} ${d<0?'ya se venció':'se vence en unos '+Math.max(1,Math.round(d/30))+' meses'}. Los que empiezan a ver opciones con tiempo consiguen mucho mejor deal que los que esperan al final. ¿Quieres que te vaya buscando opciones?`});
+      }
+    }
+    if(c.tipo==='finance'){
+      const refi=addMonths(c.fecha,12),d=dias(refi,H);
+      if(d<=30&&d>=-180){
+        out.push({cid:c.id,nom:c.nom,tel:c.tel,veh:vehCli(c),hot:false,ord:d+1000,tipo:'refi',
+          tag:d<=0?'Cumplió 1 año · revisar refi':'Cumple 1 año en '+d+' días',
+          msg:`Hola ${c.nom}${firma()} 👋 Ya ${d<=0?'llevas':'casi llevas'} un año con tu ${vehCli(c)}. A veces a esta altura conviene revisar la tasa — hay casos donde baja el pago. Si quieres le doy un vistazo sin compromiso.`});
+      }
+    }
+    const H2=hoy();
+    let aniv=new Date(H2.getFullYear(),base.getMonth(),1);
+    if(dias(aniv,H2)<-30)aniv=new Date(H2.getFullYear()+1,base.getMonth(),1);
+    const da=dias(aniv,H2),years=aniv.getFullYear()-base.getFullYear();
+    if(da>=0&&da<=30&&years>=1&&!(c.tipo==='finance'&&years===1)){
+      out.push({cid:c.id,nom:c.nom,tel:c.tel,veh:vehCli(c),hot:false,ord:da+2000,tipo:'aniv',
+        tag:'Aniversario · '+years+' año'+(years>1?'s':''),
+        msg:`¡Hola ${c.nom}! 🎉 Ya se cumple${years>1?'n':''} ${years} año${years>1?'s':''} de tu ${vehCli(c)}. ¿Cómo te ha tratado? Cualquier cosa que necesites — o si alguien cercano anda buscando carro — aquí estoy.`});
+    }
+  }
+  /* Alertas de post-venta cargadas en el paso 8 del Deal Room */
+  const PS=[['equityDate','Equity','equity',c=>`Hola ${c} 👋 Te escribo por algo puntual: tu carro está en un punto donde puede tener equity a tu favor. Si quieres reviso los números sin compromiso y te digo qué opciones tienes.`],
+            ['refiDate','Refinanciamiento','refi',c=>`Hola ${c} 👋 Se abrió ventana para revisar tu tasa. En varios casos baja el pago mensual. ¿Te lo reviso sin compromiso?`],
+            ['renewDate','Renovación','renov',c=>`Hola ${c} 👋 Ya viene el momento de renovar. Si empezamos ahora te consigo mejores números que esperando al final. ¿Miramos opciones?`]];
+  for(const l of S.leads){
+    if(!l.post)continue;
+    for(const row of PS){
+      const f=l.post[row[0]]; if(!f)continue;
+      const d=dias(new Date(f+'T00:00:00'),hoy());
+      if(d<=45){
+        out.push({lid:l.id,nom:l.nom,tel:l.tel,veh:vehLead(l),hot:d<=14,ord:d+3000,tipo:row[2],
+          tag:'Post-venta · '+row[1]+(d<0?' (hace '+Math.abs(d)+' días)':d===0?' — hoy':' en '+d+' días'),
+          msg:row[3](l.nom)});
+      }
+    }
+  }
+  out.sort((a,b)=>a.ord-b.ord);
+  return out;
+}
+
+/* ═══════════ FÁBRICAS ═══════════ */
+function nuevoLead(o){
+  return{id:uid('l'),nom:o.nom,tel:o.tel||'',email:o.email||'',origen:o.origen||'Manual',etapa:0,
+    createdAt:nowISO(),updatedAt:nowISO(),notas:o.notas||'',
+    veh:{ano:o.ano||'',marca:o.marca||'',mod:o.mod||'',pres:num(o.pres),cond:o.cond||'Nuevo'},
+    trade:{has:false,vin:'',ano:'',marca:'',mod:'',millas:0,payoff:0,acv:0,allowance:0},
+    oferta:{stock:'',precio:0,msrp:0,fees:0,tax:0,rebates:0,desc:0,down:0},
+    perfil:{dir:'',ciudad:'',estado:'FL',zip:'',empleador:'',cargo:'',ingreso:0,licencia:'',seguro:''},
+    deal:{banco:'',tipo:'Financiado',apr:0,plazo:60},
+    recap:{fni:[],finalizado:false,firmado:false},
+    post:{resena:false,referidos:[],equityDate:'',refiDate:'',renewDate:''},
+    acts:[]};
+}
+function finanzas(l){
+  const o=l.oferta||{},t=l.trade||{},d=l.deal||{};
+  const precio=num(o.precio),msrp=num(o.msrp),fees=num(o.fees),tax=num(o.tax),
+    rebates=num(o.rebates),desc=num(o.desc),down=num(o.down);
+  const allowance=t.has?num(t.allowance):0, payoff=t.has?num(t.payoff):0, acv=t.has?num(t.acv):0;
+  const totalDue=precio+fees+tax-rebates-desc-allowance;
+  const amtFin=Math.max(0,totalDue-down);
+  const equity=allowance-payoff;
+  const over=Math.max(0,allowance-acv);
+  const frontGross=precio-msrp-over;
+  const backGross=(l.recap&&l.recap.fni||[]).reduce((s,f)=>s+num(f.profit),0);
+  const apr=num(d.apr),plazo=num(d.plazo)||60;
+  return{precio,msrp,fees,tax,rebates,desc,down,allowance,payoff,acv,totalDue,amtFin,equity,over,
+    frontGross,backGross,totalGross:frontGross+backGross,apr,plazo,
+    pago:Math.round(calcPmt(amtFin,apr,plazo))};
+}
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   SINCRONIZACIÓN — GitHub (nube) o archivo en la PC
+   localStorage queda como caché rápida; la fuente de verdad
+   es el remoto. La config vive en su propia clave: el token
+   NUNCA entra en el respaldo JSON.
+═══════════════════════════════════════════════════════════ */
+const SK='asm_sync_v1';
+const SYNC_BLANK=()=>({
+  modo:'local',            /* 'local' | 'github' | 'archivo' */
+  device:'',
+  baseRev:0,               /* rev ya confirmada en el remoto */
+  ultima:'',
+  gh:{owner:'',repo:'',path:'datos/autosolution-crm.json',branch:'main',token:'',sha:''},
+  archivo:{nombre:''}
+});
+let SYNC=SYNC_BLANK();
+try{const r=localStorage.getItem(SK);if(r){const d=JSON.parse(r);
+  SYNC=Object.assign(SYNC_BLANK(),d);
+  SYNC.gh=Object.assign(SYNC_BLANK().gh,d.gh||{});
+  SYNC.archivo=Object.assign(SYNC_BLANK().archivo,d.archivo||{});}}catch(e){}
+if(!SYNC.device){
+  const ua=navigator.userAgent;
+  SYNC.device=/iPhone|iPad/.test(ua)?'iPhone':/Android/.test(ua)?'Android':
+              /Mac/.test(ua)?'Mac':/Windows/.test(ua)?'PC':'Navegador';
+}
+function saveSync(){try{localStorage.setItem(SK,JSON.stringify(SYNC));}catch(e){}}
+
+/* Estado visible: 'local'|'ok'|'pendiente'|'sync'|'error'|'conflicto'|'permiso' */
+let SYNCEST={estado:SYNC.modo==='local'?'local':'pendiente',msg:''};
+function setEstado(e,msg){
+  SYNCEST={estado:e,msg:msg||''};
+  pintarPill();
+  if(TAB==='nube')render();
+}
+const SYNC_UI={
+  local:{c:C.tx3,i:'CloudOff',t:'Solo este dispositivo'},
+  ok:{c:C.ok,i:'Cloud',t:'Guardado en la nube'},
+  pendiente:{c:C.warn,i:'Cloud',t:'Cambios sin enviar'},
+  sync:{c:C.info,i:'Loader',t:'Sincronizando…'},
+  error:{c:C.dan,i:'CloudOff',t:'Error de sincronización'},
+  conflicto:{c:C.ora,i:'AlertCircle',t:'Conflicto entre dispositivos'},
+  permiso:{c:C.warn,i:'HardDrive',t:'Reconectar el archivo'}
+};
+function pintarPill(){
+  const el=$('syncPill'); if(!el)return;
+  const u=SYNC_UI[SYNCEST.estado]||SYNC_UI.local;
+  el.innerHTML=ic(u.i,17,u.c)+(SYNCEST.estado==='sync'?'<span class="spin"></span>':'');
+  el.title=u.t+(SYNCEST.msg?' — '+SYNCEST.msg:'');
+  el.style.color=u.c;
+}
+
+/* ── base64 <-> UTF-8 (nombres con acentos y emojis) ── */
+function b64enc(str){
+  const b=new TextEncoder().encode(str);let s='';const CH=0x8000;
+  for(let i=0;i<b.length;i+=CH)s+=String.fromCharCode.apply(null,b.subarray(i,i+CH));
+  return btoa(s);
+}
+function b64dec(b64){
+  const bin=atob(String(b64).replace(/\s/g,''));
+  const b=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);
+  return new TextDecoder().decode(b);
+}
+const payload=()=>JSON.stringify(S,null,1);
+
+/* ═══ GITHUB ═══ */
+async function ghFetch(ruta,opts){
+  opts=opts||{};
+  return fetch('https://api.github.com'+ruta,Object.assign({},opts,{
+    headers:Object.assign({
+      'Authorization':'Bearer '+SYNC.gh.token,
+      'Accept':'application/vnd.github+json',
+      'X-GitHub-Api-Version':'2022-11-28'
+    },opts.headers||{})
+  }));
+}
+async function ghError(r){
+  let d='';try{const j=await r.json();d=j.message||'';}catch(e){}
+  if(r.status===401)return 'Token inválido o vencido.';
+  if(r.status===403)return 'Sin permiso. ¿El token tiene acceso de escritura (Contents) a este repo?';
+  if(r.status===404)return 'No se encontró el repo o la rama. Revisa usuario/repo/rama.';
+  if(r.status===409)return 'Conflicto de versión.';
+  return 'GitHub '+r.status+(d?': '+d:'');
+}
+const ghURL=()=>{const g=SYNC.gh;
+  return `/repos/${encodeURIComponent(g.owner)}/${encodeURIComponent(g.repo)}/contents/`+
+    String(g.path).split('/').map(encodeURIComponent).join('/');};
+
+async function ghPull(){
+  const g=SYNC.gh;
+  const r=await ghFetch(ghURL()+'?ref='+encodeURIComponent(g.branch)+'&nc='+Date.now(),{cache:'no-store'});
+  if(r.status===404)return {existe:false};
+  if(!r.ok)throw new Error(await ghError(r));
+  const j=await r.json();
+  let txt;
+  if(j.content&&j.content.length)txt=b64dec(j.content);
+  else{ /* >1 MB: la API devuelve content vacío, hay que leer el blob */
+    const rb=await ghFetch(`/repos/${encodeURIComponent(g.owner)}/${encodeURIComponent(g.repo)}/git/blobs/${j.sha}`);
+    if(!rb.ok)throw new Error(await ghError(rb));
+    txt=b64dec((await rb.json()).content);
+  }
+  return {existe:true,sha:j.sha,datos:JSON.parse(txt)};
+}
+async function ghPush(sha){
+  const g=SYNC.gh;
+  const body={branch:g.branch,content:b64enc(payload()),
+    message:`CRM · ${S.clientes.length} clientes · ${S.leads.length} leads · ${SYNC.device}`};
+  if(sha||g.sha)body.sha=sha||g.sha;
+  const r=await ghFetch(ghURL(),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(r.status===409||r.status===422){const e=new Error('sha desactualizado');e.conflicto=true;throw e;}
+  if(!r.ok)throw new Error(await ghError(r));
+  g.sha=(await r.json()).content.sha;
+  return true;
+}
+
+/* ═══ ARCHIVO EN LA PC (File System Access API) ═══ */
+const HAY_FS=typeof window!=='undefined'&&'showSaveFilePicker'in window;
+let FH=null; /* FileSystemFileHandle */
+function idbKV(op,val){
+  return new Promise((res,rej)=>{
+    if(!window.indexedDB)return res(null);
+    const rq=indexedDB.open('asm_sync',1);
+    rq.onupgradeneeded=()=>{try{rq.result.createObjectStore('kv');}catch(e){}};
+    rq.onerror=()=>rej(rq.error);
+    rq.onsuccess=()=>{
+      const db=rq.result;
+      let tx;try{tx=db.transaction('kv',op==='get'?'readonly':'readwrite');}catch(e){return res(null);}
+      const st=tx.objectStore('kv');
+      const r=op==='get'?st.get('handle'):st.put(val,'handle');
+      r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);
+    };
+  });
+}
+async function fsPermiso(pedir){
+  if(!FH)return false;
+  const o={mode:'readwrite'};
+  if((await FH.queryPermission(o))==='granted')return true;
+  if(!pedir)return false;
+  return (await FH.requestPermission(o))==='granted';
+}
+async function fsLeer(){
+  const f=await FH.getFile();
+  const t=await f.text();
+  if(!t.trim())return {existe:false};
+  return {existe:true,datos:JSON.parse(t)};
+}
+async function fsEscribir(){
+  const w=await FH.createWritable();
+  await w.write(payload());
+  await w.close();
+  return true;
+}
+
+/* ═══ ORQUESTADOR ═══ */
+let pushTimer=null, sincronizando=false, ultimoPull=0;
+function programarPush(){
+  setEstado('pendiente');
+  clearTimeout(pushTimer);
+  pushTimer=setTimeout(()=>{sincronizar();},2500);
+}
+async function sincronizar(manual){
+  if(SYNC.modo==='local'||sincronizando)return;
+  clearTimeout(pushTimer);
+  sincronizando=true; setEstado('sync');
+  try{
+    if(SYNC.modo==='archivo'){
+      if(!await fsPermiso(!!manual)){sincronizando=false;setEstado('permiso');return;}
+    }
+    const rem = SYNC.modo==='github' ? await ghPull() : await fsLeer();
+
+    if(!rem.existe){                       /* primera vez: creamos el archivo */
+      await enviar(); sincronizando=false; return;
+    }
+    const rRev=(rem.datos&&rem.datos.meta&&rem.datos.meta.rev)||0;
+    const lRev=S.meta.rev||0, base=SYNC.baseRev||0;
+
+    /* Dispositivo nuevo estrenando la conexión: aquí no hay nada que perder,
+       así que se adopta la nube sin molestar con un conflicto. */
+    if(vacio(S)&&!vacio(rem.datos)){
+      adoptar(rem.datos);
+      if(SYNC.modo==='github')SYNC.gh.sha=rem.sha;
+      SYNC.baseRev=rRev; SYNC.ultima=nowISO(); saveSync();
+      sincronizando=false; setEstado('ok'); render();
+      toast('Datos recuperados de la nube');
+      return;
+    }
+    if(rRev>base&&lRev>base&&!iguales(rem.datos,S)){
+      sincronizando=false;
+      setEstado('conflicto');
+      modalConflicto(rem);
+      return;
+    }
+    if(rRev>base){                         /* la nube va adelante: la adoptamos */
+      adoptar(rem.datos);
+      if(SYNC.modo==='github')SYNC.gh.sha=rem.sha;
+      SYNC.baseRev=rRev; SYNC.ultima=nowISO(); saveSync();
+      sincronizando=false; setEstado('ok'); render();
+      if(manual)toast('Actualizado desde la nube');
+      return;
+    }
+    if(lRev>base){ await enviar(rem.sha); sincronizando=false; if(manual)toast('Guardado en la nube'); return; }
+
+    if(SYNC.modo==='github')SYNC.gh.sha=rem.sha;
+    SYNC.ultima=nowISO(); saveSync();
+    sincronizando=false; setEstado('ok');
+    if(manual)toast('Todo al día');
+  }catch(e){
+    sincronizando=false;
+    if(e&&e.conflicto){setEstado('pendiente');setTimeout(()=>sincronizar(),800);return;}
+    setEstado('error',e&&e.message?e.message:String(e));
+    if(manual)alert('No se pudo sincronizar.\n\n'+(e&&e.message?e.message:e)+
+      '\n\nTus datos siguen guardados en este dispositivo.');
+  }
+}
+async function enviar(sha){
+  if(SYNC.modo==='github')await ghPush(sha); else await fsEscribir();
+  SYNC.baseRev=S.meta.rev; SYNC.ultima=nowISO(); saveSync();
+  setEstado('ok');
+}
+/* "Vacío" = sin nada que perder: solo el perfil del onboarding. */
+function vacio(d){
+  if(!d)return true;
+  return !((d.clientes||[]).length||(d.leads||[]).length||
+           (d.promos||[]).length||(d.tareas||[]).length);
+}
+function iguales(a,b){
+  try{
+    const limpia=o=>{const c=JSON.parse(JSON.stringify(o));delete c.meta;return JSON.stringify(c);};
+    return limpia(a)===limpia(b);
+  }catch(e){return false;}
+}
+function adoptar(d){
+  S=Object.assign(BLANK(),d);
+  S.cfg=Object.assign(BLANK().cfg,d.cfg||{});
+  ['clientes','leads','promos','tareas'].forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];});
+  if(!S.meta)S.meta={rev:0,updatedAt:'',device:''};
+  saveLocal();
+}
+function resumen(d){
+  const m=(d&&d.meta)||{};
+  return `${(d.clientes||[]).length} clientes · ${(d.leads||[]).length} leads · ${(d.promos||[]).length} programas`+
+    (m.updatedAt?`<br><span style="color:var(--tx3)">${fDateTime(m.updatedAt)}${m.device?' · '+esc(m.device):''}</span>`:'');
+}
+function modalConflicto(rem){
+  window.__CONF=rem;
+  openModal('Dos versiones distintas',
+   `<p style="font-size:12.5px;color:var(--tx2);line-height:1.6;margin-bottom:14px">
+      Este dispositivo y la nube cambiaron por separado. Elige cuál se queda —
+      la otra no se pierde: se descarga como respaldo antes de reemplazarla.</p>
+    <div class="card" style="background:var(--bg3);margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12.5px;margin-bottom:6px">
+        ${ic('Cloud',14,C.info)}En la nube</div>
+      <div style="font-size:12px;color:var(--tx2);line-height:1.6">${resumen(rem.datos)}</div></div>
+    <div class="card" style="background:var(--bg3)">
+      <div style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12.5px;margin-bottom:6px">
+        ${ic('HardDrive',14,C.p)}En este dispositivo (${esc(SYNC.device)})</div>
+      <div style="font-size:12px;color:var(--tx2);line-height:1.6">${resumen(S)}</div></div>`,
+   `<button class="btn sec" onclick="resolver('nube')">${ic('Cloud')}Usar la nube</button>
+    <button class="btn" onclick="resolver('local')">${ic('HardDrive')}Usar este</button>`);
+}
+async function resolver(cual){
+  const rem=window.__CONF; if(!rem)return;
+  closeModal();
+  bajarJSON(cual==='nube'?S:rem.datos, 'respaldo-descartado-'+today()+'.json');
+  try{
+    if(cual==='nube'){
+      adoptar(rem.datos);
+      if(SYNC.modo==='github')SYNC.gh.sha=rem.sha;
+      SYNC.baseRev=(rem.datos.meta&&rem.datos.meta.rev)||0;
+      SYNC.ultima=nowISO(); saveSync(); setEstado('ok'); render();
+      toast('Se quedó la versión de la nube');
+    }else{
+      S.meta.rev=Math.max(S.meta.rev||0,(rem.datos.meta&&rem.datos.meta.rev)||0)+1;
+      S.meta.updatedAt=nowISO(); S.meta.device=SYNC.device; saveLocal();
+      await enviar(rem.sha);
+      toast('Se quedó la versión de este dispositivo');
+    }
+  }catch(e){setEstado('error',e.message);alert('No se pudo aplicar: '+e.message);}
+}
+function bajarJSON(obj,nombre){
+  try{
+    const b=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=nombre;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  }catch(e){}
+}
+
+/* ── Arranque y disparadores automáticos ── */
+async function iniciarSync(){
+  if(SYNC.modo==='archivo'){
+    try{FH=await idbKV('get');}catch(e){FH=null;}
+    if(!FH){SYNC.modo='local';saveSync();setEstado('local');return;}
+    if(!await fsPermiso(false)){setEstado('permiso');return;}
+  }
+  if(SYNC.modo!=='local')sincronizar();
+}
+document.addEventListener('visibilitychange',()=>{
+  if(SYNC.modo==='local')return;
+  if(document.visibilityState==='hidden'){ if(S.meta.rev>SYNC.baseRev)sincronizar(); }
+  else if(Date.now()-ultimoPull>20000){ ultimoPull=Date.now(); sincronizar(); }
+});
+window.addEventListener('online',()=>{if(SYNC.modo!=='local')sincronizar();});
+setInterval(()=>{
+  if(SYNC.modo!=='local'&&document.visibilityState==='visible'&&!sincronizando){
+    ultimoPull=Date.now(); sincronizar();
+  }
+},120000);
+window.addEventListener('beforeunload',e=>{
+  if(SYNC.modo!=='local'&&S.meta.rev>SYNC.baseRev){
+    e.preventDefault();e.returnValue='Hay cambios sin enviar a la nube.';return e.returnValue;
+  }
+});
+</script>
+<script>
+/* ═══════════ NAVEGACIÓN ═══════════ */
+let TAB='dashboard', LEADID=null, CLIID=null, STEP=1, Q='', QLIB='';
+let FSRC='Todos', FEST='Todos';
+
+function drawer(open){
+  $('aside').classList.toggle('on',!!open);
+  $('scrim').classList.toggle('on',!!open);
+}
+function go(tab,opts){
+  if(tab==='__more'){drawer(true);return;}
+  TAB=tab; if(opts&&opts.lead)LEADID=opts.lead; if(opts&&opts.step)STEP=opts.step;
+  drawer(false); $('content').scrollTop=0; render();
+}
+function openDeal(id,step){LEADID=id;STEP=step||1;TAB='deal';drawer(false);$('content').scrollTop=0;render();}
+
+function renderNav(){
+  let h='';
+  NAV.forEach(n=>{
+    if(n.sec)h+=`<div class="nvsec">${esc(n.sec)}</div>`;
+    let bdg=0;
+    if(n.id==='alertas')bdg=calcAlertas().length;
+    if(n.id==='tasks')bdg=S.tareas.filter(t=>!t.hecha&&t.vence&&t.vence<today()).length;
+    h+=`<button class="nvi ${TAB===n.id?'on':''}" onclick="go('${n.id}')">
+      ${ic(n.icon,15,TAB===n.id?C.p:C.tx3)}<span class="lb">${esc(n.label)}</span>
+      ${n.soon?'<span class="soon">PRONTO</span>':bdg>0?`<span class="bdg">${bdg}</span>`:''}
+    </button>`;
+  });
+  $('sbNav').innerHTML=h;
+  $('sbLogo').innerHTML=LOGO;
+  $('sbAv').textContent=ini(S.cfg.nombre);
+  $('sbName').textContent=S.cfg.nombre||'Mi cartera';
+
+  const alertN=calcAlertas().length;
+  $('bottomnav').innerHTML=TABS.map(t=>{
+    const on=TAB===t.id||(t.id==='pipeline'&&(TAB==='leads'||TAB==='deal'));
+    const dot=(t.id==='alertas'&&alertN>0);
+    return `<button class="bn ${on?'on':''}" onclick="go('${t.id}')">
+      ${ic(t.icon,19,on?C.p:'currentColor')}<span>${esc(t.label)}</span>${dot?'<span class="dot"></span>':''}</button>`;
+  }).join('');
+}
+
+const VIEWS={};
+function render(){
+  const nav=NAV.find(n=>n.id===TAB);
+  $('tbTitle').textContent = TAB==='deal'?'Deal Room' : TAB==='ficha'?'Cliente' : (nav?nav.label:'AutoSolution');
+  $('content').classList.toggle('flush',TAB==='deal');
+  renderNav();
+  const fn=VIEWS[TAB]||VIEWS.dashboard;
+  $('view').innerHTML=fn();
+  /* La animación usa transform y crearía un bloque contenedor que rompe
+     el position:fixed de la barra financiera del Deal Room. */
+  $('view').classList.remove('fi');
+  if(TAB!=='deal'){void $('view').offsetWidth;$('view').classList.add('fi');}
+}
+
+/* ═══════════ MODAL GENÉRICO ═══════════ */
+let MODAL_CTX={};
+function openModal(title,body,foot,ctx){
+  MODAL_CTX=ctx||{};
+  $('mTitle').textContent=title;
+  $('mBody').innerHTML=body;
+  $('mFoot').innerHTML=foot||'';
+  $('mFoot').style.display=foot?'flex':'none';
+  $('mask').classList.add('on');
+}
+function closeModal(){$('mask').classList.remove('on');MODAL_CTX={};}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();drawer(false);}});
+
+/* ═══════════ WHATSAPP ═══════════ */
+function openMsg(titulo,tel,texto){
+  const t=tel10(tel);
+  openModal(titulo,
+    `<label class="f">Mensaje — edítalo si quieres</label>
+     <textarea class="inp" id="msgTxt" rows="7">${esc(texto)}</textarea>
+     <p style="font-size:11px;color:var(--tx3);margin-top:10px;line-height:1.6">
+     ${t?`Se abre TU WhatsApp con el mensaje listo para <b style="color:var(--tx2)">+${esc(t)}</b>. Uno por uno, natural — sin riesgo de bloqueo.`
+        :'<span style="color:#eab308">Este contacto no tiene teléfono válido.</span> Agrégalo en su ficha para poder escribirle.'}</p>`,
+    `<button class="btn sec" onclick="copiarTexto(document.getElementById('msgTxt').value)">${ic('Copy')}Copiar</button>
+     <button class="btn wa" ${t?'':'disabled'} onclick="mandarWa()">${ic('Wa')}Abrir WhatsApp</button>`,
+    {tel:t});
+}
+function mandarWa(){
+  const t=MODAL_CTX.tel; if(!t)return;
+  const txt=$('msgTxt')?$('msgTxt').value:'';
+  window.open('https://wa.me/'+t+'?text='+encodeURIComponent(txt),'_blank');
+  closeModal();
+}
+function copiarTexto(txt){
+  const done=()=>toast('Copiado');
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(done).catch(()=>fallback());}
+  else fallback();
+  function fallback(){
+    const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');done();}catch(e){toast('Selecciona y copia el texto a mano');}
+    document.body.removeChild(ta);
+  }
+}
+function msgAlerta(i){
+  const a=calcAlertas()[i]; if(!a)return;
+  openMsg(a.nom,a.tel,a.msg);
+}
+</script>
+<script>
+/* ═══════════════════════════════════════════
+   VISTA · HOY (dashboard)
+═══════════════════════════════════════════ */
+VIEWS.dashboard=function(){
+  const h=new Date().getHours();
+  const saludo=h<12?'Buenos días':h<18?'Buenas tardes':'Buenas noches';
+  const activos=S.leads.filter(l=>ETAPAS[l.etapa]!=='Vendido'&&ETAPAS[l.etapa]!=='Perdido');
+  const vendidos=S.leads.filter(l=>ETAPAS[l.etapa]==='Vendido');
+  const gross=vendidos.reduce((s,l)=>s+finanzas(l).totalGross,0);
+  const al=calcAlertas();
+  const pend=S.tareas.filter(t=>!t.hecha);
+  const venc=pend.filter(t=>t.vence&&t.vence<today());
+  const cola=activos.map(l=>({l,u:getUrgency(l)})).filter(x=>x.u.score>=35)
+    .sort((a,b)=>b.u.score-a.u.score).slice(0,6);
+
+  let out=`<div class="stack">
+    <div class="rowb">
+      <div>
+        <div style="font-size:10.5px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.08em">${saludo},</div>
+        <h1 style="font-size:25px;font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-top:3px">${esc((S.cfg.nombre||'Bienvenido').split(' ')[0])}</h1>
+        <div style="font-size:11.5px;color:var(--tx3);margin-top:4px">Tu cartera es privada. Vive en este dispositivo.</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      ${kpi('BookOpen','En el libro',S.clientes.length,'Clientes entregados',C.ok)}
+      ${kpi('Zap','Alertas',al.length,'Para contactar',C.p)}
+      ${kpi('Users','Leads activos',activos.length,fm(activos.reduce((s,l)=>s+(finanzas(l).precio||num(l.veh&&l.veh.pres)),0)),C.info)}
+      ${kpi('DollarSign','Gross acum.',fm(gross),vendidos.length+' entrega'+(vendidos.length===1?'':'s'),C.warn)}
+    </div>`;
+
+  if(venc.length) out+=`<div class="card" style="background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.2)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;color:var(--dan)">
+        ${ic('AlertCircle',15)}<b style="font-size:12.5px">${venc.length} tarea(s) vencida(s)</b></div>
+      <p style="font-size:11.5px;color:var(--tx3);line-height:1.55">Responder en los primeros 15 minutos multiplica el cierre. Atiende ahora.</p>
+      <button class="btn dan sm" style="margin-top:10px" onclick="go('tasks')">Ver tareas →</button>
+    </div>`;
+
+  out+=`<div class="card pad0">
+    <div class="chead rowb"><div><div style="display:flex;align-items:center;gap:7px">${ic('Zap',15,C.p)}Cola de acción — llama ahora</div>
+      <div class="s">Leads ordenados por urgencia calculada en tiempo real</div></div>
+      <button class="btn ghost xs" style="color:var(--p);font-weight:700" onclick="go('leads')">Ver todos →</button></div>`;
+  out+= cola.length? cola.map(x=>{
+      const l=x.l,u=x.u;
+      return `<button class="lrow" onclick="openDeal('${l.id}')">
+        <div class="heat" style="background:${u.color}"></div>
+        <div class="body">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+              <span class="lname">${esc(l.nom)}</span>${badge(ETAPAS[l.etapa],ETAPA_C[ETAPAS[l.etapa]])}</div>
+            <div class="lmeta">${esc(vehLead(l))} · <span style="color:var(--tx2)">${fm(l.veh&&l.veh.pres)}</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:10px;font-weight:800;color:${u.color}">${u.label}</div>
+            <div class="mono" style="font-size:10px;color:var(--tx3);margin-top:2px">Score ${u.score}</div>
+          </div>${ic('ChevronRight',14,C.tx3)}
+        </div></button>`;}).join('')
+    : empty('CheckCircle2','Sin acciones urgentes',
+        S.leads.length?'Todos tus leads están al día.':'Agrega tu primer lead con el botón <b style="color:var(--p)">Lead</b> de arriba.');
+  out+='</div>';
+
+  out+=`<div class="grid1">
+    <div class="card pad0">
+      <div class="chead rowb"><span>Alertas del libro</span>
+        <button class="btn ghost xs" style="color:var(--p);font-weight:700" onclick="go('alertas')">Ver todas →</button></div>
+      ${al.length? al.slice(0,3).map((a,i)=>`<div style="padding:12px 16px;border-bottom:1px solid var(--bd)">
+          <div class="atag" style="color:${a.hot?C.p:C.warn}">${esc(a.tag)}</div>
+          <div class="lname" style="margin-top:4px">${esc(a.nom)}</div>
+          <div class="lmeta">${esc(a.veh)}</div></div>`).join('')
+        : empty('Bell','Sin alertas','Cuando agregues clientes al libro con fecha y plazo, aparecen solas.')}
+    </div>
+    <div class="card pad0">
+      <div class="chead rowb"><span>Compromisos</span>
+        <button class="btn ghost xs" style="color:var(--tx3)" onclick="go('tasks')">Ver todos</button></div>
+      ${pend.length? pend.slice(0,4).map(t=>`<div style="display:flex;align-items:center;gap:9px;padding:11px 16px;border-bottom:1px solid var(--bd)">
+          <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:${t.vence&&t.vence<today()?C.dan:t.prio==='Alta'?C.p:t.prio==='Media'?C.warn:C.tx3}"></div>
+          <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.titulo)}</div>
+          <div style="font-size:10.5px;color:${t.vence&&t.vence<today()?C.dan:C.tx3}">${esc(t.leadNom||'General')} · ${fDate(t.vence)}</div></div>
+        </div>`).join('')
+        : `<div style="font-size:12px;color:var(--tx3);text-align:center;padding:22px 0">✓ Sin compromisos pendientes</div>`}
+    </div>
+  </div>`;
+
+  out+=`<div class="card">
+    <div style="font-weight:700;font-size:13px;margin-bottom:12px">Pipeline por etapa</div>
+    ${ETAPAS.slice(0,5).map(e=>{
+      const n=S.leads.filter(l=>ETAPAS[l.etapa]===e).length;
+      const pct=activos.length?Math.min(100,n/Math.max(1,activos.length)*100):0;
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:11.5px;color:var(--tx2)">${e}</span>
+          <span style="font-size:11.5px;font-weight:700;color:${ETAPA_C[e]}">${n}</span></div>
+        <div style="height:5px;border-radius:99px;background:var(--bg3);overflow:hidden">
+          <div style="height:100%;border-radius:99px;background:${ETAPA_C[e]};width:${pct}%"></div></div></div>`;}).join('')}
+  </div></div>`;
+  return out;
+};
+
+/* ═══════════════════════════════════════════
+   VISTA · LIBRO DE CLIENTES
+═══════════════════════════════════════════ */
+VIEWS.libro=function(){
+  const q=QLIB.toLowerCase();
+  const list=S.clientes.filter(c=>!q||[c.nom,c.tel,c.marca,c.mod,c.notas].join(' ').toLowerCase().includes(q));
+  let out=`<div class="stack">
+    <div class="rowb"><div><h2 class="vh">Libro de clientes</h2>
+      <div class="vsub">${S.clientes.length} cliente${S.clientes.length===1?'':'s'} · de aquí salen las alertas y los programas</div></div>
+      <button class="btn sm" onclick="openCliente()">${ic('Plus')}Cliente</button></div>
+    <input class="inp" placeholder="Buscar nombre, teléfono, marca…" value="${esc(QLIB)}"
+      oninput="QLIB=this.value;document.getElementById('libroList').innerHTML=libroList()">
+    <div id="libroList">${libroList()}</div></div>`;
+  return out;
+};
+function libroList(){
+  const q=QLIB.toLowerCase();
+  const list=S.clientes.filter(c=>!q||[c.nom,c.tel,c.marca,c.mod,c.notas].join(' ').toLowerCase().includes(q));
+  if(!list.length)return `<div class="card pad0">${S.clientes.length
+    ? empty('Search','Sin resultados','Prueba con otro nombre o marca.')
+    : empty('BookOpen','Tu libro está vacío','Agrega tu primer cliente — los de este mes o los de hace años. Con la fecha y el plazo, las alertas se calculan solas.')}</div>`;
+  return `<div class="card pad0">`+list.map(c=>{
+    const vence=(c.tipo==='lease'&&c.fecha&&num(c.plazo))?addMonths(c.fecha,num(c.plazo)):null;
+    return `<button class="lrow" onclick="openFicha('${c.id}')">
+      <div class="heat" style="background:${tipoCol(c.tipo)}"></div>
+      <div class="body"><div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+          <span class="lname">${esc(c.nom)}</span>${badge(tipoLbl(c.tipo),tipoCol(c.tipo))}</div>
+        <div class="lmeta">${esc(vehCli(c))}</div>
+        <div class="lmeta" style="color:var(--tx3)">${c.fecha?'Vendido '+fmtM(addMonths(c.fecha,0)):'Sin fecha de venta'}${vence?'  ·  vence '+fmtM(vence):''}</div>
+      </div>${ic('ChevronRight',14,C.tx3)}</div></button>`;}).join('')+`</div>`;
+}
+</script>
+<script>
+/* ═══════════ CLIENTE · alta / edición / ficha ═══════════ */
+function openCliente(id){
+  const c=id?S.clientes.find(x=>x.id===id):null;
+  const g=k=>c?esc(c[k]==null?'':c[k]):'';
+  openModal(c?'Editar cliente':'Nuevo cliente',
+   `<div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
+      <div class="fr" style="grid-column:1/-1"><label class="f">Nombre *</label><input class="inp" id="cNom" value="${g('nom')}" placeholder="Nombre del cliente"></div>
+      <div class="fr" style="grid-column:1/-1"><label class="f">Teléfono *</label><input class="inp" id="cTel" inputmode="tel" value="${g('tel')}" placeholder="3055551234"></div>
+      <div class="fr"><label class="f">Marca</label><input class="inp" id="cMarca" value="${g('marca')}" placeholder="Toyota"></div>
+      <div class="fr"><label class="f">Modelo</label><input class="inp" id="cMod" value="${g('mod')}" placeholder="Corolla"></div>
+      <div class="fr"><label class="f">Año</label><input class="inp" id="cAno" inputmode="numeric" value="${g('ano')}" placeholder="2024"></div>
+      <div class="fr"><label class="f">Tipo</label><select class="inp" id="cTipo">
+        ${['lease','finance','cash'].map(t=>`<option value="${t}" ${c&&c.tipo===t?'selected':''}>${tipoLbl(t)}</option>`).join('')}
+      </select></div>
+      <div class="fr"><label class="f">Mes de venta</label><input class="inp" id="cFecha" type="month" value="${g('fecha')}"></div>
+      <div class="fr"><label class="f">Plazo <span class="h">meses</span></label><input class="inp" id="cPlazo" inputmode="numeric" value="${c?esc(c.plazo||''):'36'}" placeholder="36"></div>
+      <div class="fr" style="grid-column:1/-1"><label class="f">Notas</label><input class="inp" id="cNotas" value="${g('notas')}" placeholder="Referido de…, cumpleaños…"></div>
+      <p style="grid-column:1/-1;font-size:11px;color:var(--tx3);line-height:1.55;margin-top:2px">
+        El <b style="color:var(--tx2)">mes de venta</b> y el <b style="color:var(--tx2)">plazo</b> son los que generan las alertas de fin de lease, refi y aniversario.</p>
+    </div>
+    ${c?`<button class="btn dan full" style="margin-top:16px" onclick="delCliente('${c.id}')">${ic('Trash2')}Eliminar cliente</button>`:''}`,
+   `<button class="btn sec" onclick="closeModal()">Cancelar</button>
+    <button class="btn" onclick="saveCliente()">${ic('Save')}Guardar</button>`,
+   {id:id||null});
+}
+function saveCliente(){
+  const nom=$('cNom').value.trim(), tel=$('cTel').value.trim();
+  if(!nom||!tel){alert('Nombre y teléfono son obligatorios.');return;}
+  const data={nom,tel,marca:$('cMarca').value.trim(),mod:$('cMod').value.trim(),ano:$('cAno').value.trim(),
+    tipo:$('cTipo').value,fecha:$('cFecha').value,plazo:num($('cPlazo').value),notas:$('cNotas').value.trim()};
+  if(MODAL_CTX.id){
+    const i=S.clientes.findIndex(x=>x.id===MODAL_CTX.id);
+    if(i>=0)S.clientes[i]=Object.assign({},S.clientes[i],data);
+  }else{
+    S.clientes.unshift(Object.assign({id:uid('c'),createdAt:nowISO()},data));
+  }
+  save();closeModal();toast('Cliente guardado');render();
+}
+function delCliente(id){
+  if(!confirm('¿Eliminar este cliente del libro?'))return;
+  S.clientes=S.clientes.filter(x=>x.id!==id);
+  save();closeModal();toast('Cliente eliminado');render();
+}
+function openFicha(id){
+  const c=S.clientes.find(x=>x.id===id); if(!c)return;
+  const vence=(c.tipo==='lease'&&c.fecha&&num(c.plazo))?addMonths(c.fecha,num(c.plazo)):null;
+  const mine=calcAlertas().filter(a=>a.cid===c.id);
+  openModal(c.nom,
+   `<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
+      ${badge(tipoLbl(c.tipo),tipoCol(c.tipo))}${c.fecha?badge('Vendido '+fmtM(addMonths(c.fecha,0)),C.tx3):''}
+      ${vence?badge('Vence '+fmtM(vence),C.warn):''}</div>
+    <div class="card" style="background:var(--bg3)">
+      ${[['Teléfono',esc(c.tel)],['Vehículo',esc(vehCli(c))],['Plazo',c.plazo?c.plazo+' meses':'—'],
+         ['Notas',c.notas?esc(c.notas):'—']].map(r=>`<div class="sumrow"><span style="color:var(--tx3)">${r[0]}</span>
+         <span style="color:var(--tx2);text-align:right;max-width:60%">${r[1]}</span></div>`).join('')}
+    </div>
+    ${mine.length?`<div class="mlab">Alertas activas</div>`+mine.map(a=>`<div class="card arow ${a.hot?'hot':''}" style="margin-top:8px">
+        <div class="atag">${esc(a.tag)}</div>
+        <button class="btn wa sm" style="margin-top:9px" onclick="openMsg(${jsq(c.nom)},${jsq(c.tel)},${jsq(a.msg)})">${ic('Wa')}Escribirle</button>
+      </div>`).join(''):''}`,
+   `<button class="btn sec" onclick="openCliente('${c.id}')">${ic('Edit2')}Editar</button>
+    <button class="btn wa" onclick="msgReconectar('${c.id}')">${ic('Wa')}Reconectar</button>`);
+}
+function msgReconectar(id){
+  const c=S.clientes.find(x=>x.id===id); if(!c)return;
+  openMsg(c.nom,c.tel,`Hola ${c.nom}${firma()} 👋 ¿Cómo te ha ido con el ${vehCli(c)}? Te escribo para saludarte y que sepas que aquí sigo para lo que necesites. Y si alguien cercano anda buscando carro, me lo pasas con confianza — lo trato igual que a ti.`);
+}
+
+/* ═══════════════════════════════════════════
+   VISTA · ALERTAS
+═══════════════════════════════════════════ */
+VIEWS.alertas=function(){
+  const al=calcAlertas();
+  let out=`<div class="stack">
+    <div><h2 class="vh">Alertas</h2>
+      <div class="vsub">Fin de lease, refinanciación, aniversarios y post-venta — calculados solos desde tus datos reales.</div></div>`;
+  if(!al.length){
+    out+=`<div class="card pad0">${empty('Bell','Sin alertas por ahora',
+      'Cuando agregues clientes al libro con <b style="color:var(--tx2)">mes de venta</b> y <b style="color:var(--tx2)">plazo</b>, o cargues fechas de post-venta en el Deal Room, aparecen aquí solas.')}</div>`;
+  }else{
+    out+=al.map((a,i)=>`<div class="card arow ${a.hot?'hot':''}">
+      <div class="atag">${esc(a.tag)}</div>
+      <div class="lname" style="margin-top:5px">${esc(a.nom)}</div>
+      <div class="lmeta">${esc(a.veh)}</div>
+      <div class="aact">
+        <button class="btn wa sm" onclick="msgAlerta(${i})">${ic('Wa')}WhatsApp</button>
+        ${a.cid?`<button class="btn sec sm" onclick="openFicha('${a.cid}')">Ficha</button>`:''}
+        ${a.lid?`<button class="btn sec sm" onclick="openDeal('${a.lid}',8)">Deal Room</button>`:''}
+      </div></div>`).join('');
+  }
+  return out+'</div>';
+};
+</script>
+<script>
+/* ═══════════════════════════════════════════
+   VISTA · LEADS
+═══════════════════════════════════════════ */
+VIEWS.leads=function(){
+  return `<div class="stack">
+    <div class="rowb"><div><h2 class="vh">Leads</h2>
+      <div class="vsub">Ordenados por urgencia real: etapa, antigüedad y presupuesto.</div></div>
+      <button class="btn sm" onclick="openQuick()">${ic('UserPlus')}Nuevo</button></div>
+    <input class="inp" placeholder="Nombre, vehículo, teléfono…" value="${esc(Q)}"
+      oninput="Q=this.value;document.getElementById('leadList').innerHTML=leadList()">
+    <div style="display:flex;gap:8px">
+      <select class="inp" onchange="FSRC=this.value;document.getElementById('leadList').innerHTML=leadList()">
+        ${['Todos'].concat(ORIGENES).map(o=>`<option ${FSRC===o?'selected':''}>${o}</option>`).join('')}</select>
+      <select class="inp" onchange="FEST=this.value;document.getElementById('leadList').innerHTML=leadList()">
+        ${['Todos'].concat(ETAPAS).map(o=>`<option ${FEST===o?'selected':''}>${o}</option>`).join('')}</select>
+    </div>
+    <div id="leadList">${leadList()}</div></div>`;
+};
+function leadList(){
+  const q=Q.toLowerCase();
+  const vis=S.leads
+    .filter(l=>FSRC==='Todos'||l.origen===FSRC)
+    .filter(l=>FEST==='Todos'||ETAPAS[l.etapa]===FEST)
+    .filter(l=>!q||[l.nom,l.tel,l.email,l.veh&&l.veh.marca,l.veh&&l.veh.mod].join(' ').toLowerCase().includes(q))
+    .map(l=>({l,u:getUrgency(l)})).sort((a,b)=>b.u.score-a.u.score);
+  if(!vis.length)return `<div class="card pad0">${S.leads.length
+    ? empty('Search','Sin resultados','Cambia los filtros o el término de búsqueda.')
+    : empty('Users','Sin leads todavía','Toca <b style="color:var(--p)">Nuevo</b> y captura tu primer prospecto. Del captador, de Instagram, de donde llegue.')}</div>`;
+  return `<div class="card pad0">`+vis.map(x=>{
+    const l=x.l,u=x.u,f=finanzas(l);
+    const tar=S.tareas.filter(t=>t.leadId===l.id&&!t.hecha).length;
+    return `<button class="lrow" onclick="openDeal('${l.id}')">
+      <div class="heat" style="background:${u.color}"></div>
+      <div class="body"><div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+          <span class="lname">${esc(l.nom)}</span>${badge(ETAPAS[l.etapa],ETAPA_C[ETAPAS[l.etapa]])}</div>
+        <div class="lmeta">${esc(vehLead(l))}</div>
+        <div class="tagrow">
+          <span style="font-size:10.5px;color:var(--p);font-weight:700">${fm(f.precio||num(l.veh&&l.veh.pres))}</span>
+          <span style="font-size:10px;color:var(--tx3)">${esc(l.origen)}</span>
+          ${tar?badge(tar+' tarea'+(tar>1?'s':''),C.warn):''}
+          ${l.trade&&l.trade.has?badge('Trade-In',C.info):''}
+        </div></div>
+      <div style="text-align:right;flex-shrink:0"><div style="font-size:10px;font-weight:800;color:${u.color}">${u.label}</div>
+        <div class="mono" style="font-size:10px;color:var(--tx3);margin-top:2px">${u.score}</div></div>
+      ${ic('ChevronRight',14,C.tx3)}</div></button>`;}).join('')+`</div>`;
+}
+
+/* ── Captura rápida ── */
+function openQuick(){
+  openModal('Captura rápida de lead',
+   `<div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
+      <div class="fr" style="grid-column:1/-1"><label class="f">Nombre *</label><input class="inp" id="qNom" placeholder="Nombre del prospecto"></div>
+      <div class="fr" style="grid-column:1/-1"><label class="f">Teléfono *</label><input class="inp" id="qTel" inputmode="tel" placeholder="3055551234"></div>
+      <div class="fr"><label class="f">Marca</label><input class="inp" id="qMarca" placeholder="Toyota"></div>
+      <div class="fr"><label class="f">Modelo</label><input class="inp" id="qMod" placeholder="RAV4"></div>
+      <div class="fr"><label class="f">Presupuesto $</label><input class="inp" id="qPres" inputmode="numeric" placeholder="35000"></div>
+      <div class="fr"><label class="f">Origen</label><select class="inp" id="qOrigen">
+        ${ORIGENES.map(o=>`<option${o==='Walk-in'?' selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="fr" style="grid-column:1/-1"><label class="f">Interés / nota</label><input class="inp" id="qNota" placeholder="SUV, crédito bueno, este mes…"></div>
+    </div>`,
+   `<button class="btn sec" onclick="closeModal()">Cancelar</button>
+    <button class="btn" onclick="saveQuick()">${ic('UserPlus')}Crear y abrir</button>`);
+}
+function saveQuick(){
+  const nom=$('qNom').value.trim(), tel=$('qTel').value.trim();
+  if(!nom||!tel){alert('Nombre y teléfono son obligatorios.');return;}
+  const l=nuevoLead({nom,tel,marca:$('qMarca').value.trim(),mod:$('qMod').value.trim(),
+    pres:$('qPres').value,origen:$('qOrigen').value,notas:$('qNota').value.trim(),ano:new Date().getFullYear()});
+  S.leads.unshift(l);save();closeModal();toast('Lead "'+nom+'" creado');openDeal(l.id,1);
+}
+
+/* ═══════════════════════════════════════════
+   VISTA · PIPELINE (kanban)
+═══════════════════════════════════════════ */
+VIEWS.pipeline=function(){
+  const total=S.leads.filter(l=>ETAPAS[l.etapa]!=='Perdido')
+    .reduce((s,l)=>s+(finanzas(l).precio||num(l.veh&&l.veh.pres)),0);
+  let out=`<div class="stack">
+    <div class="rowb"><div><h2 class="vh">Sales Pipeline</h2>
+      <div class="vsub">Valor total: <span style="color:var(--p);font-weight:700">${fm(total)}</span> · al llegar a <b style="color:var(--ok)">Vendido</b> pasa a tu libro.</div></div>
+      <button class="btn sm" onclick="openQuick()">${ic('Plus')}Lead</button></div>`;
+  if(!S.leads.length){out+=`<div class="card pad0">${empty('Briefcase','Pipeline vacío','Los leads nuevos aparecen en la columna <b style="color:var(--info)">Nuevo</b> y avanzan con las flechas.')}</div></div>`;return out;}
+  out+=`<div class="kan sh">`+ETAPAS.map(e=>{
+    const col=ETAPA_C[e], items=S.leads.filter(l=>ETAPAS[l.etapa]===e);
+    const st=items.reduce((s,l)=>s+(finanzas(l).precio||num(l.veh&&l.veh.pres)),0);
+    return `<div class="kcol">
+      <div class="khead" style="border-top:3px solid ${col}">
+        <div class="rowb"><span style="font-size:12px;font-weight:700">${e}</span>
+          <span style="font-size:10px;font-weight:800;background:${col}22;color:${col};padding:2px 7px;border-radius:99px">${items.length}</span></div>
+        <div class="mono" style="font-size:10px;color:var(--tx3);margin-top:2px">${fm(st)}</div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;min-height:120px">
+        ${items.length?items.map(l=>{const u=getUrgency(l);return `<div class="kcard">
+          <div class="hb" style="background:${u.color}"></div>
+          <div style="padding:10px 12px" onclick="openDeal('${l.id}')">
+            <div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.nom)}</div>
+            <div style="font-size:11px;color:var(--tx3);margin-top:2px">${esc(vehLead(l))}</div>
+            <div class="mono" style="font-size:12px;font-weight:700;color:var(--p);margin-top:4px">${fm(finanzas(l).precio||num(l.veh&&l.veh.pres))}</div>
+          </div>
+          <div style="display:flex;gap:5px;padding:6px 10px;border-top:1px solid var(--bd);justify-content:flex-end">
+            <button class="btn ghost xs" style="border:1px solid var(--bd);background:var(--bg3)" onclick="mover('${l.id}',-1)">◀</button>
+            <button class="btn ghost xs" style="border:1px solid var(--bd);background:var(--bg3)" onclick="mover('${l.id}',1)">▶</button>
+          </div></div>`;}).join('')
+        :`<div style="text-align:center;color:var(--tx3);font-size:11px;padding:22px 0;border:1px dashed var(--bd);border-radius:10px">Sin tratos</div>`}
+      </div></div>`;}).join('')+`</div></div>`;
+  return out;
+};
+function mover(id,dir){
+  const l=S.leads.find(x=>x.id===id); if(!l)return;
+  const ni=Math.max(0,Math.min(ETAPAS.length-1,l.etapa+dir));
+  if(ni===l.etapa)return;
+  l.etapa=ni; l.updatedAt=nowISO();
+  l.acts.unshift({id:uid('a'),tipo:'stage_change',autor:S.cfg.nombre||'Yo',
+    txt:'Fase actualizada: "'+ETAPAS[ni]+'"',fecha:nowISO()});
+  save();
+  if(ETAPAS[ni]==='Vendido')pasarAlLibro(l.id);
+  else render();
+}
+/* ── Pipeline → Libro (motor del libro) ── */
+function pasarAlLibro(id){
+  const l=S.leads.find(x=>x.id===id); if(!l)return;
+  if(S.clientes.some(c=>c.leadId===l.id)){render();toast('Ya está en tu libro');return;}
+  const tipoDeal=(l.deal&&l.deal.tipo)||'Financiado';
+  const tipo=tipoDeal==='Lease'?'lease':tipoDeal==='Contado'?'cash':'finance';
+  openModal('🎉 ¡Cerrado!',
+   `<p style="font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:14px">
+      Pasa a <b style="color:var(--tx)">${esc(l.nom)}</b> a tu libro de clientes. Con estos dos datos, las alertas de fin de lease, refi y aniversario se calculan solas.</p>
+    <div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
+      <div class="fr"><label class="f">Tipo</label><select class="inp" id="pbTipo">
+        ${['lease','finance','cash'].map(t=>`<option value="${t}"${t===tipo?' selected':''}>${tipoLbl(t)}</option>`).join('')}</select></div>
+      <div class="fr"><label class="f">Plazo <span class="h">meses</span></label><input class="inp" id="pbPlazo" inputmode="numeric" value="${esc(num(l.deal&&l.deal.plazo)||36)}"></div>
+      <div class="fr" style="grid-column:1/-1"><label class="f">Mes de venta</label><input class="inp" id="pbFecha" type="month" value="${thisMonth()}"></div>
+    </div>`,
+   `<button class="btn sec" onclick="closeModal();render()">Ahora no</button>
+    <button class="btn ok" onclick="confirmarLibro('${l.id}')">${ic('BookOpen')}Pasar al libro</button>`);
+}
+function confirmarLibro(id){
+  const l=S.leads.find(x=>x.id===id); if(!l)return;
+  S.clientes.unshift({id:uid('c'),leadId:l.id,nom:l.nom,tel:l.tel,
+    marca:(l.veh&&l.veh.marca)||'',mod:(l.veh&&l.veh.mod)||'',ano:(l.veh&&l.veh.ano)||'',
+    tipo:$('pbTipo').value,fecha:$('pbFecha').value,plazo:num($('pbPlazo').value),
+    notas:l.notas||'',createdAt:nowISO()});
+  save();closeModal();toast('Pasó a tu libro');go('libro');
+}
+</script>
+<script>
+/* ═══════════════════════════════════════════
+   VISTA · TAREAS
+═══════════════════════════════════════════ */
+VIEWS.tasks=function(){
+  const vis=S.tareas.slice().sort((a,b)=>
+    (!a.hecha&&b.hecha)?-1:(a.hecha&&!b.hecha)?1:String(a.vence||'').localeCompare(String(b.vence||'')));
+  const pend=vis.filter(t=>!t.hecha), venc=pend.filter(t=>t.vence&&t.vence<today());
+  return `<div class="stack">
+    <div class="rowb"><div><h2 class="vh">Tareas y compromisos</h2>
+      <div class="vsub">${pend.length} pendiente${pend.length===1?'':'s'} · ${venc.length} vencida${venc.length===1?'':'s'}</div></div>
+      <button class="btn sm" onclick="openTarea()">${ic('Plus')}Nueva</button></div>
+    ${vis.length?`<div style="display:flex;flex-direction:column;gap:8px">`+vis.map(t=>{
+      const ov=!t.hecha&&t.vence&&t.vence<today();
+      return `<div class="card" style="display:flex;align-items:center;gap:11px;padding:12px 14px;border-color:${ov?'rgba(239,68,68,.3)':'var(--bd)'}">
+        <input type="checkbox" ${t.hecha?'checked':''} onchange="toggleTarea('${t.id}')" style="accent-color:${C.ok};width:17px;height:17px;flex-shrink:0">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:600;color:${t.hecha?C.tx3:C.tx};${t.hecha?'text-decoration:line-through':''}">${esc(t.titulo)}</span>
+            ${ov?badge('Vencida',C.dan):''}${badge(t.prio,t.prio==='Alta'?C.p:t.prio==='Media'?C.warn:C.tx3)}</div>
+          <div style="font-size:11px;color:var(--tx3);margin-top:3px">${esc(t.leadNom||'General')} · ${fDate(t.vence)}</div></div>
+        <button class="iconbtn" onclick="delTarea('${t.id}')">${ic('Trash2',14,C.tx3)}</button>
+      </div>`;}).join('')+`</div>`
+    :`<div class="card pad0">${empty('CheckSquare','Sin tareas','Agrega compromisos de seguimiento — o créalos desde el paso <b style="color:var(--tx2)">Workspace</b> de cada lead.')}</div>`}
+  </div>`;
+};
+function openTarea(leadId){
+  const l=leadId?S.leads.find(x=>x.id===leadId):null;
+  openModal('Nueva tarea',
+   `<div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
+      <div class="fr" style="grid-column:1/-1"><label class="f">Título *</label><input class="inp" id="tTit" placeholder="Llamar al cliente…"></div>
+      <div class="fr" style="grid-column:1/-1"><label class="f">Prospecto asociado</label><input class="inp" id="tLead" value="${l?esc(l.nom):''}" placeholder="Nombre del cliente"></div>
+      <div class="fr"><label class="f">Vence</label><input class="inp" id="tVence" type="date" value="${today()}"></div>
+      <div class="fr"><label class="f">Prioridad</label><select class="inp" id="tPrio">
+        <option>Alta</option><option>Media</option><option>Baja</option></select></div>
+    </div>`,
+   `<button class="btn sec" onclick="closeModal()">Cancelar</button>
+    <button class="btn" onclick="saveTarea()">${ic('Save')}Guardar</button>`,{leadId:leadId||''});
+}
+function saveTarea(){
+  const t=$('tTit').value.trim(); if(!t){alert('Escribe el título de la tarea.');return;}
+  S.tareas.unshift({id:uid('t'),leadId:MODAL_CTX.leadId||'',leadNom:$('tLead').value.trim()||'General',
+    titulo:t,vence:$('tVence').value,prio:$('tPrio').value,hecha:false});
+  save();closeModal();toast('Tarea creada');render();
+}
+function toggleTarea(id){const t=S.tareas.find(x=>x.id===id);if(t){t.hecha=!t.hecha;save();render();}}
+function delTarea(id){S.tareas=S.tareas.filter(x=>x.id!==id);save();render();}
+
+/* ═══════════════════════════════════════════
+   VISTA · TRADE-INS
+═══════════════════════════════════════════ */
+VIEWS.tradeins=function(){
+  const vis=S.leads.filter(l=>l.trade&&l.trade.has);
+  const acv=vis.reduce((s,l)=>s+num(l.trade.acv),0);
+  const mi=vis.length?Math.round(vis.reduce((s,l)=>s+num(l.trade.millas),0)/vis.length):0;
+  let out=`<div class="stack"><h2 class="vh">Retomas / Trade-Ins</h2>
+    <div class="grid2">
+      ${kpi('RefreshCw','Total retomas',vis.length,'',C.p)}
+      ${kpi('DollarSign','ACV acumulado',fm(acv),'',C.ok)}
+      ${kpi('Activity','Millas promedio',fmN(mi)+' mi','',C.warn)}
+      ${kpi('TrendingUp','Equity total',fm(vis.reduce((s,l)=>s+(num(l.trade.allowance)-num(l.trade.payoff)),0)),'',C.info)}
+    </div>`;
+  if(!vis.length){out+=`<div class="card pad0">${empty('RefreshCw','Sin retomas','Marca <b style="color:var(--tx2)">"El cliente tiene trade-in"</b> en el paso 4 del Deal Room y aparecerán aquí.')}</div>`;}
+  else out+=`<div class="grid1">`+vis.map(l=>{const t=l.trade,eq=num(t.allowance)-num(t.payoff);
+    return `<div class="card">
+      <div class="rowb" style="margin-bottom:10px">${badge('Trade-In',C.info)}
+        <span class="mono" style="font-size:9.5px;color:var(--tx3)">${esc((t.vin||'').slice(-8)||'—')}</span></div>
+      <div style="font-size:15px;font-weight:800">${esc([t.ano,t.marca,t.mod].filter(Boolean).join(' ')||'Vehículo sin datos')}</div>
+      <div style="font-size:11px;color:var(--tx3);margin-top:2px">Propietario: <span style="color:var(--tx2)">${esc(l.nom)}</span></div>
+      <div class="grid2" style="grid-template-columns:1fr 1fr;gap:9px;margin-top:12px">
+        ${[['ACV',fm(t.acv),C.ok],['Allowance',fm(t.allowance),C.tx2],['Payoff',fm(t.payoff),C.warn],['Millaje',fmN(t.millas)+' mi',C.tx3]]
+          .map(r=>`<div><div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">${r[0]}</div>
+          <div class="mono" style="font-size:13px;font-weight:700;color:${r[2]}">${r[1]}</div></div>`).join('')}
+      </div>
+      <div class="rowb" style="margin-top:12px;padding-top:11px;border-top:1px solid var(--bd)">
+        <div><div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em">Equity</div>
+          <div class="mono" style="font-size:15px;font-weight:800;color:${eq>=0?C.ok:C.dan}">${fm(eq)}</div></div>
+        <button class="btn sec sm" onclick="openDeal('${l.id}',4)">Ver →</button></div>
+    </div>`;}).join('')+`</div>`;
+  return out+'</div>';
+};
+</script>
+<script>
+/* ═══════════════════════════════════════════
+   VISTA · PROGRAMAS (promos del motor)
+═══════════════════════════════════════════ */
+VIEWS.promos=function(){
+  let out=`<div class="stack">
+    <div><h2 class="vh">Programas del mes</h2>
+      <div class="vsub">Carga el programa con sus números reales. Te genera el post para redes y te dice a qué clientes tuyos enviárselo.</div></div>
+    <div class="card">
+      <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fr"><label class="f">Marca *</label><input class="inp" id="pMarca" placeholder="Toyota"></div>
+        <div class="fr"><label class="f">Modelo *</label><input class="inp" id="pModelo" placeholder="Corolla LE"></div>
+        <div class="fr"><label class="f">$ / mes</label><input class="inp" id="pPago" inputmode="numeric" placeholder="199"></div>
+        <div class="fr"><label class="f">Al firmar</label><input class="inp" id="pDas" inputmode="numeric" placeholder="3999"></div>
+        <div class="fr"><label class="f">Meses</label><input class="inp" id="pPlazo" inputmode="numeric" placeholder="36"></div>
+        <div class="fr"><label class="f">Millas/año</label><input class="inp" id="pMillas" inputmode="numeric" placeholder="10000"></div>
+        <div class="fr" style="grid-column:1/-1"><label class="f">Expira</label><input class="inp" id="pExp" placeholder="8/31"></div>
+        <div class="fr" style="grid-column:1/-1"><label class="f">Nota / letra chica</label><input class="inp" id="pNota" placeholder="Tier 1, excluye tax y tags…"></div>
+      </div>
+      <button class="btn full" style="margin-top:12px" onclick="addPromo()">${ic('Save')}Guardar programa</button>
+    </div>`;
+  if(!S.promos.length){out+=`<div class="card pad0">${empty('Tag','Sin programas cargados','Carga aquí los programas de lease de todas tus marcas, mes a mes.')}</div>`;}
+  else out+=S.promos.map(p=>{
+    const mismos=S.clientes.filter(c=>(c.marca||'').toLowerCase()===p.marca.toLowerCase());
+    const otros=S.clientes.filter(c=>c.marca&&(c.marca||'').toLowerCase()!==p.marca.toLowerCase());
+    return `<div class="promo">
+      <div class="phead">
+        <div class="pbrand">${esc(p.marca)}</div>
+        <div class="pmodel">${esc(p.modelo||'')}</div>
+        ${p.pago?`<div class="ppay mono">${fm(p.pago)}<small> /mes · ${fm(p.das)} al firmar · ${esc(p.plazo)}m · ${fmN(p.millas)} mi</small></div>`:''}
+      </div>
+      ${(p.nota||p.exp)?`<div class="pfine">${esc(p.nota||'')}${p.exp?(p.nota?' · ':'')+'Expira '+esc(p.exp):''}</div>`:''}
+      <div style="padding:12px 16px 14px">
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn sm" onclick="copiarPost('${p.id}')">${ic('Copy')}Copiar post</button>
+          <button class="btn sec sm" onclick="togMatch('${p.id}')">Clientes (${mismos.length})</button>
+          <button class="btn ghost sm" onclick="delPromo('${p.id}')">${ic('Trash2')}</button>
+        </div>
+        <div id="match-${p.id}" style="display:none;margin-top:11px;border-top:1px solid var(--bd);padding-top:4px">
+          ${mismos.length?`<div class="mlab">Tienen ${esc(p.marca)}</div>`+mismos.map(c=>
+            `<div class="mrow"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.nom)} · ${esc(vehCli(c))}</span>
+             <button class="btn wa xs" onclick="promoMsg('${c.id}','${p.id}',1)">${ic('Wa')}WA</button></div>`).join('')
+            :`<p style="font-size:12px;color:var(--tx3);margin-top:10px">Nadie con esta marca en tu libro todavía.</p>`}
+          ${otros.length?`<div class="mlab">Otras marcas — ofrecer cambio</div>`+otros.slice(0,15).map(c=>
+            `<div class="mrow"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.nom)} · ${esc(c.marca)}</span>
+             <button class="btn wa xs" onclick="promoMsg('${c.id}','${p.id}',0)">${ic('Wa')}WA</button></div>`).join(''):''}
+        </div>
+      </div></div>`;}).join('');
+  return out+'</div>';
+};
+function addPromo(){
+  const marca=$('pMarca').value.trim(), modelo=$('pModelo').value.trim();
+  if(!marca||!modelo){alert('Marca y modelo son obligatorios.');return;}
+  S.promos.unshift({id:uid('p'),marca,modelo,pago:num($('pPago').value),das:num($('pDas').value),
+    plazo:$('pPlazo').value.trim()||'36',millas:num($('pMillas').value)||10000,
+    exp:$('pExp').value.trim(),nota:$('pNota').value.trim(),
+    mes:new Date().toLocaleDateString('es-US',{month:'long',year:'numeric'})});
+  save();toast('Programa guardado');render();
+}
+function delPromo(id){if(confirm('¿Eliminar este programa?')){S.promos=S.promos.filter(p=>p.id!==id);save();render();}}
+function togMatch(id){const e=$('match-'+id);e.style.display=e.style.display==='none'?'block':'none';}
+function promoLinea(p){
+  return `${p.marca} ${p.modelo} — ${fm(p.pago)}/mes · ${fm(p.das)} al firmar · ${p.plazo} meses · ${fmN(p.millas)} mi/año`;
+}
+function promoMsg(cid,pid,misma){
+  const c=S.clientes.find(x=>x.id===cid), p=S.promos.find(x=>x.id===pid);
+  if(!c||!p)return;
+  const linea=promoLinea(p);
+  const t=misma
+   ? `Hola ${c.nom}${firma()} 👋 Salió el programa de ${p.marca} este mes y me acordé de ti: ${linea}. ${p.nota?p.nota+'. ':''}Si te interesa te paso los números completos, sin compromiso.`
+   : `Hola ${c.nom}${firma()} 👋 ¿Cómo va todo con tu ${vehCli(c)}? Este mes salió un programa fuerte: ${linea}. Si alguna vez pensaste en cambiar, este es buen mes para mirar. Sin compromiso.`;
+  openMsg(c.nom,c.tel,t);
+}
+function copiarPost(pid){
+  const p=S.promos.find(x=>x.id===pid); if(!p)return;
+  const wa=tel10(S.cfg.wa);
+  const post=
+`🚗 ${p.marca.toUpperCase()} ${p.modelo||''} — ${p.pago?fm(p.pago)+'/MES':''}
+
+✅ ${fm(p.das)} al firmar (todo claro, sin sorpresas)
+✅ ${p.plazo} meses · ${fmN(p.millas)} millas/año
+${p.nota?'📋 '+p.nota+'\n':''}${p.exp?'⏰ Válido hasta '+p.exp+'\n':''}
+El número COMPLETO, con la letra chica incluida.
+Así trabajo yo — sin sorpresas al firmar.
+
+📲 Escríbeme${wa?': wa.me/'+wa:' por DM'}
+#autosmiami #lease #${p.marca.toLowerCase()} #miami`;
+  openModal('Post para redes',
+    `<label class="f">Listo para pegar en IG, Facebook o TikTok</label>
+     <textarea class="inp" id="msgTxt" rows="12">${esc(post)}</textarea>`,
+    `<button class="btn sec" onclick="closeModal()">Cerrar</button>
+     <button class="btn" onclick="copiarTexto(document.getElementById('msgTxt').value)">${ic('Copy')}Copiar post</button>`);
+}
+</script>
+<script>
+/* ═══════════════════════════════════════════
+   VISTA · REPORTES
+═══════════════════════════════════════════ */
+VIEWS.reports=function(){
+  const vis=S.leads;
+  const vendidos=vis.filter(l=>ETAPAS[l.etapa]==='Vendido');
+  const rate=vis.length?Math.round(vendidos.length/vis.length*100):0;
+  const gross=vendidos.reduce((s,l)=>s+finanzas(l).totalGross,0);
+  const venc=S.tareas.filter(t=>!t.hecha&&t.vence&&t.vence<today());
+  const src=ORIGENES.map(o=>{
+    const c=vis.filter(l=>l.origen===o).length, sc=vis.filter(l=>l.origen===o&&ETAPAS[l.etapa]==='Vendido').length;
+    return{o,c,sc,r:c?Math.round(sc/c*100):0};}).filter(x=>x.c>0);
+  const lease=S.clientes.filter(c=>c.tipo==='lease').length,
+        fin=S.clientes.filter(c=>c.tipo==='finance').length,
+        cash=S.clientes.filter(c=>c.tipo==='cash').length;
+  return `<div class="stack">
+    <div class="rowb"><div><h2 class="vh">Reportes</h2>
+      <div class="vsub">Todo calculado sobre tus datos reales. Nada estimado.</div></div>
+      <button class="btn sec sm" onclick="exportar()">${ic('Download')}Respaldo</button></div>
+    <div class="grid2">
+      ${kpi('Trophy','Vendidos',vendidos.length,'De '+vis.length+' leads',C.ok)}
+      ${kpi('TrendingUp','Conversión',rate+'%','Cierre sobre leads',C.p)}
+      ${kpi('DollarSign','Gross total',fm(gross),'Front + back',C.warn)}
+      ${kpi('AlertCircle','Tareas vencidas',venc.length,'Requieren acción',venc.length?C.dan:C.tx3)}
+    </div>
+    <div class="grid1">
+      <div class="card">
+        <div style="font-weight:700;font-size:13px;margin-bottom:13px">Conversión por canal de origen</div>
+        ${src.length?src.map(x=>`<div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+            <span style="color:var(--tx2)">${x.o}</span>
+            <span><span style="color:var(--tx3)">${x.sc}/${x.c}</span> · <span style="color:var(--p);font-weight:700">${x.r}%</span></span></div>
+          <div style="height:6px;border-radius:99px;background:var(--bg3);overflow:hidden">
+            <div style="height:100%;background:var(--p);border-radius:99px;width:${Math.max(2,x.r)}%"></div></div></div>`).join('')
+          :`<div style="color:var(--tx3);font-size:12px">Sin datos todavía. Aparece cuando registres leads.</div>`}
+      </div>
+      <div class="card">
+        <div style="font-weight:700;font-size:13px;margin-bottom:13px">Embudo de conversión</div>
+        ${ETAPAS.map(e=>{const n=vis.filter(l=>ETAPAS[l.etapa]===e).length;
+          return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="width:9px;height:9px;border-radius:50%;background:${ETAPA_C[e]};flex-shrink:0"></div>
+            <span style="font-size:12px;color:var(--tx2);min-width:78px">${e}</span>
+            <div style="flex:1;height:6px;background:var(--bg3);border-radius:99px;overflow:hidden">
+              <div style="height:100%;background:${ETAPA_C[e]};border-radius:99px;width:${vis.length?n/vis.length*100:0}%"></div></div>
+            <span style="font-size:11px;font-weight:700;color:${ETAPA_C[e]};min-width:18px;text-align:right">${n}</span></div>`;}).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-weight:700;font-size:13px;margin-bottom:13px">Composición de tu libro</div>
+      ${S.clientes.length?[['Lease',lease,'#F87171'],['Financiado',fin,C.warn],['Cash',cash,C.ok]].map(r=>
+        `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:12px;color:var(--tx2);min-width:78px">${r[0]}</span>
+          <div style="flex:1;height:6px;background:var(--bg3);border-radius:99px;overflow:hidden">
+            <div style="height:100%;background:${r[2]};border-radius:99px;width:${r[1]/S.clientes.length*100}%"></div></div>
+          <span style="font-size:11px;font-weight:700;color:${r[2]};min-width:18px;text-align:right">${r[1]}</span></div>`).join('')
+        :`<div style="color:var(--tx3);font-size:12px">Tu libro está vacío.</div>`}
+    </div>
+  </div>`;
+};
+
+/* ═══════════════════════════════════════════
+   VISTAS · PRÓXIMAMENTE
+═══════════════════════════════════════════ */
+function soonView(id){
+  const s=SOON[id];
+  return `<div class="stack">
+    <div class="card" style="text-align:center;padding:32px 22px">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--ps);display:flex;align-items:center;
+        justify-content:center;margin:0 auto 16px;color:var(--p)">${ic(s.icon,22,C.p)}</div>
+      <div style="font-size:20px;font-weight:900;letter-spacing:-.02em">${esc(s.t)}</div>
+      <div class="bdg2" style="color:var(--warn);background:rgba(234,179,8,.1);border-color:rgba(234,179,8,.3);margin-top:10px">PRÓXIMAMENTE</div>
+      <p style="color:var(--tx2);font-size:13px;line-height:1.65;margin:16px auto 0;max-width:420px">${esc(s.d)}</p>
+      <p style="color:var(--tx3);font-size:12px;line-height:1.65;margin:12px auto 0;max-width:420px">${esc(s.n)}</p>
+    </div>
+    <div class="card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)">
+      <div style="display:flex;gap:9px;align-items:flex-start">
+        ${ic('AlertCircle',15,C.info)}
+        <p style="font-size:12px;color:var(--tx2);line-height:1.6">Este módulo está en el diseño pero <b>todavía no tiene motor</b>. Preferimos dejarlo vacío antes que mostrarte números inventados.</p>
+      </div></div>
+  </div>`;
+}
+VIEWS.campaigns=()=>soonView('campaigns');
+VIEWS.performance=()=>soonView('performance');
+VIEWS.connections=()=>soonView('connections');
+VIEWS.nextup=()=>soonView('nextup');
+VIEWS.admin=()=>soonView('admin');
+
+/* ═══════════════════════════════════════════
+   VISTA · NUBE (respaldo y sincronización)
+═══════════════════════════════════════════ */
+VIEWS.nube=function(){
+  const u=SYNC_UI[SYNCEST.estado]||SYNC_UI.local;
+  const pend=Math.max(0,(S.meta.rev||0)-(SYNC.baseRev||0));
+  const g=SYNC.gh;
+  let out=`<div class="stack">
+    <div><h2 class="vh">Nube y respaldo</h2>
+      <div class="vsub">Dónde viven tus datos y cómo llegan de un dispositivo a otro.</div></div>
+
+    <div class="card" style="border-color:${u.c}40;background:${u.c}0d">
+      <div style="display:flex;align-items:center;gap:11px">
+        <div style="width:38px;height:38px;border-radius:10px;background:${u.c}18;display:flex;
+          align-items:center;justify-content:center;flex-shrink:0">${ic(u.i,19,u.c)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:14px;color:${u.c}">${u.t}</div>
+          <div style="font-size:11.5px;color:var(--tx3);margin-top:2px">
+            ${SYNC.modo==='github'?`${esc(g.owner)}/${esc(g.repo)} · ${esc(g.path)}`
+             :SYNC.modo==='archivo'?esc(SYNC.archivo.nombre||'archivo local')
+             :'Los datos solo están en este navegador'}
+          </div>
+        </div>
+      </div>
+      ${SYNCEST.msg?`<p style="font-size:11.5px;color:${C.dan};line-height:1.55;margin-top:11px">${esc(SYNCEST.msg)}</p>`:''}
+      ${SYNC.modo!=='local'?`
+        <div class="sumrow" style="margin-top:12px;border-top:1px solid var(--bd);padding-top:10px">
+          <span style="color:var(--tx3)">Última sincronización</span>
+          <span style="color:var(--tx2)">${SYNC.ultima?fDateTime(SYNC.ultima):'nunca'}</span></div>
+        <div class="sumrow"><span style="color:var(--tx3)">Cambios sin enviar</span>
+          <span style="color:${pend?C.warn:C.tx2}">${pend?pend+' cambio'+(pend>1?'s':''):'ninguno'}</span></div>
+        <div class="sumrow"><span style="color:var(--tx3)">Este dispositivo</span>
+          <span style="color:var(--tx2)">${esc(SYNC.device)}</span></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn sm" style="flex:1" onclick="sincronizar(true)">${ic('RefreshCw')}Sincronizar ahora</button>
+          <button class="btn sec sm" onclick="desconectar()">Desconectar</button>
+        </div>`:''}
+    </div>`;
+
+  if(SYNC.modo==='local'){
+    out+=`<div class="card" style="background:rgba(234,179,8,.06);border-color:rgba(234,179,8,.22)">
+      <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.warn)}
+        <p style="font-size:12px;color:var(--tx2);line-height:1.6">
+          Ahora mismo tus datos viven solo en este navegador. Si borras la caché del sitio,
+          cambias de teléfono o entras desde otra computadora, <b>no están</b>.
+          Conecta una de las dos opciones de abajo.</p></div></div>
+
+    <div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('Github',15,C.tx)}Opción 1 — GitHub <span class="bdg2" style="color:${C.ok};background:${C.ok}18;border-color:${C.ok}30">RECOMENDADA</span></div>
+        <div class="s">Funciona en el teléfono y en la PC a la vez. Guarda historial: cada cambio es una versión que puedes recuperar.</div></div>
+      <div style="padding:15px 16px">
+        <div class="mlab" style="margin-top:0">Qué necesitas</div>
+        <ol style="font-size:12px;color:var(--tx2);line-height:1.75;padding-left:18px;margin-bottom:14px">
+          <li>Un repo <b>privado</b> en GitHub (ej. <span class="mono">crm-datos</span>).</li>
+          <li>Un token de acceso: GitHub › Settings › Developer settings ›
+              <b>Fine-grained tokens</b> › Generate new token.</li>
+          <li>Dale acceso <b>solo a ese repo</b> y permiso
+              <span class="mono">Contents: Read and write</span>.</li>
+        </ol>
+        <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fr"><label class="f">Usuario u organización</label>
+            <input class="inp" id="ghOwner" value="${esc(g.owner)}" placeholder="tu-usuario" autocapitalize="off" spellcheck="false"></div>
+          <div class="fr"><label class="f">Repositorio</label>
+            <input class="inp" id="ghRepo" value="${esc(g.repo)}" placeholder="crm-datos" autocapitalize="off" spellcheck="false"></div>
+          <div class="fr"><label class="f">Rama</label>
+            <input class="inp" id="ghBranch" value="${esc(g.branch)}" placeholder="main" autocapitalize="off" spellcheck="false"></div>
+          <div class="fr"><label class="f">Ruta del archivo</label>
+            <input class="inp" id="ghPath" value="${esc(g.path)}" placeholder="datos/crm.json" autocapitalize="off" spellcheck="false"></div>
+          <div class="fr" style="grid-column:1/-1"><label class="f">Token <span class="h">se queda en este navegador</span></label>
+            <input class="inp" id="ghToken" type="password" value="${esc(g.token)}" placeholder="github_pat_…" autocapitalize="off" spellcheck="false"></div>
+        </div>
+        <button class="btn full" style="margin-top:12px" onclick="conectarGitHub()">${ic('Cloud')}Conectar con GitHub</button>
+        <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+          El token se guarda aparte de tus datos y <b>nunca</b> entra en el respaldo JSON.
+          Si lo pierdes o lo revocas, generas otro y reconectas — los datos no se tocan.</p>
+      </div>
+    </div>
+
+    <div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('HardDrive',15,C.tx)}Opción 2 — Archivo en la PC</div>
+        <div class="s">Escribe directo en un archivo tuyo. Si lo pones dentro de OneDrive, Google Drive o iCloud, se sincroniza solo.</div></div>
+      <div style="padding:15px 16px">
+        ${HAY_FS?`
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn sm" style="flex:1" onclick="crearArchivo()">${ic('Save')}Crear archivo nuevo</button>
+            <button class="btn sec sm" style="flex:1" onclick="abrirArchivo()">${ic('Upload')}Usar uno existente</button>
+          </div>
+          <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+            El navegador te pedirá permiso una vez por sesión. No funciona en iPhone —
+            si usas iPhone, ve por GitHub.</p>`
+        :`<p style="font-size:12px;color:var(--tx3);line-height:1.6">
+            Este navegador no permite escribir archivos directamente
+            (Safari y Firefox todavía no lo soportan). Usa <b>Chrome</b> o <b>Edge</b> en la PC,
+            o conecta GitHub — que funciona en todos.</p>`}
+      </div>
+    </div>`;
+  }
+
+  out+=`<div class="card pad0">
+    <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('Download',15,C.tx)}Respaldo manual</div>
+      <div class="s">Siempre disponible, con o sin nube.</div></div>
+    <div style="padding:15px 16px">
+      <button class="btn sec full" onclick="exportar()">${ic('Download')}Exportar respaldo JSON</button>
+      <div style="height:8px"></div>
+      <button class="btn sec full" onclick="document.getElementById('impFile').click()">${ic('Upload')}Importar respaldo</button>
+    </div></div>`;
+
+  if(SYNC.modo==='github'){
+    out+=`<div class="card">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;margin-bottom:8px">
+        ${ic('History',14,C.info)}Historial de versiones</div>
+      <p style="font-size:12px;color:var(--tx3);line-height:1.6;margin-bottom:11px">
+        Cada guardado queda como un commit. Si algo se borra por error, ahí está el estado anterior.</p>
+      <button class="btn sec sm full" onclick="window.open('https://github.com/${encodeURIComponent(g.owner)}/${encodeURIComponent(g.repo)}/commits/${encodeURIComponent(g.branch)}','_blank')">
+        ${ic('Github')}Ver historial en GitHub</button></div>`;
+  }
+  return out+'</div>';
+};
+
+async function conectarGitHub(){
+  const g={owner:$('ghOwner').value.trim(),repo:$('ghRepo').value.trim(),
+    branch:$('ghBranch').value.trim()||'main',path:$('ghPath').value.trim()||'datos/autosolution-crm.json',
+    token:$('ghToken').value.trim(),sha:''};
+  if(!g.owner||!g.repo||!g.token){alert('Usuario, repositorio y token son obligatorios.');return;}
+  g.path=g.path.replace(/^\/+/,'');
+  const prev=JSON.parse(JSON.stringify(SYNC.gh));
+  SYNC.gh=g;
+  setEstado('sync');
+  try{
+    const r=await ghFetch(`/repos/${encodeURIComponent(g.owner)}/${encodeURIComponent(g.repo)}`);
+    if(!r.ok)throw new Error(await ghError(r));
+    const info=await r.json();
+    if(!info.permissions||!info.permissions.push)
+      throw new Error('El token no tiene permiso de escritura en este repo (necesita Contents: Read and write).');
+    if(!info.private&&!confirm('⚠️ El repo "'+g.owner+'/'+g.repo+'" es PÚBLICO.\n\nLos datos de tus clientes (nombres, teléfonos, direcciones) quedarían visibles para cualquiera.\n\n¿Continuar de todos modos?')){
+      SYNC.gh=prev;setEstado('local');return;
+    }
+    SYNC.modo='github'; SYNC.baseRev=0; saveSync();
+    await sincronizar(true);
+    render();
+  }catch(e){
+    SYNC.gh=prev; SYNC.modo='local'; saveSync();
+    setEstado('local');
+    alert('No se pudo conectar.\n\n'+(e&&e.message?e.message:e));
+    render();
+  }
+}
+async function crearArchivo(){
+  try{
+    FH=await window.showSaveFilePicker({suggestedName:'autosolution-crm.json',
+      types:[{description:'Datos del CRM',accept:{'application/json':['.json']}}]});
+    await usarArchivo();
+  }catch(e){if(e&&e.name!=='AbortError')alert('No se pudo crear el archivo: '+e.message);}
+}
+async function abrirArchivo(){
+  try{
+    const [h]=await window.showOpenFilePicker({
+      types:[{description:'Datos del CRM',accept:{'application/json':['.json']}}]});
+    FH=h; await usarArchivo();
+  }catch(e){if(e&&e.name!=='AbortError')alert('No se pudo abrir el archivo: '+e.message);}
+}
+async function usarArchivo(){
+  if(!await fsPermiso(true)){alert('Sin permiso de escritura sobre el archivo.');return;}
+  await idbKV('put',FH);
+  SYNC.modo='archivo'; SYNC.archivo.nombre=FH.name; SYNC.baseRev=0; saveSync();
+  await sincronizar(true);
+  render();
+}
+function desconectar(){
+  if(!confirm('¿Desconectar? Los datos siguen en este dispositivo y en el destino, pero dejan de sincronizarse.'))return;
+  SYNC.modo='local'; SYNC.gh.token=''; SYNC.gh.sha=''; SYNC.baseRev=0; SYNC.ultima='';
+  SYNC.archivo.nombre=''; FH=null;
+  try{idbKV('put',null);}catch(e){}
+  saveSync(); setEstado('local'); toast('Desconectado'); render();
+}
+
+/* ═══════════════════════════════════════════
+   VISTA · CONFIG
+═══════════════════════════════════════════ */
+VIEWS.settings=function(){
+  return `<div class="stack">
+    <h2 class="vh">Configuración</h2>
+    <div class="card">
+      <div style="font-weight:700;font-size:14px;margin-bottom:13px">Perfil comercial</div>
+      <div class="fr" style="margin-bottom:11px"><label class="f">Tu nombre <span class="h">va en los mensajes</span></label>
+        <input class="inp" id="cfgNombre" value="${esc(S.cfg.nombre)}" placeholder="Diana"></div>
+      <div class="fr" style="margin-bottom:11px"><label class="f">Tu WhatsApp <span class="h">para el post de redes</span></label>
+        <input class="inp" id="cfgWa" inputmode="tel" value="${esc(S.cfg.wa)}" placeholder="3055551234"></div>
+      <div class="fr" style="margin-bottom:13px"><label class="f">Concesionario</label>
+        <input class="inp" id="cfgDealer" value="${esc(S.cfg.dealer)}" placeholder="AutoSolution Miami"></div>
+      <button class="btn full" onclick="saveCfg()">${ic('Save')}Guardar</button>
+    </div>
+    <div class="card">
+      <div style="font-weight:700;font-size:14px">Tu libro es tuyo</div>
+      <p style="font-size:12px;color:var(--tx3);line-height:1.6;margin:6px 0 13px">
+        ${SYNC.modo==='github'?`Sincronizado con <b style="color:var(--tx2)">${esc(SYNC.gh.owner)}/${esc(SYNC.gh.repo)}</b>. Se abre igual desde el teléfono y desde la PC.`
+         :SYNC.modo==='archivo'?`Guardándose en <b style="color:var(--tx2)">${esc(SYNC.archivo.nombre)}</b> en esta computadora.`
+         :`<span style="color:${C.warn}">Ahora mismo los datos viven solo en este navegador.</span> Conéctalo a la nube para no perder nada.`}</p>
+      <button class="btn ${SYNC.modo==='local'?'':'sec'} full" onclick="go('nube')">${ic('Cloud')}Nube y respaldo</button>
+    </div>
+    <div class="card">
+      <div style="font-weight:700;font-size:13px;margin-bottom:10px">Los 20 módulos del sistema</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${NAV.map(n=>`<span class="bdg2" style="color:${n.soon?C.tx3:C.tx2};background:transparent;border-color:var(--bd2)">${esc(n.label)}${n.soon?' · pronto':''}</span>`).join('')}
+        ${FLOW.map(f=>`<span class="bdg2" style="color:${f.color};background:${f.color}15;border-color:${f.color}30">${f.id}. ${esc(f.label)}</span>`).join('')}
+      </div>
+      <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:12px">
+        Deal Room de 8 pasos · Motor de urgencia · Alertas automáticas de lease, refi y aniversario · Mensajes por WhatsApp uno a uno.</p>
+    </div>
+    <div class="card" style="background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.18)">
+      <div style="font-weight:700;font-size:12px;color:var(--dan);margin-bottom:8px">Zona peligrosa</div>
+      <p style="font-size:11.5px;color:var(--tx3);line-height:1.55;margin-bottom:12px">
+        Borra clientes, leads, programas y tareas de este dispositivo. Exporta un respaldo antes.</p>
+      <button class="btn dan sm" onclick="borrarTodo()">${ic('Trash2')}Borrar todo</button>
+    </div>
+    <p style="font-size:11px;color:var(--tx3);text-align:center;line-height:1.6;padding:4px 0 10px">
+      Los datos viven solo en este navegador. Nadie más los ve.<br>AutoSolution Miami · CRM v1.0</p>
+  </div>`;
+};
+function saveCfg(){
+  S.cfg.nombre=$('cfgNombre').value.trim();
+  S.cfg.wa=$('cfgWa').value.trim();
+  S.cfg.dealer=$('cfgDealer').value.trim()||'AutoSolution Miami';
+  save();toast('Guardado');render();
+}
+function exportar(){
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='autosolution-crm-'+today()+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  toast('Respaldo descargado');
+}
+function importar(ev){
+  const f=ev.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!d||(!Array.isArray(d.clientes)&&!Array.isArray(d.leads))){alert('Archivo no válido.');return;}
+      const n=(d.clientes||[]).length, m=(d.leads||[]).length;
+      if(!confirm(`Importar ${n} cliente(s) y ${m} lead(s)? Reemplaza todo lo que hay ahora.`))return;
+      const revPrev=S.meta.rev||0;
+      S=Object.assign(BLANK(),d);
+      S.cfg=Object.assign(BLANK().cfg,d.cfg||{});
+      S.cfg.onboarded=true;
+      ['clientes','leads','promos','tareas'].forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];});
+      /* el import gana sobre lo que haya en la nube */
+      S.meta={rev:Math.max(revPrev,(d.meta&&d.meta.rev)||0)+1,updatedAt:nowISO(),device:SYNC.device};
+      save({silent:true});if(SYNC.modo!=='local')programarPush();
+      if($('onb'))$('onb').style.display='none';
+      toast('Respaldo importado');render();
+    }catch(e){alert('No se pudo leer el archivo.');}
+  };
+  r.readAsText(f);
+  ev.target.value='';
+}
+function borrarTodo(){
+  if(!confirm('¿Borrar TODO? Exporta un respaldo primero.'))return;
+  if(!confirm('¿Seguro? Esto no se puede deshacer.'))return;
+  const nombre=S.cfg.nombre, wa=S.cfg.wa, dealer=S.cfg.dealer;
+  S=BLANK(); S.cfg={nombre,wa,dealer,onboarded:true};
+  save();toast('Todo borrado');go('dashboard');
+}
+</script>
+<script>
+/* ═══════════════════════════════════════════
+   VISTA · DEAL ROOM (flujo de 8 pasos)
+═══════════════════════════════════════════ */
+function L(){return S.leads.find(x=>x.id===LEADID);}
+function upd(patch){const l=L();if(!l)return;Object.assign(l,patch);l.updatedAt=nowISO();save();}
+function updN(key,k,v){const l=L();if(!l)return;l[key]=l[key]||{};l[key][k]=v;l.updatedAt=nowISO();save();}
+function updNum(key,k,v){updN(key,k,num(v));}
+function stepDone(l,s){
+  const f=finanzas(l);
+  if(s===1)return !!(l.nom&&l.tel);
+  if(s===2)return (l.acts||[]).length>0;
+  if(s===3)return f.precio>0;
+  if(s===4)return !l.trade.has||f.acv>0;
+  if(s===5)return !!l.perfil.empleador;
+  if(s===6)return !!l.deal.banco;
+  if(s===7)return !!l.recap.finalizado;
+  if(s===8)return !!(l.post.resena||l.post.equityDate||l.post.refiDate||l.post.renewDate);
+  return false;
+}
+VIEWS.deal=function(){
+  const l=L();
+  if(!l)return `<div class="stack" style="padding:16px 14px">${empty('Search','Lead no encontrado','')}
+    <button class="btn sec" onclick="go('leads')">← Volver a Leads</button></div>`;
+  const f=finanzas(l), u=getUrgency(l), et=ETAPAS[l.etapa];
+  let out=`<div style="padding:11px 14px;border-bottom:1px solid var(--bd);background:var(--bg2)">
+    <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+      <button class="btn ghost xs" style="padding:4px 0" onclick="go('leads')">${ic('ArrowLeft',13)}Leads</button>
+      <span style="font-size:13px;font-weight:700">${esc(l.nom)}</span>
+      ${badge(et,ETAPA_C[et])}${badge(u.label,u.color)}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+      <select class="inp" style="flex:1;padding:7px 10px;font-size:12px" onchange="cambiarEtapa(this.value)">
+        ${ETAPAS.map((e,i)=>`<option value="${i}"${i===l.etapa?' selected':''}>${e}</option>`).join('')}</select>
+      <button class="btn wa sm" onclick="leadWa()">${ic('Wa')}WA</button>
+      <button class="iconbtn" onclick="delLead()">${ic('Trash2',15,C.tx3)}</button>
+    </div>
+  </div>
+  <div class="steps sh">`+FLOW.map(s=>{
+    const on=STEP===s.id, dn=stepDone(l,s.id);
+    return `<button class="stp ${on?'on':''} ${!on&&dn?'done':''}" onclick="setStep(${s.id})">
+      <span class="n">${dn&&!on?ic('Check',10):s.id}</span>${esc(s.label)}</button>`;}).join('')+`</div>
+  <div style="padding:16px 14px calc(126px + var(--sb))"><div class="inner">${STEPV[STEP](l,f)}</div></div>
+  <div class="fbar sh">`+
+    [['Precio',fm(f.precio),C.tx2],['Total',fm(Math.max(0,f.totalDue)),C.tx],['Financiar',fm(f.amtFin),C.info],
+     ['Front',fm(f.frontGross),f.frontGross>=0?C.ok:C.dan],['Back',fm(f.backGross),C.ok],
+     ['Gross',fm(f.totalGross),f.totalGross>=0?C.ok:C.dan],['Pago/mes',fm(f.pago),C.p]]
+    .map(r=>`<div class="f"><div class="fl">${r[0]}</div><div class="fv mono" style="color:${r[2]}">${r[1]}</div></div>`).join('')
+  +`</div>`;
+  return out;
+};
+function setStep(n){STEP=n;render();$('content').scrollTop=0;}
+function cambiarEtapa(v){
+  const l=L();if(!l)return;
+  const ni=Number(v); if(ni===l.etapa)return;
+  l.etapa=ni;l.updatedAt=nowISO();
+  l.acts.unshift({id:uid('a'),tipo:'stage_change',autor:S.cfg.nombre||'Yo',txt:'Fase actualizada: "'+ETAPAS[ni]+'"',fecha:nowISO()});
+  save();
+  if(ETAPAS[ni]==='Vendido')pasarAlLibro(l.id); else render();
+}
+function delLead(){
+  const l=L();if(!l)return;
+  if(!confirm('¿Eliminar el lead "'+l.nom+'"? Sus tareas también se borran.'))return;
+  S.leads=S.leads.filter(x=>x.id!==l.id);
+  S.tareas=S.tareas.filter(t=>t.leadId!==l.id);
+  save();toast('Lead eliminado');go('leads');
+}
+function leadWa(){
+  const l=L();if(!l)return;
+  const v=vehLead(l);
+  openMsg(l.nom,l.tel,`Hola ${l.nom}${firma()} 👋 ${(l.veh&&l.veh.marca)?'Te escribo por el '+v+'.':'Vi que andas buscando carro.'} Trabajo con todas las marcas y te consigo el número completo — con la letra chica, sin sorpresas al firmar. ¿Qué buscas y cuánto quieres pagar al mes?`);
+}
+const secTit=(icon,color,txt)=>`<div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:12px">${ic(icon,14,color)}${txt}</div>`;
+const fld=(lab,inner,help)=>`<div class="fr"><label class="f">${lab}${help?`<span class="h">· ${help}</span>`:''}</label>${inner}</div>`;
+const inpT=(v,oninput,ph,type)=>`<input class="inp"${type?` type="${type}"`:''} value="${esc(v==null?'':v)}" placeholder="${esc(ph||'')}" onchange="${oninput}">`;
+const inpN=(v,oninput,ph)=>`<input class="inp" inputmode="decimal" value="${esc(v||0)}" placeholder="${esc(ph||'0')}" onchange="${oninput}">`;
+const selT=(opts,cur,onchange)=>`<select class="inp" onchange="${onchange}">${opts.map(o=>{
+  const v=typeof o==='string'?o:o.v,lb=typeof o==='string'?o:o.l;
+  return `<option value="${esc(v)}"${String(cur)===String(v)?' selected':''}>${esc(lb)}</option>`;}).join('')}</select>`;
+
+const STEPV={};
+/* ── 1 · CAPTACIÓN ── */
+STEPV[1]=function(l){
+  return `<div class="stack">${secTit('Radio',C.info,'Datos de captación')}
+  <div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
+    ${fld('Nombre',inpT(l.nom,"upd({nom:this.value})"),'')}
+    ${fld('Teléfono',inpT(l.tel,"upd({tel:this.value})",'3055551234'))}
+    ${fld('Email',inpT(l.email,"upd({email:this.value})",'correo@email.com','email'))}
+    ${fld('Origen',selT(ORIGENES,l.origen,"upd({origen:this.value})"))}
+    ${fld('Marca',inpT(l.veh.marca,"updN('veh','marca',this.value)",'Toyota'))}
+    ${fld('Modelo',inpT(l.veh.mod,"updN('veh','mod',this.value)",'RAV4'))}
+    ${fld('Año',inpT(l.veh.ano,"updN('veh','ano',this.value)",'2025'))}
+    ${fld('Presupuesto $',inpN(l.veh.pres,"updNum('veh','pres',this.value);render()"))}
+    ${fld('Condición',selT(['Nuevo','Usado'],l.veh.cond,"updN('veh','cond',this.value)"))}
+    ${fld('Etapa',selT(ETAPAS.map((e,i)=>({v:i,l:e})),l.etapa,"cambiarEtapa(this.value)"))}
+    <div class="fr" style="grid-column:1/-1"><label class="f">Notas</label>
+      <textarea class="inp" style="min-height:70px" onchange="upd({notas:this.value})" placeholder="Observaciones iniciales…">${esc(l.notas)}</textarea></div>
+  </div>
+  <div class="card" style="background:var(--bg3)">
+    <div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Trazabilidad</div>
+    <div class="sumrow"><span style="color:var(--tx3)">Capturado</span><span style="color:var(--tx2)">${fDateTime(l.createdAt)}</span></div>
+    <div class="sumrow"><span style="color:var(--tx3)">Última actividad</span><span style="color:var(--tx2)">${fDateTime(l.updatedAt)}</span></div>
+    <div class="sumrow"><span style="color:var(--tx3)">Urgencia</span><span style="color:${getUrgency(l).color};font-weight:700">${getUrgency(l).label} · ${getUrgency(l).score}</span></div>
+  </div></div>`;
+};
+
+/* ── 2 · WORKSPACE ── */
+let ACTTIPO='call';
+const ACT_I={call:'Phone',email:'Mail',text:'MessageSquare',note:'FileText',appointment:'Calendar',stage_change:'RefreshCw',manager_note:'Shield'};
+const ACT_C={call:C.p,email:C.info,text:C.ok,note:C.tx3,appointment:C.warn,stage_change:C.vio,manager_note:C.ora};
+STEPV[2]=function(l){
+  const tar=S.tareas.filter(t=>t.leadId===l.id);
+  return `<div class="stack">${secTit('Activity',C.vio,'Registrar interacción')}
+  <div class="card" style="background:var(--bg3)">
+    <div class="actgrid">
+      ${[['call','Llamada','Phone'],['text','SMS','MessageSquare'],['email','Email','Mail'],['note','Nota','FileText'],['appointment','Cita','Calendar']]
+        .map(a=>`<button class="actbtn" style="${ACTTIPO===a[0]?`border-color:${ACT_C[a[0]]};background:${ACT_C[a[0]]}18;color:${ACT_C[a[0]]}`:''}"
+          onclick="ACTTIPO='${a[0]}';render()">${ic(a[2],14)}<span>${a[1]}</span></button>`).join('')}
+    </div>
+    ${ACTTIPO==='call'?`<div class="fr" style="margin-bottom:9px"><label class="f">Duración</label>
+      <input class="inp" id="actDur" placeholder="3m 10s" style="max-width:130px"></div>`:''}
+    <textarea class="inp" id="actTxt" style="min-height:78px" placeholder="¿Qué pasó en esta interacción?"></textarea>
+    <button class="btn full sm" style="margin-top:9px" onclick="addAct()">${ic('Send')}Registrar</button>
+  </div>
+  ${(l.acts||[]).length?`<div class="tl">`+l.acts.map(a=>{
+    const col=ACT_C[a.tipo]||C.tx3;
+    return `<div class="tli">
+      <div class="dot" style="background:${col}18;border-color:${col}40;color:${col}">${ic(ACT_I[a.tipo]||'FileText',9)}</div>
+      <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:10px 12px">
+        <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:4px">
+          <span style="font-size:9px;font-weight:800;color:${col};text-transform:uppercase;letter-spacing:.07em">${esc(String(a.tipo).replace('_',' '))} · ${esc(a.autor)}</span>
+          <span style="font-size:9px;color:var(--tx3);white-space:nowrap">${fDateTime(a.fecha)}</span></div>
+        <p style="font-size:12px;color:var(--tx2);line-height:1.55">${esc(a.txt)}</p>
+        ${a.dur?`<div style="font-size:10px;color:var(--p);font-weight:700;margin-top:5px">⏱ ${esc(a.dur)}</div>`:''}
+      </div></div>`;}).join('')+`</div>`
+   :`<div style="font-size:12px;color:var(--tx3);padding:6px 2px">Sin interacciones aún. La primera define el ritmo del trato.</div>`}
+  <div>
+    <div class="rowb" style="margin-bottom:9px">
+      <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--tx2)">
+        ${ic('CheckSquare',13,C.warn)}Tareas asociadas (${tar.length})</div>
+      <button class="btn sec xs" onclick="openTarea('${l.id}')">${ic('Plus')}Nueva</button></div>
+    ${tar.length?tar.map(t=>{const ov=!t.hecha&&t.vence&&t.vence<today();
+      return `<div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;margin-bottom:6px;
+        background:${ov?'rgba(239,68,68,.04)':'var(--bg3)'};border:1px solid ${ov?'rgba(239,68,68,.3)':'var(--bd)'}">
+        <input type="checkbox" ${t.hecha?'checked':''} onchange="toggleTarea('${t.id}')" style="accent-color:${C.ok};width:15px;height:15px">
+        <span style="flex:1;font-size:12px;color:${t.hecha?C.tx3:C.tx};${t.hecha?'text-decoration:line-through':''}">${esc(t.titulo)}</span>
+        <span style="font-size:10px;color:${ov?C.dan:C.tx3};white-space:nowrap">${fDate(t.vence)}</span>
+      </div>`;}).join('')
+     :`<div style="font-size:12px;color:var(--tx3)">Sin tareas para este lead.</div>`}
+  </div></div>`;
+};
+function addAct(){
+  const l=L();if(!l)return;
+  const txt=$('actTxt').value.trim(); if(!txt){alert('Escribe qué pasó.');return;}
+  const a={id:uid('a'),tipo:ACTTIPO,autor:S.cfg.nombre||'Yo',txt,fecha:nowISO()};
+  if(ACTTIPO==='call'&&$('actDur'))a.dur=$('actDur').value.trim();
+  l.acts.unshift(a);l.updatedAt=nowISO();save();toast('Interacción registrada');render();
+}
+
+/* ── 3 · OFERTA ── */
+STEPV[3]=function(l,f){
+  const rows=[['Precio de venta',f.precio,0],['+ Fees / Doc',f.fees,0],['+ Impuestos',f.tax,0],
+    ['− Rebates',f.rebates,1],['− Descuento',f.desc,1]];
+  if(f.allowance>0)rows.push(['− Trade allowance',f.allowance,1]);
+  return `<div class="stack">${secTit('Tag',C.warn,'Construcción de la oferta')}
+  <div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
+    ${fld('# Stock',inpT(l.oferta.stock,"updN('oferta','stock',this.value)",'AQ8-2025-001'))}
+    ${fld('Condición',selT(['Nuevo','Usado'],l.veh.cond,"updN('veh','cond',this.value)"))}
+    ${fld('MSRP $',inpN(l.oferta.msrp,"updNum('oferta','msrp',this.value);render()"))}
+    ${fld('Precio de venta $',inpN(l.oferta.precio,"updNum('oferta','precio',this.value);render()"))}
+    ${fld('Descuento $',inpN(l.oferta.desc,"updNum('oferta','desc',this.value);render()"))}
+    ${fld('Fees / Doc $',inpN(l.oferta.fees,"updNum('oferta','fees',this.value);render()"))}
+    ${fld('Impuestos $',inpN(l.oferta.tax,"updNum('oferta','tax',this.value);render()"))}
+    ${fld('Rebates $',inpN(l.oferta.rebates,"updNum('oferta','rebates',this.value);render()"))}
+    ${fld('Down payment $',inpN(l.oferta.down,"updNum('oferta','down',this.value);render()"))}
+  </div>
+  <div class="card" style="background:var(--bg3)">
+    <div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Resumen en tiempo real</div>
+    ${rows.map(r=>`<div class="sumrow"><span style="color:var(--tx2)">${r[0]}</span>
+      <span class="mono" style="color:${r[2]&&r[1]>0?C.dan:C.tx2}">${r[2]&&r[1]>0?'− ':''}${fm(Math.abs(r[1]))}</span></div>`).join('')}
+    <div class="sumrow b"><span>= Total a pagar</span><span class="mono">${fm(Math.max(0,f.totalDue))}</span></div>
+    <div class="sumrow"><span style="color:var(--tx2);padding-left:14px">− Down payment</span>
+      <span class="mono" style="color:${f.down>0?C.dan:C.tx2}">${f.down>0?'− ':''}${fm(f.down)}</span></div>
+    <div class="sumrow b"><span>= Monto a financiar</span><span class="mono" style="color:${C.info}">${fm(f.amtFin)}</span></div>
+  </div></div>`;
+};
+
+/* ── 4 · TRADE-IN ── */
+STEPV[4]=function(l,f){
+  let out=`<div class="stack">
+    <div class="rowb">${secTit('RefreshCw',C.ora,'Vehículo de retoma').replace('margin-bottom:12px','margin-bottom:0')}
+      <label class="check"><input type="checkbox" ${l.trade.has?'checked':''} onchange="updN('trade','has',this.checked);render()">Tiene trade-in</label></div>`;
+  if(!l.trade.has)return out+`<div class="card pad0">${empty('RefreshCw','Sin vehículo de parte de pago','Marca la casilla de arriba si el cliente entrega un carro.')}</div></div>`;
+  out+=`<div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
+    ${fld('VIN',inpT(l.trade.vin,"updN('trade','vin',this.value)",'1HGBH41JXMN109186'))}
+    ${fld('Año',inpT(l.trade.ano,"updN('trade','ano',this.value)",'2019'))}
+    ${fld('Marca',inpT(l.trade.marca,"updN('trade','marca',this.value)",'BMW'))}
+    ${fld('Modelo',inpT(l.trade.mod,"updN('trade','mod',this.value)",'X5'))}
+    ${fld('Millaje',inpN(l.trade.millas,"updNum('trade','millas',this.value);render()"))}
+    ${fld('Payoff $',inpN(l.trade.payoff,"updNum('trade','payoff',this.value);render()"))}
+    ${fld('ACV $',inpN(l.trade.acv,"updNum('trade','acv',this.value);render()"),'valor real')}
+    ${fld('Allowance $',inpN(l.trade.allowance,"updNum('trade','allowance',this.value);render()"),'lo que ofreces')}
+  </div>
+  <div class="card" style="background:var(--bg3);display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+    ${[['Equity del cliente',f.equity,f.equity>=0?C.ok:C.dan],['Overallowance',f.over,f.over>0?C.dan:C.tx3],['Payoff pendiente',f.payoff,C.tx2]]
+      .map(r=>`<div><div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">${r[0]}</div>
+      <div class="mono" style="font-size:18px;font-weight:800;color:${r[2]}">${fm(r[1])}</div></div>`).join('')}
+  </div></div>`;
+  return out;
+};
+
+/* ── 5 · PERFIL ── */
+STEPV[5]=function(l){
+  return `<div class="stack">${secTit('UserCheck',C.ok,'Perfil extendido')}
+  <div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
+    <div style="grid-column:1/-1">${fld('Dirección',inpT(l.perfil.dir,"updN('perfil','dir',this.value)",'123 Main St'))}</div>
+    ${fld('Ciudad',inpT(l.perfil.ciudad,"updN('perfil','ciudad',this.value)",'Miami'))}
+    ${fld('Estado',inpT(l.perfil.estado,"updN('perfil','estado',this.value)",'FL'))}
+    ${fld('ZIP',inpT(l.perfil.zip,"updN('perfil','zip',this.value)",'33101'))}
+    ${fld('Seguro',inpT(l.perfil.seguro,"updN('perfil','seguro',this.value)",'State Farm, GEICO…'))}
+    <div style="grid-column:1/-1;height:1px;background:var(--bd);margin:2px 0"></div>
+    <div style="grid-column:1/-1">${fld('Empleador / Empresa',inpT(l.perfil.empleador,"updN('perfil','empleador',this.value)"))}</div>
+    ${fld('Cargo',inpT(l.perfil.cargo,"updN('perfil','cargo',this.value)",'Manager…'))}
+    ${fld('Ingreso mensual $',inpN(l.perfil.ingreso,"updNum('perfil','ingreso',this.value)"))}
+    <div style="grid-column:1/-1">${fld('# Licencia de conducir',inpT(l.perfil.licencia,"updN('perfil','licencia',this.value)"))}</div>
+  </div></div>`;
+};
+
+/* ── 6 · CIERRE F&I ── */
+STEPV[6]=function(l,f){
+  return `<div class="stack">${secTit('Landmark','#a78bfa','Cierre del negocio — F&I')}
+  <div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
+    ${fld('Banco / Financiera',selT([{v:'',l:'Seleccionar banco…'}].concat(BANCOS),l.deal.banco,"updN('deal','banco',this.value);render()"))}
+    ${fld('Tipo de negocio',selT(['Financiado','Contado','Lease'],l.deal.tipo,"updN('deal','tipo',this.value)"))}
+    ${fld('APR %',inpN(l.deal.apr,"updNum('deal','apr',this.value);render()"))}
+    ${fld('Término',selT(['24','36','48','60','72','84'],l.deal.plazo,"updNum('deal','plazo',this.value);render()"),'meses')}
+  </div>
+  <div class="card" style="background:#0c0c0c;border-color:var(--bd2)">
+    <div class="rowb" style="align-items:flex-end">
+      <div><div style="font-size:9px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Pago mensual estimado</div>
+        <div class="mono" style="font-size:38px;font-weight:900;color:var(--p);letter-spacing:-.04em;line-height:1">${fm(f.pago)}</div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:6px">${f.plazo} meses · ${f.apr}% APR · ${fm(f.amtFin)} financiado</div></div>
+      <div style="text-align:right"><div style="font-size:9px;color:var(--tx3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Backend</div>
+        <div class="mono" style="font-size:20px;font-weight:800;color:${C.ok}">${fm(f.backGross)}</div></div>
+    </div></div>
+  <div>
+    <div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Productos F&amp;I / Backend</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <select class="inp" id="fniProd" style="flex:1">${FNI.map(p=>`<option>${p}</option>`).join('')}</select>
+      <input class="inp" id="fniProfit" inputmode="numeric" placeholder="Profit $" style="width:110px">
+      <button class="btn sm" onclick="addFni()">${ic('Plus')}</button>
+    </div>
+    ${(l.recap.fni||[]).length?l.recap.fni.map(p=>`<div class="rowb" style="background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:9px 12px;margin-bottom:6px">
+      <span style="font-size:12px;color:var(--tx2)">${esc(p.name)}</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="mono" style="font-size:13px;font-weight:700;color:${C.ok}">${fm(p.profit)}</span>
+        <button class="iconbtn" onclick="rmFni('${p.id}')">${ic('X',14,C.tx3)}</button></div></div>`).join('')
+     :`<div style="font-size:12px;color:var(--tx3)">Sin productos F&amp;I agregados.</div>`}
+  </div></div>`;
+};
+function addFni(){
+  const l=L();if(!l)return;
+  const profit=num($('fniProfit').value);
+  if(!profit){alert('Escribe el profit del producto.');return;}
+  l.recap.fni=l.recap.fni||[];
+  l.recap.fni.push({id:uid('f'),name:$('fniProd').value,profit});
+  l.updatedAt=nowISO();save();render();
+}
+function rmFni(id){const l=L();if(!l)return;l.recap.fni=(l.recap.fni||[]).filter(f=>f.id!==id);save();render();}
+
+/* ── 7 · RECAP ── */
+STEPV[7]=function(l,f){
+  return `<div class="stack">
+  <div class="card" style="background:#0b0b0b;border-color:var(--bd2);position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,${C.p} 0 14px,transparent 14px 24px)"></div>
+    <div style="font-size:9px;font-weight:800;color:var(--p);text-transform:uppercase;letter-spacing:.12em;margin:6px 0 14px">Deal Recap — resumen del negocio</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      ${[['Precio venta',fm(f.precio),C.tx],['A financiar',fm(f.amtFin),C.info],
+         ['Front Gross',fm(f.frontGross),f.frontGross>=0?C.ok:C.dan],['Back Gross',fm(f.backGross),C.ok],
+         ['GROSS TOTAL',fm(f.totalGross),f.totalGross>=0?C.ok:C.dan],['Pago/mes',fm(f.pago),C.p],
+         ['Banco',esc(l.deal.banco||'—'),C.tx2],[f.apr+'% APR',f.plazo+' meses',C.tx3]]
+        .map(r=>`<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:3px">${r[0]}</div>
+        <div class="mono" style="font-size:15px;font-weight:800;color:${r[2]};letter-spacing:-.02em">${r[1]}</div></div>`).join('')}
+    </div></div>
+  <div class="grid1" style="grid-template-columns:1fr;gap:10px">
+    ${[['finalizado','Trato finalizado','Marcado como cerrado — activa post-venta'],
+       ['firmado','Documentos firmados','Contratos, title e insurance completados']]
+      .map(r=>`<div style="display:flex;align-items:center;gap:11px;background:var(--bg3);border-radius:10px;padding:14px;
+        border:1px solid ${l.recap[r[0]]?C.ok+'40':'var(--bd)'}">
+        <input type="checkbox" ${l.recap[r[0]]?'checked':''} onchange="updN('recap','${r[0]}',this.checked);render()" style="accent-color:${C.ok};width:17px;height:17px">
+        <div><div style="font-size:12.5px;font-weight:700">${r[1]}</div>
+          <div style="font-size:10.5px;color:var(--tx3);margin-top:2px">${r[2]}</div></div></div>`).join('')}
+  </div>
+  ${l.recap.finalizado?`<div class="card" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3);text-align:center;color:${C.ok};font-size:12.5px;font-weight:600;line-height:1.6">
+      ✅ Trato cerrado y procesado.<br>Marca la etapa como <b>Vendido</b> para pasarlo a tu libro y activar las alertas.</div>
+    ${ETAPAS[l.etapa]!=='Vendido'?`<button class="btn ok full" onclick="cambiarEtapa(${ETAPAS.indexOf('Vendido')})">${ic('BookOpen')}Marcar Vendido y pasar al libro</button>`:''}`:''}
+  </div>`;
+};
+
+/* ── 8 · POST-VENTA ── */
+STEPV[8]=function(l){
+  const dl=f=>{if(!f)return null;return dias(new Date(f+'T00:00:00'),hoy());};
+  return `<div class="stack">${secTit('Bell','#fb923c','Alertas CRM de post-venta')}
+  <div class="card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)">
+    <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.info)}
+      <p style="font-size:11.5px;color:var(--tx2);line-height:1.6">Las fechas que cargues aquí aparecen solas en <b>Alertas</b> 45 días antes, con el mensaje de WhatsApp ya escrito.</p></div>
+  </div>
+  <div class="card">
+    <div style="font-weight:700;font-size:12.5px;margin-bottom:9px">⭐ Google Review</div>
+    <label class="check"><input type="checkbox" ${l.post.resena?'checked':''} onchange="updN('post','resena',this.checked);render()">Reseña solicitada al cliente</label>
+  </div>
+  <div class="card">
+    <div style="font-weight:700;font-size:12.5px;margin-bottom:9px">👥 Referidos</div>
+    <div style="display:flex;gap:8px;margin-bottom:9px">
+      <input class="inp" id="refTxt" placeholder="Nombre y teléfono…" style="flex:1">
+      <button class="btn sm" onclick="addRef()">${ic('Plus')}</button></div>
+    ${(l.post.referidos||[]).length?l.post.referidos.map((r,i)=>
+      `<div class="mrow"><span>${esc(r)}</span><button class="iconbtn" onclick="rmRef(${i})">${ic('X',13,C.tx3)}</button></div>`).join('')
+     :`<div style="font-size:11.5px;color:var(--tx3)">Sin referidos.</div>`}
+  </div>
+  ${[['equityDate','TrendingUp',C.ok,'Alerta de Equity','Fecha para revisar el equity del cliente'],
+     ['refiDate','TrendingUp',C.vio,'Alerta de Refinanciamiento','Fecha para ofrecer mejor tasa'],
+     ['renewDate','RefreshCw',C.p,'Alerta de Renovación','Fecha para hablar de renovar']]
+    .map(r=>{const d=dl(l.post[r[0]]);
+    return `<div class="card">
+      <div style="font-weight:700;font-size:12.5px;display:flex;align-items:center;gap:7px;margin-bottom:5px">${ic(r[1],13,r[2])}${r[3]}</div>
+      <div style="font-size:10.5px;color:var(--tx3);margin-bottom:8px">${r[4]}</div>
+      <input class="inp" type="date" value="${esc(l.post[r[0]]||'')}" onchange="updN('post','${r[0]}',this.value);render()">
+      ${d!==null?`<div style="font-size:10.5px;color:${r[2]};font-weight:700;margin-top:7px">
+        ${d<0?'Pasó hace '+Math.abs(d)+' días':d===0?'Es hoy':'Faltan '+d+' días'}${d<=45?' · ya está en Alertas':''}</div>`:''}
+    </div>`;}).join('')}
+  </div>`;
+};
+function addRef(){
+  const l=L();if(!l)return;
+  const t=$('refTxt').value.trim(); if(!t)return;
+  l.post.referidos=l.post.referidos||[];l.post.referidos.push(t);
+  l.updatedAt=nowISO();save();render();
+}
+function rmRef(i){const l=L();if(!l)return;l.post.referidos.splice(i,1);save();render();}
+</script>
+<script>
+/* ═══════════════════════════════════════════
+   ONBOARDING (una sola vez, sin login falso)
+═══════════════════════════════════════════ */
+function showOnb(){
+  $('onb').style.display='flex';
+  $('onb').innerHTML=`
+    <div class="onbhero">
+      <div class="glow"></div>
+      <div style="position:relative;z-index:1">${LOGO}</div>
+      <div style="position:relative;z-index:1">
+        <div class="onbtag">${ic('Zap',12,C.p)}CRM exclusivo automotriz</div>
+        <h1 style="font-size:34px;font-weight:900;color:#fff;line-height:1.08;text-transform:uppercase;letter-spacing:-.03em;margin-bottom:14px">
+          Cierra más.<br><span style="color:var(--p)">Cada turno.</span></h1>
+        <p style="color:var(--tx3);font-size:13px;line-height:1.7;max-width:340px">
+          Motor de urgencia en tiempo real, flujo de 8 pasos con F&amp;I, y alertas automáticas de fin de lease, refi y aniversario sobre tu propio libro de clientes.</p>
+      </div>
+      <div class="dtonly" style="font-size:10px;color:var(--tx3);border-top:1px solid var(--bd);padding-top:16px">
+        © 2026 AutoSolution Miami CRM · Tus datos viven solo en este dispositivo</div>
+    </div>
+    <div class="onbwrap"><div class="onbform">
+      <h2 style="font-size:23px;font-weight:900;letter-spacing:-.02em;margin-bottom:6px">Empecemos</h2>
+      <p style="color:var(--tx3);font-size:13px;margin-bottom:22px;line-height:1.6">
+        Solo dos datos. Tu nombre firma los mensajes de WhatsApp y tu número va en los posts de redes.</p>
+      <div class="fr" style="margin-bottom:12px"><label class="f">Tu nombre</label>
+        <input class="inp" id="obNom" placeholder="Diana" style="font-size:15px;padding:12px 14px"></div>
+      <div class="fr" style="margin-bottom:18px"><label class="f">Tu WhatsApp</label>
+        <input class="inp" id="obWa" inputmode="tel" placeholder="3055551234" style="font-size:15px;padding:12px 14px"></div>
+      <button class="btn lg full" onclick="doOnb()">${ic('ChevronRight')}Entrar al workspace</button>
+      <p style="font-size:11px;color:var(--tx3);text-align:center;margin-top:16px;line-height:1.6">
+        Puedes cambiarlos cuando quieras en <b style="color:var(--tx2)">Config</b>.<br>
+        La app arranca vacía: todo lo que veas sale de lo que tú cargues.</p>
+      <button class="btn ghost sm full" style="margin-top:14px" onclick="document.getElementById('impFile').click()">
+        ${ic('Upload')}Tengo un respaldo — importarlo</button>
+    </div></div>`;
+}
+function doOnb(){
+  S.cfg.nombre=$('obNom').value.trim();
+  S.cfg.wa=$('obWa').value.trim();
+  S.cfg.onboarded=true;
+  save();
+  $('onb').style.display='none';
+  render();
+}
+
+/* ═══════════════════════════════════════════
+   ARRANQUE
+═══════════════════════════════════════════ */
+if(!S.cfg.onboarded && !S.clientes.length && !S.leads.length){ showOnb(); }
+render();
+pintarPill();
+iniciarSync();
+</script>
+</body>
+</html>
