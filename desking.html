@@ -78,9 +78,10 @@ a{color:var(--info);text-decoration:none;font-size:11px}
 </head>
 <body>
 <header>
+  <a href="./" style="display:inline-flex;align-items:center;gap:5px;color:var(--tx2);font-size:12px;font-weight:700;padding:8px 10px;border:1px solid var(--bd);border-radius:9px;flex-shrink:0">← CRM</a>
   <div>
     <div class="logo">AUTOSOLUTION<b>.</b> <span style="font-weight:400;color:var(--tx3)">Desking</span></div>
-    <div class="sub">Arma el negocio · número completo · sin conexión a nada</div>
+    <div class="sub">Arma el negocio · número completo · conectado a tu libro</div>
   </div>
 </header>
 
@@ -155,8 +156,47 @@ try{const r=localStorage.getItem(K);if(r){const d=JSON.parse(r);S=Object.assign(
   if(!Array.isArray(S.bancos)||!S.bancos.length)S.bancos=JSON.parse(JSON.stringify(BANCOS_BASE));}}catch(e){}
 function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
 
+/* ═══ CONEXIÓN AL LIBRO DEL CRM (misma origen → mismo localStorage) ═══ */
+let LIBRO={clientes:[],leads:[]};
+function cargarLibro(){
+  try{
+    const r=localStorage.getItem('asm_libro_v1');
+    if(r){const d=JSON.parse(r);
+      LIBRO.clientes=Array.isArray(d.clientes)?d.clientes:[];
+      LIBRO.leads=Array.isArray(d.leads)?d.leads:[];}
+  }catch(e){}
+}
+cargarLibro();
+const vehTxt=p=>[p.ano,p.marca,p.mod].filter(Boolean).join(' ')||'—';
+function personas(){
+  return [
+    ...LIBRO.clientes.map(c=>({kind:'cliente',id:c.id,nom:c.nom,tel:c.tel,veh:vehTxt(c),raw:c})),
+    ...LIBRO.leads.map(l=>({kind:'lead',id:l.id,nom:l.nom,tel:l.tel,veh:vehTxt(l.veh||{}),raw:l}))
+  ];
+}
+function vincular(kind,id){
+  const p=personas().find(x=>x.kind===kind&&x.id===id); if(!p)return;
+  const r=p.raw;
+  W.vinculo={kind,id,nom:p.nom};
+  W.cliente=p.nom; W.tel=p.tel||'';
+  if(kind==='cliente'){
+    W.marca=r.marca||''; W.modelo=r.mod||''; W.ano=r.ano||'';
+    W.tipo=r.tipo==='finance'?'finance':r.tipo==='cash'?'cash':'lease';
+  }else{
+    const v=r.veh||{};
+    W.marca=v.marca||''; W.modelo=v.mod||''; W.ano=v.ano||'';
+    if(v.pres)W.precio=v.pres;
+    const d=r.deal||{};
+    if(d.apr)W.apr=d.apr; if(d.plazo)W.plazoF=d.plazo;
+    W.tipo=d.tipo==='Lease'?'lease':d.tipo==='Contado'?'cash':'finance';
+  }
+  render();
+}
+function desvincular(){W.vinculo=null;render();}
+
 /* ═══ WORKSHEET (vivo, no persiste hasta guardar) ═══ */
 let W={
+  vinculo:null,
   tipo:'lease', cliente:'', tel:'',
   ano:'', marca:'', modelo:'', stock:'', cond:'Nuevo',
   msrp:'', precio:'', rebates:0,
@@ -253,6 +293,28 @@ function rDesk(){
       <button class="${W.tipo==='finance'?'on':''}" onclick="W.tipo='finance';render()">Financiado</button>
       <button class="${W.tipo==='cash'?'on':''}" onclick="W.tipo='cash';render()">Contado</button>
     </div>
+    ${W.vinculo?`
+    <div style="display:flex;align-items:center;gap:10px;background:var(--ps);border:1px solid rgba(227,28,28,.3);border-radius:11px;padding:11px 14px;margin-bottom:12px">
+      <span style="font-size:16px">${W.vinculo.kind==='cliente'?'📒':'🎯'}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:800;color:var(--tx)">${esc(W.vinculo.nom)}</div>
+        <div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">${W.vinculo.kind==='cliente'?'Cliente de tu libro':'Lead del pipeline'} · el negocio se guarda en su historial</div>
+      </div>
+      <button class="btn sec sm" onclick="desvincular()">Cambiar</button>
+    </div>
+    ${cotDe(W.vinculo).length?`<div style="margin-bottom:12px;background:var(--bg3);border:1px solid var(--bd);border-radius:11px;padding:11px 14px">
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-bottom:7px">Negocios guardados de ${esc(W.vinculo.nom)} (${cotDe(W.vinculo).length})</div>
+      ${cotDe(W.vinculo).slice(0,3).map(q=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)">
+        <span style="flex:1;font-size:12px;color:var(--tx2)">${esc([q.w.ano,q.w.marca,q.w.modelo].filter(Boolean).join(' '))} · <b style="text-transform:uppercase;font-size:10px">${q.w.tipo}</b> · ${q.fecha}</span>
+        <button class="btn sec sm" onclick="abrirCot(${q.id})">Abrir</button>
+      </div>`).join('')}
+    </div>`:''}`
+    :`
+    <div class="f" style="margin-bottom:12px;position:relative">
+      <label>¿Para quién es el negocio? — busca en tu libro y leads</label>
+      <input id="buscaP" placeholder="Escribe el nombre… (${personas().length} en tu CRM)" oninput="buscarP(this.value)" autocomplete="off">
+      <div id="listaP"></div>
+    </div>`}
     <div class="grid">
       ${F('Cliente','cliente','text','Nombre')}${F('Teléfono (WhatsApp)','tel','tel','305 000 0000')}
     </div>
@@ -380,8 +442,23 @@ function waCot(){
 }
 function guardarCot(){
   if(!num(W.precio)){toast('Arma el negocio primero');return}
-  S.cotizaciones.unshift({id:Date.now(),fecha:new Date().toLocaleDateString('es-US'),w:JSON.parse(JSON.stringify(W)),texto:quoteText()});
-  save();toast('Cotización guardada');
+  S.cotizaciones.unshift({id:Date.now(),fecha:new Date().toLocaleDateString('es-US'),vinculo:W.vinculo?JSON.parse(JSON.stringify(W.vinculo)):null,w:JSON.parse(JSON.stringify(W)),texto:quoteText()});
+  save();toast(W.vinculo?`Guardado en el historial de ${W.vinculo.nom}`:'Cotización guardada');render();
+}
+function cotDe(v){return S.cotizaciones.filter(q=>q.vinculo&&q.vinculo.kind===v.kind&&q.vinculo.id===v.id)}
+function buscarP(q){
+  const el=$('listaP');if(!el)return;
+  q=(q||'').trim().toLowerCase();
+  if(!q){el.innerHTML='';return}
+  const m=personas().filter(p=>(p.nom+' '+p.veh+' '+(p.tel||'')).toLowerCase().includes(q)).slice(0,6);
+  el.innerHTML=m.length?`<div style="position:absolute;left:0;right:0;top:100%;z-index:30;background:var(--bg2);border:1px solid var(--bd2);border-radius:11px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.5)">
+    ${m.map(p=>`<div onclick="vincular('${p.kind}','${p.id}')" style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--bd);cursor:pointer">
+      <span>${p.kind==='cliente'?'📒':'🎯'}</span>
+      <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--tx)">${esc(p.nom)}</div>
+      <div style="font-size:11px;color:var(--tx3)">${esc(p.veh)}${p.tel?' · '+esc(p.tel):''}</div></div>
+      <span style="font-size:9px;font-weight:800;text-transform:uppercase;color:${p.kind==='cliente'?'var(--ok)':'var(--info)'}">${p.kind}</span>
+    </div>`).join('')}</div>`
+  :`<div style="position:absolute;left:0;right:0;top:100%;z-index:30;background:var(--bg2);border:1px solid var(--bd);border-radius:11px;padding:11px 14px;font-size:12px;color:var(--tx3)">Nadie con ese nombre — escribe abajo los datos a mano.</div>`;
 }
 function abrirCot(id){const q=S.cotizaciones.find(x=>x.id===id);if(!q)return;W=JSON.parse(JSON.stringify(q.w));go('desk')}
 function delCot(id){S.cotizaciones=S.cotizaciones.filter(x=>x.id!==id);save();render()}
@@ -473,6 +550,7 @@ function rCotizaciones(){
     ${S.cotizaciones.length?S.cotizaciones.map(q=>`<div class="qrow">
       <div style="flex:1;min-width:0">
         <b>${esc(q.w.cliente||'Sin nombre')}</b> <span class="pill">${q.w.tipo}</span>
+        ${q.vinculo?`<span class="pill" style="background:rgba(34,197,94,.1);color:var(--ok)">${q.vinculo.kind==='cliente'?'📒 libro':'🎯 lead'}</span>`:''}
         <div style="font-size:11px;color:var(--tx3)">${esc([q.w.ano,q.w.marca,q.w.modelo].filter(Boolean).join(' '))} · ${q.fecha}</div>
       </div>
       <button class="btn sec sm" onclick="abrirCot(${q.id})">Abrir</button>
@@ -497,6 +575,14 @@ function impJson(el){
   r.readAsText(f);
 }
 
+/* Abierto desde la ficha del CRM: ?cid=<cliente> o ?lid=<lead> */
+(function(){
+  try{
+    const p=new URLSearchParams(location.search);
+    if(p.get('cid'))vincular('cliente',p.get('cid'));
+    else if(p.get('lid'))vincular('lead',p.get('lid'));
+  }catch(e){}
+})();
 render();
 </script>
 </body>

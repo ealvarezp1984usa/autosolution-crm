@@ -992,6 +992,21 @@ function abrirHerramienta(href){
   if(SYNC.modo!=='local'&&S.meta.rev>SYNC.baseRev)sincronizar();
   window.open(href,'_blank','noopener');
 }
+/* Desking lee asm_libro_v1 del mismo origen, así que ve los datos al vuelo. */
+function armarNegocio(kind,id){
+  armarNegocio.ultimo=id;
+  abrirHerramienta('./desking.html?'+(kind==='cliente'?'cid':'lid')+'='+encodeURIComponent(id));
+}
+/* Cotizaciones que Desking guardó para esta persona (clave asm_desk_v1). */
+function negociosDe(kind,id){
+  try{
+    const r=localStorage.getItem('asm_desk_v1'); if(!r)return [];
+    const d=JSON.parse(r);
+    if(!d||!Array.isArray(d.cotizaciones))return [];
+    return d.cotizaciones.filter(q=>q&&q.vinculo&&q.vinculo.kind===kind&&q.vinculo.id===id);
+  }catch(e){return [];}
+}
+const tipoDesk=t=>t==='finance'?'Finance':t==='cash'?'Cash':'Lease';
 function go(tab,opts){
   if(tab==='__more'){drawer(true);return;}
   TAB=tab; if(opts&&opts.lead)LEADID=opts.lead; if(opts&&opts.step)STEP=opts.step;
@@ -1273,6 +1288,7 @@ function openFicha(id){
   const c=S.clientes.find(x=>x.id===id); if(!c)return;
   const vence=(c.tipo==='lease'&&c.fecha&&num(c.plazo))?addMonths(c.fecha,num(c.plazo)):null;
   const mine=calcAlertas().filter(a=>a.cid===c.id);
+  const negs=negociosDe('cliente',c.id);
   openModal(c.nom,
    `<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
       ${badge(tipoLbl(c.tipo),tipoCol(c.tipo))}${c.fecha?badge('Vendido '+fmtM(addMonths(c.fecha,0)),C.tx3):''}
@@ -1282,6 +1298,17 @@ function openFicha(id){
          ['Notas',c.notas?esc(c.notas):'—']].map(r=>`<div class="sumrow"><span style="color:var(--tx3)">${r[0]}</span>
          <span style="color:var(--tx2);text-align:right;max-width:60%">${r[1]}</span></div>`).join('')}
     </div>
+    <button class="btn full" style="margin-top:12px" onclick="armarNegocio('cliente','${c.id}')">
+      🧮 Armar negocio</button>
+    ${negs.length?`<div class="card" style="background:var(--bg3);margin-top:10px">
+      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-bottom:7px">
+        Negocios armados (${negs.length})</div>
+      ${negs.slice(0,3).map(q=>`<div class="sumrow" style="border-bottom:1px solid var(--bd);padding:6px 0">
+        <span style="color:var(--tx2)">${esc(q.fecha||'—')} · ${esc(tipoDesk(q.w&&q.w.tipo))}</span>
+        <span style="color:var(--tx3);text-align:right;max-width:55%">${esc([q.w&&q.w.marca,q.w&&q.w.modelo].filter(Boolean).join(' ')||'—')}</span>
+      </div>`).join('')}
+      ${negs.length>3?`<div style="font-size:10.5px;color:var(--tx3);margin-top:7px">+${negs.length-3} más — se ven en Desking</div>`:''}
+    </div>`:''}
     ${mine.length?`<div class="mlab">Alertas activas</div>`+mine.map(a=>`<div class="card arow ${a.hot?'hot':''}" style="margin-top:8px">
         <div class="atag">${esc(a.tag)}</div>
         <button class="btn wa sm" style="margin-top:9px" onclick="openMsg(${jsq(c.nom)},${jsq(c.tel)},${jsq(a.msg)})">${ic('Wa')}Escribirle</button>
@@ -2029,6 +2056,7 @@ VIEWS.deal=function(){
     <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
       <select class="inp" style="flex:1;padding:7px 10px;font-size:12px" onchange="cambiarEtapa(this.value)">
         ${ETAPAS.map((e,i)=>`<option value="${i}"${i===l.etapa?' selected':''}>${e}</option>`).join('')}</select>
+      <button class="btn sm" onclick="armarNegocio('lead','${l.id}')" title="Armar negocio en Desking">🧮 Armar</button>
       <button class="btn wa sm" onclick="leadWa()">${ic('Wa')}WA</button>
       <button class="iconbtn" onclick="delLead()">${ic('Trash2',15,C.tx3)}</button>
     </div>
