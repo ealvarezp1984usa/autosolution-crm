@@ -1476,7 +1476,12 @@ async function revisarEnlace(){
   h.split('&').forEach(kv=>{const i=kv.indexOf('=');
     if(i>0)p[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1).replace(/\+/g,' '));});
   try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
-  if(p.error_description||p.error){AUERR=p.error_description||p.error;return false;}
+  if(p.error_description||p.error){
+    const T={otp_expired:'Ese enlace ya venció. Pide otro con "Olvidé mi contraseña".',
+             access_denied:'Ese enlace ya se usó o venció. Pide otro con "Olvidé mi contraseña".'};
+    AUERR=T[p.error_code]||T[p.error]||p.error_description||p.error;
+    return false;
+  }
   if(!p.access_token||!p.refresh_token)return false;
   adoptarSesion({access_token:p.access_token,refresh_token:p.refresh_token,
     expires_in:num(p.expires_in)||3600});
