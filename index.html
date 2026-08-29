@@ -3150,6 +3150,8 @@ async function arrancar(){
       return;
     }catch(e){AUERR=e&&e.message?e.message:String(e);}
   }
+  /* Enlace vencido pero la sesion sigue viva: el aviso va de toast, no de muro. */
+  if(AUERR&&SES&&SES.refresh_token){toast(AUERR);AUERR='';}
   if(!SES||!SES.refresh_token){mostrarAuth();return;}
 
   SYNC.modo='supabase'; if(!SYNC.uid)SYNC.uid=miId(); saveSync();
