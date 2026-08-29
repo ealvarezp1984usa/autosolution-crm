@@ -309,7 +309,7 @@ select.inp{-webkit-appearance:none;appearance:none;
     <div class="sbfoot">
       <div id="sbAcc"></div>
       <div style="font-size:9.5px;color:var(--tx3);line-height:1.6;padding:2px 4px">
-        AutoSolution Miami · v1.1<br>Tu cartera se guarda en tu cuenta.
+        AutoSolution Miami · v1.2<br>Tu cartera se guarda en tu cuenta.
       </div>
     </div>
   </aside>
@@ -395,7 +395,8 @@ const NAV=[
   {id:'connections',icon:'Share2',label:'Equipo',soon:1,sec:'Equipo'},
   {id:'nextup',icon:'RotateCcw',label:'Next-Up',soon:1},
   {id:'admin',icon:'Shield',label:'Admin',soon:1},
-  {id:'nube',icon:'Cloud',label:'Nube',sec:'Sistema'},
+  {id:'ayuda',icon:'Sparkle',label:'Ayuda',sec:'Sistema'},
+  {id:'nube',icon:'Cloud',label:'Nube'},
   {id:'settings',icon:'Settings',label:'Config'},
 ];
 const TABS=[
@@ -1260,6 +1261,7 @@ async function entrarConSesion(){
   try{await sincronizar(true);}catch(e){}
   aplicarPerfil();
   render();
+  if(!S.cfg.tourVisto)setTimeout(()=>abrirTour(0),900);
 }
 function sesionMuerta(){
   SES=null;
@@ -1684,6 +1686,147 @@ async function guardarVendedor(){
   }
 }
 
+/* ═══ ADMIN · invitar vendedor por WhatsApp ═══
+   El admin pone nombre y número; se abre SU WhatsApp con el link.
+   El vendedor crea su cuenta solo, con sus 30 días gratis. */
+const LINK_APP='https://crm.autosolutionsmiami.com';
+function invitarVendedor(){
+  const nom=$('invNom').value.trim(), wa=$('invWa').value.trim();
+  if(!nom||!wa){alert('Pon el nombre y el WhatsApp del vendedor.');return;}
+  if(tel10(wa).length<11){alert('El WhatsApp necesita 10 dígitos con área (ej. 3055551234).');return;}
+  const yo=(SES&&SES.perfil&&SES.perfil.nombre)?SES.perfil.nombre.split(' ')[0]:'';
+  openMsg('Invitar a '+nom, wa,
+`Hola ${nom} 👋${yo?' Soy '+yo+'.':''}
+
+Te paso el CRM que usamos para el libro de clientes y el desking:
+${LINK_APP}
+
+Ábrelo, crea tu cuenta con tu correo y tienes 30 días gratis. Ahí llevas tus clientes, tus leads y armas los números del negocio desde el teléfono.
+
+Cualquier duda me escribes.`);
+}
+
+/* ═══ VISTA · AYUDA ═══ */
+const AYUDA=[
+ {i:'Zap',t:'Cómo se usa esto, en corto',
+  p:['Entra un cliente nuevo o una persona interesada: la metes como <b>Lead</b>.',
+     'Trabajas el lead por los 8 pasos del <b>Deal Room</b> hasta cerrarlo.',
+     'Cuando lo entregas, pasa a tu <b>Libro</b>: ahí vive para siempre.',
+     'El sistema empieza a avisarte solo cuando toca volver a llamarlo.']},
+ {i:'Users',t:'Leads — la gente que todavía no compra',
+  p:['El botón <b>Lead</b> arriba a la derecha crea uno en 5 segundos.',
+     'La <b>Cola de acción</b> de Hoy los ordena por urgencia: llama de arriba abajo.',
+     'Cada lead tiene 8 pasos: captación, workspace, oferta, trade-in, perfil, cierre, recap y post-venta.']},
+ {i:'BookOpen',t:'Libro — tus clientes de por vida',
+  p:['Aquí van los que ya compraron. Es tu activo, y viaja contigo.',
+     'Llena <b>mes de venta</b> y <b>plazo</b>: sin eso no hay alertas.',
+     'Pon <b>VIN</b> y <b>agencia de seguro</b> si los tienes — sirven después.',
+     'No deja meter dos veces a la misma persona: compara teléfono, correo, nombre y dirección.']},
+ {i:'Bell',t:'Alertas — el dinero que ya tienes',
+  p:['El sistema calcula solo a quién toca llamar: fin de lease a 6 meses, 4 meses, 60 días y vencido, y refi al año.',
+     'Cada alerta trae <b>el mensaje ya escrito</b>. Le das un toque y se abre TU WhatsApp con el texto listo.',
+     'Sale de tu número, uno por uno. El sistema no manda nada solo: te dice a quién y qué decir.']},
+ {i:'DollarSign',t:'Desking — armar el número',
+  p:['Se abre en otra pestaña y ve tus clientes al vuelo.',
+     'Lo que armas ahí vuelve al CRM y queda pegado a ese cliente o lead.']},
+ {i:'TrendingUp',t:'Rendimiento — cómo vas',
+  p:['Pon tu <b>meta del mes</b> en unidades y gross.',
+     'Te dice si vas en ritmo contra el día de hoy, no contra el mes entero.',
+     'Abajo tienes tus últimos 12 meses y tu mejor mes.']},
+ {i:'Cloud',t:'Tu información',
+  p:['Todo se guarda en tu cuenta y se sincroniza solo entre tu teléfono y tu computadora.',
+     'Sin internet sigue funcionando: guarda en el aparato y sube cuando vuelve la señal.',
+     'Nadie más ve tu cartera. Ningún otro vendedor puede leer tu libro.',
+     'En <b>Nube</b> puedes exportar un respaldo cuando quieras.']},
+ {i:'Phone',t:'Instalarlo como app',
+  p:['<b>iPhone:</b> abre el link en Safari, toca Compartir y elige <i>Añadir a pantalla de inicio</i>.',
+     '<b>Android:</b> Chrome te ofrece instalarlo solo; si no, menú ⋮ → <i>Instalar aplicación</i>.',
+     'Queda con su icono, a pantalla completa, y abre aunque no tengas señal.']}
+];
+function vistaAyuda(){
+  return `<div class="stack">
+    <div><h2 class="vh">Ayuda</h2>
+      <div class="vsub">Cómo se usa el sistema. Si algo no está claro, mándanos una sugerencia abajo.</div></div>
+    <div class="card" style="background:var(--ps);border-color:rgba(227,28,28,.22)">
+      <div style="display:flex;gap:10px;align-items:center">
+        ${ic('Sparkle',16,C.p)}
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:13px">¿Prefieres verlo paso a paso?</div>
+          <div style="font-size:11.5px;color:var(--tx2);margin-top:2px">Te repito el recorrido de bienvenida.</div>
+        </div>
+        <button class="btn sm" onclick="abrirTour(0)">${ic('ChevronRight')}Ver</button>
+      </div>
+    </div>
+    ${AYUDA.map(s=>`<div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic(s.i,15,C.tx)}${esc(s.t)}</div></div>
+      <div style="padding:13px 16px">
+        <ul style="margin:0;padding-left:17px;font-size:12.5px;color:var(--tx2);line-height:1.75">
+          ${s.p.map(x=>`<li style="margin-bottom:5px">${x}</li>`).join('')}
+        </ul>
+      </div></div>`).join('')}
+    <div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('MessageSquare',15,C.tx)}Sugerencias y problemas</div>
+        <div class="s">Lo que escribas aquí lo leemos y se arregla. Di qué esperabas y qué pasó.</div></div>
+      <div style="padding:15px 16px">
+        <textarea class="inp" id="sugTxt" rows="4" placeholder="Ej: cuando pongo un cliente sin apellido no me deja…"></textarea>
+        <button class="btn full" style="margin-top:10px" onclick="mandarSugerencia()">${ic('Send')}Enviar sugerencia</button>
+        ${(S.cfg.sugerencias||[]).length?`<div class="mlab">Las que ya mandaste</div>
+          ${(S.cfg.sugerencias||[]).slice().reverse().map(s=>`<div class="sumrow" style="align-items:flex-start">
+            <span style="color:var(--tx2);flex:1">${esc(s.t)}</span>
+            <span style="color:var(--tx3);flex-shrink:0;margin-left:10px">${fDate(String(s.f).slice(0,10))}</span></div>`).join('')}`:''}
+      </div></div>
+  </div>`;
+};
+function mandarSugerencia(){
+  const t=$('sugTxt').value.trim();
+  if(!t){alert('Escribe la sugerencia primero.');return;}
+  S.cfg.sugerencias=(S.cfg.sugerencias||[]).concat([{t:t,f:nowISO(),v:'1.2'}]);
+  save();
+  $('sugTxt').value='';
+  toast('Gracias — la leemos');
+  render();
+}
+
+/* ═══ TOUR DE BIENVENIDA ═══ */
+const TOUR=[
+ {i:'Zap',t:'Bienvenido a tu libro',
+  d:'Esto no es un CRM de dealer. Es <b>tu</b> cartera: te sigue de concesionario en concesionario y nadie más la ve.'},
+ {i:'UserPlus',t:'Empieza por un lead',
+  d:'El botón rojo <b>Lead</b>, arriba a la derecha, mete a una persona interesada en 5 segundos. En <b>Hoy</b> aparecen ordenados por urgencia: llamas de arriba abajo.'},
+ {i:'BookOpen',t:'Al vender, pasa al Libro',
+  d:'Cuando entregues, mételo en el <b>Libro</b> con su <b>mes de venta</b> y su <b>plazo</b>. Eso es lo que hace que el sistema te avise después.'},
+ {i:'Bell',t:'El sistema te dice a quién llamar',
+  d:'Fin de lease a 6 meses, 4 meses, 60 días y vencido. Refi al año. Cada alerta trae <b>el mensaje escrito</b>: un toque y se abre tu WhatsApp. Sale de tu número, uno por uno.'},
+ {i:'DollarSign',t:'Y armas el número en Desking',
+  d:'Lease, finance o cash. Lo que armes vuelve pegado a ese cliente.'},
+ {i:'Cloud',t:'Tu información viaja contigo',
+  d:'Se guarda en tu cuenta y se sincroniza sola entre el teléfono y la computadora. Sin señal sigue funcionando. En <b>Ayuda</b> te explico cómo instalarlo como app.'}
+];
+let TPASO=0;
+function abrirTour(i){
+  TPASO=Math.max(0,Math.min(TOUR.length-1,i||0));
+  const s=TOUR[TPASO], ult=TPASO===TOUR.length-1;
+  openModal('',
+   `<div style="text-align:center;padding:6px 0 2px">
+      <div style="width:54px;height:54px;border-radius:15px;background:var(--ps);display:flex;align-items:center;
+        justify-content:center;margin:0 auto 16px">${ic(s.i,25,C.p)}</div>
+      <div style="font-size:19px;font-weight:900;letter-spacing:-.02em;margin-bottom:10px">${esc(s.t)}</div>
+      <p style="font-size:13.5px;color:var(--tx2);line-height:1.7;max-width:340px;margin:0 auto">${s.d}</p>
+      <div style="display:flex;gap:6px;justify-content:center;margin-top:20px">
+        ${TOUR.map((_,k)=>`<span style="width:${k===TPASO?'18px':'6px'};height:6px;border-radius:99px;
+          background:${k===TPASO?C.p:'var(--bd2)'};transition:width .2s"></span>`).join('')}
+      </div>
+    </div>`,
+   `${TPASO>0?`<button class="btn sec" onclick="abrirTour(${TPASO-1})">Atrás</button>`:
+              `<button class="btn sec" onclick="cerrarTour()">Saltar</button>`}
+    <button class="btn" onclick="${ult?'cerrarTour()':'abrirTour('+(TPASO+1)+')'}">
+      ${ult?ic('Check')+'Empezar':ic('ChevronRight')+'Siguiente'}</button>`);
+}
+function cerrarTour(){
+  closeModal();
+  if(!S.cfg.tourVisto){S.cfg.tourVisto=true;saveLocal();}
+}
+
 /* ═══════════ NAVEGACIÓN ═══════════ */
 let TAB='dashboard', LEADID=null, CLIID=null, STEP=1, Q='', QLIB='';
 let FSRC='Todos', FEST='Todos';
@@ -1955,25 +2098,83 @@ function libroList(){
 </script>
 <script>
 /* ═══════════ CLIENTE · alta / edición / ficha ═══════════ */
+/* ═══ Agencias de seguro conocidas (el campo queda editable) ═══ */
+const AGENCIAS=['El Toro Insurance','Univista Insurance','Caley Insurance','Insurance Nation'];
+
+/* ═══ ANTI-DUPLICADOS ═══
+   Dentro del libro de un vendedor no puede haber dos veces la misma
+   persona. Se compara telefono, correo, nombre+apellido y direccion,
+   normalizando: "305-555-1234" y "13055551234" son el mismo numero. */
+const normTel=t=>{let d=String(t||'').replace(/\D/g,'');return d.length===11&&d[0]==='1'?d.slice(1):d;};
+const normTxt=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
+const nombreCompleto=o=>normTxt((o.nom||'')+' '+(o.apellido||''));
+
+function buscarDuplicado(lista,d,exceptoId){
+  const tel=normTel(d.tel), em=normTxt(d.email), dir=normTxt(d.dir), nc=nombreCompleto(d);
+  for(const x of lista){
+    if(exceptoId&&x.id===exceptoId)continue;
+    if(tel&&tel.length>=10&&normTel(x.tel)===tel)return{x,campo:'el mismo teléfono'};
+    if(em&&normTxt(x.email)===em)return{x,campo:'el mismo correo'};
+    if(nc&&nc.length>4&&nombreCompleto(x)===nc)return{x,campo:'el mismo nombre y apellido'};
+    if(dir&&dir.length>8&&normTxt(x.dir)===dir)return{x,campo:'la misma dirección'};
+  }
+  return null;
+}
+function avisoDuplicado(dup,queEs){
+  alert('Ya tienes a esta persona en tu '+queEs+'.\n\n'+
+    (dup.x.nom||'')+' '+(dup.x.apellido||'')+'  ·  '+(dup.x.tel||'')+
+    '\n\nCoincide '+dup.campo+'.\n\n'+
+    'No se crea por duplicado: abre la ficha que ya existe y actualízala.');
+}
+
+/* ═══ CLIENTE · alta / edición (con perfil completo) ═══ */
 function openCliente(id){
   const c=id?S.clientes.find(x=>x.id===id):null;
   const g=k=>c?esc(c[k]==null?'':c[k]):'';
   openModal(c?'Editar cliente':'Nuevo cliente',
-   `<div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
-      <div class="fr" style="grid-column:1/-1"><label class="f">Nombre *</label><input class="inp" id="cNom" value="${g('nom')}" placeholder="Nombre del cliente"></div>
-      <div class="fr" style="grid-column:1/-1"><label class="f">Teléfono *</label><input class="inp" id="cTel" inputmode="tel" value="${g('tel')}" placeholder="3055551234"></div>
+   `<datalist id="dlAgencias">${AGENCIAS.map(a=>`<option value="${esc(a)}">`).join('')}</datalist>
+    <div class="mlab" style="margin-top:0">Quién es</div>
+    <div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
+      <div class="fr"><label class="f">Nombre *</label><input class="inp" id="cNom" value="${g('nom')}" placeholder="Carlos"></div>
+      <div class="fr"><label class="f">Apellidos</label><input class="inp" id="cApe" value="${g('apellido')}" placeholder="Pérez Gómez"></div>
+      <div class="fr"><label class="f">Teléfono *</label><input class="inp" id="cTel" inputmode="tel" value="${g('tel')}" placeholder="3055551234"></div>
+      <div class="fr"><label class="f">Correo</label><input class="inp" id="cEmail" type="email" inputmode="email"
+        autocapitalize="off" spellcheck="false" value="${g('email')}" placeholder="cliente@gmail.com"></div>
+      <div class="fr" style="grid-column:1/-1"><label class="f">Dirección</label>
+        <input class="inp" id="cDir" value="${g('dir')}" placeholder="1234 SW 8th St, Miami FL 33135"></div>
+    </div>
+
+    <div class="mlab">Su vehículo</div>
+    <div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
       <div class="fr"><label class="f">Marca</label><input class="inp" id="cMarca" value="${g('marca')}" placeholder="Toyota"></div>
       <div class="fr"><label class="f">Modelo</label><input class="inp" id="cMod" value="${g('mod')}" placeholder="Corolla"></div>
       <div class="fr"><label class="f">Año</label><input class="inp" id="cAno" inputmode="numeric" value="${g('ano')}" placeholder="2024"></div>
+      <div class="fr"><label class="f">Stock #</label><input class="inp" id="cStock" value="${g('stock')}"
+        autocapitalize="characters" placeholder="T24519"></div>
+      <div class="fr" style="grid-column:1/-1"><label class="f">VIN <span class="h">17 caracteres · para el seguro</span></label>
+        <input class="inp mono" id="cVin" value="${g('vin')}" maxlength="17" autocapitalize="characters"
+          spellcheck="false" placeholder="1HGCM82633A004352" oninput="this.value=this.value.toUpperCase()"></div>
+    </div>
+
+    <div class="mlab">Seguro</div>
+    <div class="fr"><label class="f">Agencia <span class="h">quién se lo vendió, no la aseguradora</span></label>
+      <input class="inp" id="cAgencia" list="dlAgencias" value="${g('agencia')}" placeholder="El Toro, Univista, Caley…"></div>
+
+    <div class="mlab">El negocio</div>
+    <div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
       <div class="fr"><label class="f">Tipo</label><select class="inp" id="cTipo">
         ${['lease','finance','cash'].map(t=>`<option value="${t}" ${c&&c.tipo===t?'selected':''}>${tipoLbl(t)}</option>`).join('')}
       </select></div>
       <div class="fr"><label class="f">Mes de venta</label><input class="inp" id="cFecha" type="month" value="${g('fecha')}"></div>
-      <div class="fr"><label class="f">Plazo <span class="h">meses</span></label><input class="inp" id="cPlazo" inputmode="numeric" value="${c?esc(c.plazo||''):'36'}" placeholder="36"></div>
-      <div class="fr" style="grid-column:1/-1"><label class="f">Notas</label><input class="inp" id="cNotas" value="${g('notas')}" placeholder="Referido de…, cumpleaños…"></div>
-      <p style="grid-column:1/-1;font-size:11px;color:var(--tx3);line-height:1.55;margin-top:2px">
-        El <b style="color:var(--tx2)">mes de venta</b> y el <b style="color:var(--tx2)">plazo</b> son los que generan las alertas de fin de lease, refi y aniversario.</p>
+      <div class="fr"><label class="f">Plazo <span class="h">meses</span></label>
+        <input class="inp" id="cPlazo" inputmode="numeric" value="${c?esc(c.plazo||''):'36'}" placeholder="36"></div>
+      <div class="fr"><label class="f">Cumpleaños</label><input class="inp" id="cCumple" type="date" value="${g('cumple')}"></div>
+      <div class="fr" style="grid-column:1/-1"><label class="f">Notas</label>
+        <input class="inp" id="cNotas" value="${g('notas')}" placeholder="Referido de…, prefiere que le llamen por la tarde…"></div>
     </div>
+    <p style="font-size:11px;color:var(--tx3);line-height:1.55;margin-top:10px">
+      El <b style="color:var(--tx2)">mes de venta</b> y el <b style="color:var(--tx2)">plazo</b> son los que generan
+      las alertas de fin de lease, refi y aniversario.</p>
     ${c?`<button class="btn dan full" style="margin-top:16px" onclick="delCliente('${c.id}')">${ic('Trash2')}Eliminar cliente</button>`:''}`,
    `<button class="btn sec" onclick="closeModal()">Cancelar</button>
     <button class="btn" onclick="saveCliente()">${ic('Save')}Guardar</button>`,
@@ -1982,13 +2183,27 @@ function openCliente(id){
 function saveCliente(){
   const nom=$('cNom').value.trim(), tel=$('cTel').value.trim();
   if(!nom||!tel){alert('Nombre y teléfono son obligatorios.');return;}
-  const data={nom,tel,marca:$('cMarca').value.trim(),mod:$('cMod').value.trim(),ano:$('cAno').value.trim(),
-    tipo:$('cTipo').value,fecha:$('cFecha').value,plazo:num($('cPlazo').value),notas:$('cNotas').value.trim()};
+  const vin=$('cVin').value.trim().toUpperCase();
+  if(vin&&vin.length!==17){
+    if(!confirm('El VIN tiene '+vin.length+' caracteres y deberían ser 17.\n\n¿Guardar así de todos modos?'))return;
+  }
+  const data={nom, apellido:$('cApe').value.trim(), tel, email:$('cEmail').value.trim().toLowerCase(),
+    dir:$('cDir').value.trim(), marca:$('cMarca').value.trim(), mod:$('cMod').value.trim(),
+    ano:$('cAno').value.trim(), stock:$('cStock').value.trim().toUpperCase(), vin:vin,
+    agencia:$('cAgencia').value.trim(), tipo:$('cTipo').value, fecha:$('cFecha').value,
+    plazo:num($('cPlazo').value), cumple:$('cCumple').value, notas:$('cNotas').value.trim()};
+
+  const dup=buscarDuplicado(S.clientes,data,MODAL_CTX.id);
+  if(dup){avisoDuplicado(dup,'libro');return;}
+
   if(MODAL_CTX.id){
     const i=S.clientes.findIndex(x=>x.id===MODAL_CTX.id);
     if(i>=0)S.clientes[i]=Object.assign({},S.clientes[i],data);
   }else{
+    /* ¿ya está como lead? no bloqueamos, pero se avisa: es la misma persona */
+    const enLeads=buscarDuplicado(S.leads,data,null);
     S.clientes.unshift(Object.assign({id:uid('c'),createdAt:nowISO()},data));
+    if(enLeads)setTimeout(()=>toast('Ojo: esta persona también está en tus leads'),700);
   }
   save();closeModal();toast('Cliente guardado');render();
 }
@@ -2463,6 +2678,7 @@ function soonView(id){
       </div></div>
   </div>`;
 }
+VIEWS.ayuda=vistaAyuda;
 VIEWS.campaigns=()=>soonView('campaigns');
 /* ═══ VISTA · RENDIMIENTO ═══
    Tu mes contra tu meta, y tu historial real. Todo sale de lo que
@@ -2718,6 +2934,17 @@ VIEWS.admin=function(){
       ${kpi('BookOpen','Clientes',fmN(totCli),'en todos los libros',C.p)}
     </div>
     ${cuerpo}
+    <div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('UserPlus',15,C.tx)}Invitar a un vendedor</div>
+        <div class="s">Le llega el link por tu WhatsApp y crea su cuenta solo, con sus 30 días gratis.</div></div>
+      <div style="padding:15px 16px">
+        <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fr"><label class="f">Nombre</label><input class="inp" id="invNom" placeholder="Carlos"></div>
+          <div class="fr"><label class="f">Su WhatsApp</label><input class="inp" id="invWa" inputmode="tel" placeholder="3055551234"></div>
+        </div>
+        <button class="btn full" style="margin-top:12px" onclick="invitarVendedor()">${ic('Wa')}Mandarle el link por WhatsApp</button>
+      </div></div>
+
     <div class="card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)">
       <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.info)}
         <p style="font-size:12px;color:var(--tx2);line-height:1.6">
@@ -2967,7 +3194,7 @@ VIEWS.settings=function(){
     </div>
     <p style="font-size:11px;color:var(--tx3);text-align:center;line-height:1.6;padding:4px 0 10px">
       ${SYNC.modo==='supabase'?'Tus datos viajan cifrados a tu cuenta. Ningún otro vendedor los ve.'
-        :'Los datos viven solo en este navegador. Nadie más los ve.'}<br>AutoSolution Miami · CRM v1.1</p>
+        :'Los datos viven solo en este navegador. Nadie más los ve.'}<br>AutoSolution Miami · CRM v1.2</p>
   </div>`;
 };
 function saveCfg(){
