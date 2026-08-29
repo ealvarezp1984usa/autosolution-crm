@@ -1050,6 +1050,7 @@ document.addEventListener('visibilitychange',()=>{
     /* Al volver de la pestaña de Desking, recogemos lo que haya guardado */
     revisarDesk();
     if(Date.now()-ultimoPull>20000){ ultimoPull=Date.now(); sincronizar(); }
+    revisarTasas();
   }
 });
 window.addEventListener('online',()=>{if(SYNC.modo!=='local')sincronizar();});
@@ -1260,7 +1261,7 @@ async function entrarConSesion(){
   ocultarAuth();
   render();pintarPill();
   try{await sincronizar(true);}catch(e){}
-  try{await bajarTasas();}catch(e){}
+  try{await revisarTasas(true);}catch(e){}
   aplicarPerfil();
   render();
   if(!S.cfg.tourVisto)setTimeout(()=>abrirTour(0),900);
@@ -1838,6 +1839,19 @@ function cerrarTour(){
 const DIAS_TASAS=15;
 let TASAS={data:[],fecha:'',actualizado:null,cargado:false,err:''};
 
+/* Chequeo silencioso: cada 2 días y cada vez que vuelve del segundo plano,
+   sin decir nada ni mostrar nada. Si cambió algo, se refresca solo. */
+const TASAS_CADA=2*24*60*60*1000;
+function tocaRevisarTasas(){
+  const u=num(localStorage.getItem('asm_tasas_chk')||0);
+  return !u || (Date.now()-u)>TASAS_CADA;
+}
+async function revisarTasas(forzar){
+  if(!SES||(!forzar&&!tocaRevisarTasas()))return false;
+  try{localStorage.setItem('asm_tasas_chk',String(Date.now()));}catch(e){}
+  return await bajarTasas();
+}
+
 async function bajarTasas(){
   try{
     const r=await sbRest('/tasas?select=data,fecha,actualizado&id=eq.1');
@@ -1845,9 +1859,22 @@ async function bajarTasas(){
     if(!t)return false;
     TASAS={data:t.data||[],fecha:t.fecha||'',actualizado:t.actualizado,cargado:true,err:''};
     if(!TASAS.data.length)return false;
-    /* las metemos en el Desking sin tocar sus cotizaciones */
+    /* MEZCLA, nunca reemplazo. Solo se actualizan las tasas de los bancos
+       que ya tiene y se agregan los que falten. Un banco que el vendedor
+       tenga en su lista NUNCA se le quita desde el servidor. */
     const d=leerDesk()||{};
-    d.bancos=JSON.parse(JSON.stringify(TASAS.data));
+    const local=Array.isArray(d.bancos)?d.bancos:[];
+    const clave=b=>String(b&&b.n||'').trim().toLowerCase();
+    const porNombre={};
+    local.forEach(b=>{porNombre[clave(b)]=b;});
+    TASAS.data.forEach(srv=>{
+      const k=clave(srv); if(!k)return;
+      const mio=porNombre[k];
+      if(mio){ mio.an=srv.an; mio.au=srv.au;
+        if(srv.nota)mio.nota=srv.nota; if(srv.w)mio.w=srv.w; if(srv.g)mio.g=srv.g; }
+      else { local.push(JSON.parse(JSON.stringify(srv))); porNombre[k]=srv; }
+    });
+    d.bancos=local;
     if(TASAS.fecha)d.bancosFecha=TASAS.fecha;
     escribirDesk(d);
     /* no es un cambio del vendedor: que no dispare una subida */
