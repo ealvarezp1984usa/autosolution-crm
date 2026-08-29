@@ -392,7 +392,7 @@ const NAV=[
   {id:'reports',icon:'BarChart2',label:'Reportes',sec:'Análisis'},
   {id:'campaigns',icon:'Megaphone',label:'Campañas',soon:1},
   {id:'performance',icon:'TrendingUp',label:'Rendimiento'},
-  {id:'connections',icon:'Share2',label:'Equipo',soon:1,sec:'Equipo'},
+  {id:'equipo',icon:'Share2',label:'Equipo',sec:'Equipo'},
   {id:'nextup',icon:'RotateCcw',label:'Next-Up',soon:1},
   {id:'admin',icon:'Shield',label:'Admin',soon:1},
   {id:'tasas',icon:'Landmark',label:'Tasas',soloAdmin:1},
@@ -2016,6 +2016,283 @@ async function publicarTasas(){
   }
 }
 
+/* ═══ EQUIPO ═══
+   Asociarse es opcional. Uno queda de jefe y ve el desempeño de los suyos:
+   unidades, leads, cierre y tareas. El dinero de cada vendedor NO sale del
+   servidor — la función equipo_resumen() ni siquiera lo devuelve.
+   Cada vendedor sigue siendo dueño de su libro y se lo lleva si se va. */
+const PODIO=['#f5c518','#c0c7d0','#cd7f32'];
+let EQ={cargado:false,equipo:null,miRol:null,miembros:[],resumen:[],invitaciones:[],err:''};
+
+async function cargarEquipo(forzar){
+  if(EQ.cargado&&!forzar)return;
+  EQ.err='';
+  try{
+    const correo=(SES&&SES.user&&SES.user.email)||'';
+    const [mios,invs]=await Promise.all([
+      sbRest('/team_members?select=id,team_id,rol,estado,teams(id,nombre,manager_id)&user_id=eq.'+encodeURIComponent(miId())+'&estado=eq.activo'),
+      correo?sbRest('/team_members?select=id,team_id,correo,rol,estado,teams(id,nombre,manager_id)&estado=eq.invitado&correo=ilike.'+encodeURIComponent(correo)):Promise.resolve([])
+    ]);
+    EQ.invitaciones=invs||[];
+    const mio=(mios&&mios[0])||null;
+    if(!mio){EQ.equipo=null;EQ.miRol=null;EQ.miembros=[];EQ.resumen=[];EQ.cargado=true;return;}
+    EQ.equipo=mio.teams||{id:mio.team_id,nombre:'Mi equipo'};
+    EQ.miRol=mio.rol;
+    const [ms,rs]=await Promise.all([
+      sbRest('/team_members?select=id,user_id,correo,rol,estado&team_id=eq.'+encodeURIComponent(mio.team_id)),
+      sbRest('/rpc/equipo_resumen',{method:'POST',body:{}})
+    ]);
+    EQ.miembros=ms||[]; EQ.resumen=rs||[];
+  }catch(e){EQ.err=e&&e.message?e.message:String(e);}
+  EQ.cargado=true;
+}
+
+function vistaEquipo(){
+  if(!EQ.cargado){setTimeout(async()=>{await cargarEquipo();if(TAB==='equipo')render();},0);
+    return `<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:12.5px">
+      Cargando tu equipo…<span class="spin"></span></div>`;}
+
+  if(EQ.err) return `<div class="stack">
+    <div><h2 class="vh">Equipo</h2></div>
+    <div class="card" style="border-color:${C.dan}38;background:${C.dan}0d">
+      <div style="display:flex;gap:9px"><div>${ic('AlertCircle',15,C.dan)}</div>
+      <div style="font-size:12px;color:var(--tx2);line-height:1.6">${esc(EQ.err)}</div></div>
+      <button class="btn sec sm full" style="margin-top:12px" onclick="EQ.cargado=false;render()">${ic('RefreshCw')}Reintentar</button>
+    </div></div>`;
+
+  /* ── invitación pendiente ── */
+  const inv=EQ.invitaciones[0];
+  if(!EQ.equipo&&inv){
+    const t=inv.teams||{};
+    return `<div class="stack">
+      <div><h2 class="vh">Te invitaron a un equipo</h2></div>
+      <div class="card" style="border-color:${C.p}38;background:${C.ps}">
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px">
+          <div style="width:40px;height:40px;border-radius:11px;background:${C.ps};display:flex;
+            align-items:center;justify-content:center">${ic('Users',20,C.p)}</div>
+          <div><div style="font-weight:800;font-size:15px">${esc(t.nombre||'Un equipo')}</div>
+            <div style="font-size:11.5px;color:var(--tx3)">quiere que trabajes con ellos</div></div>
+        </div>
+        <p style="font-size:12.5px;color:var(--tx2);line-height:1.7">
+          Si aceptas, el jefe del equipo verá <b>cuántas unidades vendes, tus leads, tu porcentaje de
+          cierre y tus tareas pendientes</b>. <b style="color:var(--tx)">No verá tu dinero</b> ni podrá
+          tocar tus clientes. Tu libro sigue siendo tuyo y te lo llevas completo si te sales.</p>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn sec" style="flex:1" onclick="rechazarInvitacion('${esc(inv.id)}')">Ahora no</button>
+          <button class="btn" style="flex:1" onclick="aceptarInvitacion('${esc(inv.id)}')">${ic('Check')}Aceptar</button>
+        </div>
+      </div></div>`;
+  }
+
+  /* ── sin equipo ── */
+  if(!EQ.equipo){
+    return `<div class="stack">
+      <div><h2 class="vh">Equipo</h2>
+        <div class="vsub">Opcional. Tu libro es tuyo con equipo o sin él.</div></div>
+      <div class="card" style="text-align:center;padding:28px 22px">
+        ${ic('Users',26,C.tx3)}
+        <div style="font-weight:800;font-size:15px;margin-top:12px">Todavía no estás en un equipo</div>
+        <p style="font-size:12.5px;color:var(--tx2);line-height:1.7;margin:10px auto 0;max-width:420px">
+          Si trabajas con otros vendedores, pueden asociarse: uno queda de jefe y ve el desempeño
+          del grupo — unidades, leads, cierre y tareas. <b style="color:var(--tx)">Nadie ve el dinero
+          de nadie</b> y nadie toca los clientes de otro.</p>
+        <button class="btn lg" style="margin-top:18px" onclick="modalCrearEquipo()">${ic('Plus')}Crear mi equipo</button>
+        <p style="font-size:11px;color:var(--tx3);margin-top:12px">
+          ¿Te van a invitar? Pídele al jefe que use el correo con el que entras aquí.</p>
+      </div></div>`;
+  }
+
+  /* ── el panel ── */
+  const soyJefe=EQ.miRol==='manager';
+  const filas=(EQ.resumen||[]).slice().sort((a,b)=>num(b.unidades_mes)-num(a.unidades_mes));
+  const tot=filas.reduce((a,f)=>({u:a.u+num(f.unidades_mes),c:a.c+num(f.clientes),
+    l:a.l+num(f.leads),v:a.v+num(f.leads_vendidos),t:a.t+num(f.tareas_pendientes)}),
+    {u:0,c:0,l:0,v:0,t:0});
+  const cierre=tot.l?Math.round(tot.v/tot.l*100):0;
+  const pend=EQ.miembros.filter(m=>m.estado==='invitado');
+
+  return `<div class="stack">
+    <div class="rowb"><div><h2 class="vh">${esc(EQ.equipo.nombre||'Mi equipo')}</h2>
+      <div class="vsub">${soyJefe?'Eres el jefe de equipo':'Eres vendedor del equipo'} · ${filas.length} ${filas.length===1?'persona':'personas'}</div></div>
+      <button class="btn ghost sm" onclick="EQ.cargado=false;render()">${ic('RefreshCw')}Actualizar</button></div>
+
+    <div class="grid2">
+      ${kpi('Trophy','Del equipo este mes',fmN(tot.u),'unidades entregadas',C.p)}
+      ${kpi('Users','Leads en juego',fmN(tot.l),fmN(tot.v)+' cerrados',C.info)}
+      ${kpi('TrendingUp','Cierre del equipo',cierre+'%','sobre los leads',C.ok)}
+      ${kpi('CheckSquare','Tareas pendientes',fmN(tot.t),tot.t?'del equipo entero':'todo al día',tot.t?C.warn:C.tx3)}
+    </div>
+
+    <div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('BarChart2',15,C.tx)}Tabla del mes</div>
+        <div class="s">Ordenados por unidades entregadas. Los tres primeros van marcados.</div></div>
+      <div>${filas.length?filas.map((f,i)=>{
+        const yo=f.user_id===miId();
+        const col=i<3?PODIO[i]:'var(--bd2)';
+        return `<div class="admrow" style="align-items:center;${yo?'background:'+C.ps:''}">
+          <div style="width:26px;text-align:center;flex-shrink:0">
+            ${i<3?`<span style="font-size:15px;font-weight:900;color:${col}">${i+1}</span>`
+                 :`<span style="font-size:12px;color:var(--tx3)">${i+1}</span>`}</div>
+          <div class="admav" style="background:${i<3?col+'22':'var(--bg3)'};color:${i<3?col:'var(--tx2)'}">${esc(ini(f.nombre)||'?')}</div>
+          <div style="min-width:0;flex:1">
+            <div class="admnom">${esc(f.nombre||'(sin nombre)')}
+              ${f.rol==='manager'?`<span class="bdg2" style="color:${C.p};background:${C.ps};border-color:${C.p}40">JEFE</span>`:''}
+              ${yo?`<span class="bdg2" style="color:${C.info};background:${C.info}18;border-color:${C.info}30">TÚ</span>`:''}</div>
+            <div class="admsub"><b style="color:var(--tx2)">${fmN(f.leads)}</b> leads ·
+              <b style="color:var(--tx2)">${num(f.cierre_pct)}%</b> de cierre ·
+              <b style="color:${num(f.tareas_pendientes)?C.warn:'var(--tx3)'}">${fmN(f.tareas_pendientes)}</b> tareas</div>
+            <div class="admsub">${f.ultima_actividad?'Activo '+fDateTime(f.ultima_actividad):'sin actividad'}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div class="mono" style="font-size:20px;font-weight:800;color:${i<3?col:'var(--tx)'};line-height:1">${fmN(f.unidades_mes)}</div>
+            <div class="admsub">este mes</div>
+            ${soyJefe&&!yo?`<button class="btn ghost xs" style="margin-top:5px"
+              onclick="sacarDelEquipo('${esc(f.user_id)}','${esc(f.nombre||'')}')">Sacar</button>`:''}
+          </div>
+        </div>`;}).join('')
+        :empty('Users','Todavía no hay nadie','Invita a tu primer vendedor abajo.')}</div>
+    </div>
+
+    ${soyJefe?`
+    ${pend.length?`<div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('Clock',15,C.warn)}Invitaciones sin aceptar (${pend.length})</div>
+        <div class="s">Todavía no han entrado. Aparecen aquí hasta que acepten.</div></div>
+      <div>${pend.map(m=>`<div class="admrow" style="align-items:center">
+        <div style="min-width:0;flex:1"><div class="admnom">${esc(m.correo||'(sin correo)')}</div>
+          <div class="admsub">esperando que acepte</div></div>
+        <button class="btn ghost xs" onclick="cancelarInvitacion('${esc(m.id)}')">Cancelar</button>
+      </div>`).join('')}</div></div>`:''}
+
+    <div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('UserPlus',15,C.tx)}Sumar a un vendedor</div>
+        <div class="s">Tiene que ser el mismo correo con el que entra al CRM.</div></div>
+      <div style="padding:15px 16px">
+        <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fr" style="grid-column:1/-1"><label class="f">Su correo</label>
+            <input class="inp" id="eqMail" type="email" inputmode="email" autocapitalize="off"
+              spellcheck="false" placeholder="vendedor@gmail.com"></div>
+          <div class="fr"><label class="f">Su nombre <span class="h">para el mensaje</span></label>
+            <input class="inp" id="eqNom" placeholder="Diana"></div>
+          <div class="fr"><label class="f">Su WhatsApp <span class="h">opcional</span></label>
+            <input class="inp" id="eqWa" inputmode="tel" placeholder="3055551234"></div>
+        </div>
+        <button class="btn full" style="margin-top:12px" onclick="invitarAlEquipo()">${ic('Send')}Invitar</button>
+        <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+          Si pones su WhatsApp, se abre el tuyo con el mensaje listo. Si no, la invitación
+          le sale sola al entrar con ese correo.</p>
+      </div>
+    </div>`:`
+    <div class="card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)">
+      <div style="display:flex;gap:9px;align-items:flex-start">${ic('Lock',15,C.info)}
+        <p style="font-size:12px;color:var(--tx2);line-height:1.6">
+          El jefe ve tus unidades, leads, cierre y tareas — <b>no ve tu dinero</b> ni puede
+          entrar a tus clientes. Tu libro es tuyo y te lo llevas completo si te sales.</p></div></div>`}
+
+    <div class="card">
+      <button class="btn dan sm full" onclick="salirDelEquipo()">
+        ${ic('LogOut')}${soyJefe?'Disolver el equipo':'Salirme del equipo'}</button>
+      <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:9px">
+        ${soyJefe?'Se disuelve para todos. Cada uno se queda con su libro completo.'
+                 :'Te llevas tu libro entero. El jefe deja de ver tus números.'}</p>
+    </div>
+  </div>`;
+};
+
+function modalCrearEquipo(){
+  openModal('Crear tu equipo',
+   `<div class="fr"><label class="f">Nombre del equipo</label>
+      <input class="inp" id="eqNombre" placeholder="Equipo Carlos" value="${esc((SES&&SES.perfil&&SES.perfil.nombre)?'Equipo '+SES.perfil.nombre.split(' ')[0]:'Mi equipo')}"></div>
+    <p style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:12px">
+      Quedas como <b style="color:var(--tx)">jefe de equipo</b>. Podrás ver las unidades, leads,
+      cierre y tareas de quien acepte tu invitación — nunca su dinero ni sus clientes.</p>`,
+   `<button class="btn sec" onclick="closeModal()">Cancelar</button>
+    <button class="btn" onclick="crearEquipo()">${ic('Plus')}Crear</button>`);
+}
+async function crearEquipo(){
+  const nombre=$('eqNombre').value.trim()||'Mi equipo';
+  try{
+    const t=await sbRest('/teams',{method:'POST',prefer:'return=representation',
+      body:{nombre:nombre,manager_id:miId()}});
+    const eq=t&&t[0];
+    if(!eq)throw new Error('El servidor no creó el equipo.');
+    await sbRest('/team_members',{method:'POST',prefer:'return=minimal',
+      body:{team_id:eq.id,user_id:miId(),correo:(SES.user&&SES.user.email)||'',
+            rol:'manager',estado:'activo',unido_en:nowISO()}});
+    closeModal();EQ.cargado=false;toast('Equipo creado');render();
+  }catch(e){alert('No se pudo crear:\n\n'+(e&&e.message?e.message:e));}
+}
+async function invitarAlEquipo(){
+  const correo=$('eqMail').value.trim().toLowerCase();
+  const nom=$('eqNom').value.trim(), wa=$('eqWa').value.trim();
+  if(!correo||correo.indexOf('@')<1){alert('Pon el correo con el que entra al CRM.');return;}
+  try{
+    await sbRest('/team_members',{method:'POST',prefer:'return=minimal',
+      body:{team_id:EQ.equipo.id,correo:correo,rol:'vendedor',estado:'invitado'}});
+    EQ.cargado=false;
+    if(wa&&tel10(wa).length>=11){
+      const jefe=(SES&&SES.perfil&&SES.perfil.nombre)?SES.perfil.nombre.split(' ')[0]:'';
+      openMsg('Invitar a '+(nom||correo), wa,
+        'Hola '+(nom||'')+' 👋'+(jefe?' Soy '+jefe+'.':'')+'\n\n'+
+        'Te invité a mi equipo en el CRM. Entra con '+correo+' y acepta la invitación en la sección Equipo:\n'+
+        LINK_APP+'\n\n'+
+        'Tu libro sigue siendo tuyo — yo solo veo unidades, leads y tareas, no tu dinero.');
+    }else{
+      toast('Invitación enviada');
+    }
+    render();
+  }catch(e){
+    const m=(e&&e.message)||'';
+    alert(/duplicate|unique/i.test(m)
+      ? 'Ya invitaste a ese correo a este equipo.'
+      : 'No se pudo invitar:\n\n'+m);
+  }
+}
+async function aceptarInvitacion(id){
+  try{
+    const r=await sbRest('/team_members?id=eq.'+encodeURIComponent(id),
+      {method:'PATCH',prefer:'return=representation',
+       body:{user_id:miId(),estado:'activo',unido_en:nowISO()}});
+    if(!r||!r.length)throw new Error('El servidor no aceptó la invitación.');
+    EQ.cargado=false;toast('Bienvenido al equipo');render();
+  }catch(e){
+    const m=(e&&e.message)||'';
+    alert(/duplicate|unique|tm_un_equipo/i.test(m)
+      ? 'Ya estás en otro equipo.\n\nSálete de ese primero y vuelve a aceptar.'
+      : 'No se pudo aceptar:\n\n'+m);
+  }
+}
+async function rechazarInvitacion(id){
+  if(!confirm('¿Rechazar la invitación?'))return;
+  try{ await sbRest('/team_members?id=eq.'+encodeURIComponent(id),{method:'DELETE',prefer:'return=minimal'});}
+  catch(e){}
+  EQ.cargado=false;toast('Invitación rechazada');render();
+}
+async function cancelarInvitacion(id){
+  try{ await sbRest('/team_members?id=eq.'+encodeURIComponent(id),{method:'DELETE',prefer:'return=minimal'});}
+  catch(e){alert('No se pudo cancelar: '+(e&&e.message?e.message:e));return;}
+  EQ.cargado=false;toast('Invitación cancelada');render();
+}
+async function sacarDelEquipo(uid,nombre){
+  if(!confirm('¿Sacar a '+(nombre||'este vendedor')+' del equipo?\n\nSe lleva su libro completo y dejas de ver sus números. No se borra nada suyo.'))return;
+  try{
+    await sbRest('/team_members?team_id=eq.'+encodeURIComponent(EQ.equipo.id)+'&user_id=eq.'+encodeURIComponent(uid),
+      {method:'DELETE',prefer:'return=minimal'});
+    EQ.cargado=false;toast('Fuera del equipo');render();
+  }catch(e){alert('No se pudo: '+(e&&e.message?e.message:e));}
+}
+async function salirDelEquipo(){
+  const soyJefe=EQ.miRol==='manager';
+  if(!confirm(soyJefe
+    ? '¿Disolver el equipo?\n\nSe deshace para todos. Cada quien se queda con su libro completo — no se borra nada de nadie.'
+    : '¿Salirte del equipo?\n\nTe llevas tu libro entero y el jefe deja de ver tus números.'))return;
+  try{
+    if(soyJefe){ await sbRest('/teams?id=eq.'+encodeURIComponent(EQ.equipo.id),{method:'DELETE',prefer:'return=minimal'}); }
+    else { await sbRest('/team_members?team_id=eq.'+encodeURIComponent(EQ.equipo.id)+'&user_id=eq.'+encodeURIComponent(miId()),
+      {method:'DELETE',prefer:'return=minimal'}); }
+    EQ.cargado=false;toast(soyJefe?'Equipo disuelto':'Saliste del equipo');render();
+  }catch(e){alert('No se pudo: '+(e&&e.message?e.message:e));}
+}
+
 /* ═══════════ NAVEGACIÓN ═══════════ */
 let TAB='dashboard', LEADID=null, CLIID=null, STEP=1, Q='', QLIB='';
 let FSRC='Todos', FEST='Todos';
@@ -2870,6 +3147,7 @@ function soonView(id){
 }
 VIEWS.ayuda=vistaAyuda;
 VIEWS.tasas=vistaTasas;
+VIEWS.equipo=vistaEquipo;
 VIEWS.campaigns=()=>soonView('campaigns');
 /* ═══ VISTA · RENDIMIENTO ═══
    Tu mes contra tu meta, y tu historial real. Todo sale de lo que
@@ -3046,7 +3324,6 @@ VIEWS.performance=function(){
     </div>
   </div>`;
 };
-VIEWS.connections=()=>soonView('connections');
 VIEWS.nextup=()=>soonView('nextup');
 /* ═══ VISTA · ADMIN (solo rol=admin) — vista admin_resumen ═══ */
 VIEWS.admin=function(){
