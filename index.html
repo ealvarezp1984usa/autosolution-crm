@@ -1580,6 +1580,110 @@ async function cargarAdmin(forzar){
 }
 </script>
 <script>
+/* ═══ ADMIN · destrabar a un vendedor ═══
+   Solo rol=admin. El RLS del servidor es quien manda: si un vendedor
+   intentara esto, el PATCH se rechaza (probado). */
+let GEST=null;
+function gestionarVendedor(uid){
+  const f=(ADM.filas||[]).find(x=>x.user_id===uid); if(!f)return;
+  GEST={f:f, diag:null};
+  pintarGestion();
+  cargarDiag(uid);
+}
+async function cargarDiag(uid){
+  try{
+    const id=encodeURIComponent(uid);
+    const [b,d]=await Promise.all([
+      sbRest('/books?select=rev,device,updated_at&user_id=eq.'+id),
+      sbRest('/desks?select=rev,updated_at&user_id=eq.'+id)
+    ]);
+    GEST.diag={b:(b&&b[0])||null,d:(d&&d[0])||null};
+  }catch(e){GEST.diag={err:e&&e.message?e.message:String(e)};}
+  if(GEST)pintarGestion();
+}
+function pintarGestion(){
+  const f=GEST.f, dg=GEST.diag;
+  const hasta=f.gratis_hasta?String(f.gratis_hasta).slice(0,10):'';
+  const diag=dg===null
+    ? `<div style="font-size:11.5px;color:var(--tx3)">Leyendo su sincronización…<span class="spin"></span></div>`
+    : dg.err
+      ? `<div style="font-size:11.5px;color:${C.dan}">${esc(dg.err)}</div>`
+      : `<div class="sumrow"><span style="color:var(--tx3)">Versión del libro (rev)</span>
+           <span class="mono" style="color:var(--tx2)">${dg.b?dg.b.rev:'—'}</span></div>
+         <div class="sumrow"><span style="color:var(--tx3)">Último dispositivo</span>
+           <span style="color:var(--tx2)">${dg.b&&dg.b.device?esc(dg.b.device):'—'}</span></div>
+         <div class="sumrow"><span style="color:var(--tx3)">Último guardado</span>
+           <span style="color:var(--tx2)">${dg.b&&dg.b.updated_at?fDateTime(dg.b.updated_at):'nunca'}</span></div>
+         <div class="sumrow"><span style="color:var(--tx3)">Versión del desking</span>
+           <span class="mono" style="color:var(--tx2)">${dg.d?dg.d.rev:'—'}</span></div>`;
+
+  openModal('Gestionar a '+(f.nombre||'vendedor'),
+   `<div class="card" style="background:var(--bg3);margin-bottom:14px">
+      <div class="sumrow"><span style="color:var(--tx3)">WhatsApp</span>
+        <span class="mono" style="color:var(--tx2)">${esc(f.whatsapp||'—')}</span></div>
+      <div class="sumrow"><span style="color:var(--tx3)">Alta</span>
+        <span style="color:var(--tx2)">${f.registrado?fDate(String(f.registrado).slice(0,10)):'—'}</span></div>
+      <div class="sumrow"><span style="color:var(--tx3)">Su libro</span>
+        <span style="color:var(--tx2)">${fmN(f.clientes)} clientes · ${fmN(f.leads)} leads · ${fmN(f.negocios_armados)} negocios</span></div>
+    </div>
+
+    <div class="mlab">Estado de su sincronización</div>
+    <div class="card" style="background:var(--bg3);margin-bottom:14px">${diag}</div>
+
+    <div class="mlab">Plan</div>
+    <select class="inp" id="gPlan">
+      <option value="gratis"${f.plan==='gratis'?' selected':''}>Gratis / prueba</option>
+      <option value="activo"${f.plan==='activo'?' selected':''}>Activo (pagando)</option>
+      <option value="pausado"${f.plan==='pausado'?' selected':''}>Pausado</option>
+    </select>
+
+    <div class="mlab">Prueba gratis hasta</div>
+    <input class="inp" id="gHasta" type="date" value="${esc(hasta)}">
+    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+      <button class="btn sec xs" onclick="sumarDias(7)">+7 días</button>
+      <button class="btn sec xs" onclick="sumarDias(15)">+15 días</button>
+      <button class="btn sec xs" onclick="sumarDias(30)">+30 días</button>
+      <button class="btn sec xs" onclick="sumarDias(0)">hoy</button>
+    </div>
+
+    <div class="mlab">Rol</div>
+    <select class="inp" id="gRol">
+      <option value="vendedor"${f.rol==='vendedor'?' selected':''}>Vendedor</option>
+      <option value="admin"${f.rol==='admin'?' selected':''}>Administrador</option>
+    </select>
+
+    <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:12px">
+      Pausar no borra nada: el vendedor sigue viendo su libro pero con el aviso de cuenta pausada.
+      Nunca se toca su información.</p>`,
+   `<button class="btn sec" onclick="closeModal();GEST=null">Cancelar</button>
+    <button class="btn" onclick="guardarVendedor()">${ic('Save')}Guardar</button>`);
+}
+function sumarDias(n){
+  const i=$('gHasta'); if(!i)return;
+  const base=n===0?new Date():(i.value?new Date(i.value+'T00:00:00'):new Date());
+  if(n>0)base.setDate(base.getDate()+n);
+  i.value=base.toISOString().slice(0,10);
+}
+async function guardarVendedor(){
+  if(!GEST)return;
+  const uid=GEST.f.user_id;
+  const cambio={plan:$('gPlan').value, gratis_hasta:$('gHasta').value||null, rol:$('gRol').value};
+  if(cambio.rol==='vendedor'&&GEST.f.rol==='admin'&&uid===miId()){
+    alert('No puedes quitarte a ti mismo el rol de administrador: te quedarías sin consola.');return;
+  }
+  try{
+    await sbRest('/profiles?user_id=eq.'+encodeURIComponent(uid),
+      {method:'PATCH',prefer:'return=minimal',body:cambio});
+    closeModal();GEST=null;
+    toast('Cuenta actualizada');
+    await cargarAdmin(true);
+    if(uid===miId()){try{await cargarPerfil();}catch(e){}render();}
+  }catch(e){
+    alert('No se pudo guardar:\n\n'+(e&&e.message?e.message:e)+
+      '\n\nSi dice 403 o no cambia nada, es que tu cuenta no tiene rol=admin en el servidor.');
+  }
+}
+
 /* ═══════════ NAVEGACIÓN ═══════════ */
 let TAB='dashboard', LEADID=null, CLIID=null, STEP=1, Q='', QLIB='';
 let FSRC='Todos', FEST='Todos';
@@ -2595,6 +2699,8 @@ VIEWS.admin=function(){
               Última actividad: ${esc(act)}</div>
           </div>
           <div style="text-align:right;flex-shrink:0">
+            <button class="btn sec xs" style="margin-bottom:6px"
+              onclick="gestionarVendedor('${esc(f.user_id)}')">${ic('Settings')}Gestionar</button><br>
             ${badge(u.t,u.c)}
             <div class="admsub" style="margin-top:5px">${f.gratis_hasta?'gratis hasta '+fDate(String(f.gratis_hasta).slice(0,10)):'—'}</div>
             <div class="admsub">alta ${f.registrado?fDate(String(f.registrado).slice(0,10)):'—'}</div>
@@ -2615,8 +2721,8 @@ VIEWS.admin=function(){
     <div class="card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)">
       <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.info)}
         <p style="font-size:12px;color:var(--tx2);line-height:1.6">
-          Solo lectura. El plan y el período gratis se cambian en Supabase (tabla <span class="mono">profiles</span>),
-          y aquí se ve el efecto en cuanto actualizas.</p></div></div>
+          Desde <b>Gestionar</b> cambias plan, período de prueba y rol de cada vendedor, y ves si su
+          sincronización está al día. Es lo primero que hay que mirar cuando alguien dice que "no le carga".</p></div></div>
   </div>`;
 };
 
