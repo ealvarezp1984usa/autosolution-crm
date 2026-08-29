@@ -517,7 +517,7 @@ function rBancos(){
   return `<div class="card">
     <h2>Bancos y tasas de referencia</h2>
     <div class="hint">Los comunes de <b>RouteOne/DealerTrack</b> (para cuando tengas tu dealer, la conexión va aquí), las cautivas de marca, y las credit unions — que publican sus tasas GRATIS en sus webs. Las tasas son <b>referencia (${esc(S.bancosFecha)})</b>: edítalas con la del día. Toca <b>Usar</b> para llevar la tasa al Desk.</div>
-    <div class="note">📌 Referencia del mercado: el promedio nacional de APR nuevo ronda 6.5-7% y usado 10-11%; las credit unions suelen estar 1-2 puntos por debajo de los bancos. Buen crédito baja de ahí, subprime sube.<br>🔄 <b>Rutina diaria del equipo:</b> antes del primer desking del día, abre el link del banco que vas a usar y actualiza su tasa aquí — 60 segundos y trabajas con el número real. (Cuando el backend esté vivo, esto se actualizará solo todos los días.)</div>
+    <div class="note">📌 Referencia del mercado: el promedio nacional de APR nuevo ronda 6.5-7% y usado 10-11%; las credit unions suelen estar 1-2 puntos por debajo de los bancos. Buen crédito baja de ahí, subprime sube.<br>🔄 <b>Estas tasas llegan solas:</b> se publican desde la oficina cada quincena y se actualizan en tu Desking al abrir el CRM. No tienes que mantenerlas. Si el banco te da hoy un número distinto para un caso concreto, cámbialo aquí para ese deal y ya.</div>
     <div class="row" style="margin-bottom:6px">
       <div class="f" style="flex:1"><label>Fecha de estas tasas</label><input value="${esc(S.bancosFecha)}" onchange="S.bancosFecha=this.value;save()"></div>
     </div>
