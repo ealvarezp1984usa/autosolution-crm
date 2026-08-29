@@ -395,6 +395,7 @@ const NAV=[
   {id:'connections',icon:'Share2',label:'Equipo',soon:1,sec:'Equipo'},
   {id:'nextup',icon:'RotateCcw',label:'Next-Up',soon:1},
   {id:'admin',icon:'Shield',label:'Admin',soon:1},
+  {id:'tasas',icon:'Landmark',label:'Tasas',soloAdmin:1},
   {id:'ayuda',icon:'Sparkle',label:'Ayuda',sec:'Sistema'},
   {id:'nube',icon:'Cloud',label:'Nube'},
   {id:'settings',icon:'Settings',label:'Config'},
@@ -1259,6 +1260,7 @@ async function entrarConSesion(){
   ocultarAuth();
   render();pintarPill();
   try{await sincronizar(true);}catch(e){}
+  try{await bajarTasas();}catch(e){}
   aplicarPerfil();
   render();
   if(!S.cfg.tourVisto)setTimeout(()=>abrirTour(0),900);
@@ -1827,6 +1829,166 @@ function cerrarTour(){
   if(!S.cfg.tourVisto){S.cfg.tourVisto=true;saveLocal();}
 }
 
+/* ═══ TASAS DE BANCOS — centralizadas ═══
+   Eduardo las publica cada ~15 días y todos los vendedores las reciben
+   solas. El vendedor no tiene que hacer nada: al entrar, las tasas
+   aparecen ya puestas en su Desking.
+   Se escriben en la misma clave que Desking ya lee (asm_desk_v1),
+   así que Desking no cambia por dentro. */
+const DIAS_TASAS=15;
+let TASAS={data:[],fecha:'',actualizado:null,cargado:false,err:''};
+
+async function bajarTasas(){
+  try{
+    const r=await sbRest('/tasas?select=data,fecha,actualizado&id=eq.1');
+    const t=(r&&r[0])||null;
+    if(!t)return false;
+    TASAS={data:t.data||[],fecha:t.fecha||'',actualizado:t.actualizado,cargado:true,err:''};
+    if(!TASAS.data.length)return false;
+    /* las metemos en el Desking sin tocar sus cotizaciones */
+    const d=leerDesk()||{};
+    d.bancos=JSON.parse(JSON.stringify(TASAS.data));
+    if(TASAS.fecha)d.bancosFecha=TASAS.fecha;
+    escribirDesk(d);
+    /* no es un cambio del vendedor: que no dispare una subida */
+    SYNC.deskSig=deskSig();saveSync();
+    return true;
+  }catch(e){TASAS.err=e&&e.message?e.message:String(e);return false;}
+}
+function diasDesdeTasas(){
+  if(!TASAS.actualizado)return null;
+  return dias(hoy(),new Date(String(TASAS.actualizado).slice(0,10)+'T00:00:00'));
+}
+
+/* ═══ VISTA · TASAS (solo admin) ═══ */
+let TEDIT=null;
+function vistaTasas(){
+  if(!esAdmin())return soonView('admin');
+  if(!TASAS.cargado){setTimeout(async()=>{await bajarTasas();TASAS.cargado=true;if(TAB==='tasas')render();},0);
+    return `<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:12.5px">
+      Leyendo las tasas publicadas…<span class="spin"></span></div>`;}
+
+  const lista=TEDIT||TASAS.data;
+  const d=diasDesdeTasas();
+  const vencido=d===null||d>=DIAS_TASAS;
+  const grupos=['Credit Union','Cautiva','RouteOne'];
+  const GT={'RouteOne':'Comunes en RouteOne','Cautiva':'Cautivas de marca','Credit Union':'Credit Unions (tasas públicas)'};
+  const GC={'RouteOne':C.info,'Cautiva':C.vio,'Credit Union':C.ok};
+
+  if(!lista.length){
+    return `<div class="stack">
+      <div><h2 class="vh">Tasas de los bancos</h2>
+        <div class="vsub">Las publicas tú y le llegan solas a todos los vendedores.</div></div>
+      <div class="card" style="text-align:center;padding:26px">
+        ${ic('Landmark',26,C.tx3)}
+        <div style="font-weight:800;font-size:14px;margin-top:12px">Todavía no has publicado tasas</div>
+        <p style="font-size:12.5px;color:var(--tx2);line-height:1.65;margin:10px auto 16px;max-width:400px">
+          Carga la lista base de bancos (RouteOne, cautivas y credit unions) desde tu Desking,
+          ajusta las tasas y publícalas. A partir de ahí, cada vendedor las recibe al entrar.</p>
+        <button class="btn" onclick="cargarBaseTasas()">${ic('Download')}Cargar la lista base</button>
+      </div>
+      ${TASAS.err?`<div class="card" style="border-color:${C.dan}38;background:${C.dan}0d">
+        <div style="font-size:12px;color:var(--tx2)">${esc(TASAS.err)}</div></div>`:''}
+    </div>`;
+  }
+
+  return `<div class="stack">
+    <div><h2 class="vh">Tasas de los bancos</h2>
+      <div class="vsub">Las publicas tú cada ~${DIAS_TASAS} días. Los vendedores no tocan nada: les llegan solas.</div></div>
+
+    <div class="card" style="border-color:${vencido?C.warn:C.ok}38;background:${vencido?C.warn:C.ok}0d">
+      <div style="display:flex;align-items:center;gap:11px">
+        <div style="width:38px;height:38px;border-radius:10px;background:${vencido?C.warn:C.ok}18;
+          display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          ${ic(vencido?'AlertCircle':'CheckCircle2',19,vencido?C.warn:C.ok)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:14px;color:${vencido?C.warn:C.ok}">
+            ${d===null?'Sin publicar todavía':vencido?'Toca actualizarlas':'Al día'}</div>
+          <div style="font-size:11.5px;color:var(--tx3);margin-top:2px">
+            ${d===null?'Publica para que los vendedores las reciban'
+              :'Publicadas hace '+d+' día'+(d===1?'':'s')+' · etiqueta: '+esc(TASAS.fecha||'sin fecha')}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="fr"><label class="f">Etiqueta que ve el vendedor</label>
+        <input class="inp" id="tFecha" value="${esc(TEDIT?(window.__tFecha||TASAS.fecha):TASAS.fecha)}"
+          placeholder="1ra quincena de septiembre 2026"></div>
+      <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:9px">
+        Aparece en su Desking como “tasas de referencia (${esc(TASAS.fecha||'…')})”. Ponle algo que le diga
+        de cuándo son, no una fecha exacta: son referencia, no el número final del banco.</p>
+    </div>
+
+    ${grupos.map(g=>{
+      const bs=lista.map((b,i)=>({b,i})).filter(x=>x.b.g===g);
+      if(!bs.length)return '';
+      return `<div class="card pad0">
+        <div class="chead"><span class="bdg2" style="color:${GC[g]};background:${GC[g]}18;border-color:${GC[g]}30">${GT[g]}</span></div>
+        <div>${bs.map(({b,i})=>`<div class="admrow" style="align-items:center">
+          <div style="min-width:0;flex:1">
+            <div class="admnom">${esc(b.n)}</div>
+            ${b.nota?`<div class="admsub">${esc(b.nota)}</div>`:''}
+            ${b.w?`<div class="admsub"><a href="https://www.${esc(b.w)}" target="_blank" rel="noopener"
+              style="color:${C.info};text-decoration:none">${esc(b.w)} ↗</a></div>`:''}
+          </div>
+          <div style="display:flex;gap:7px;flex-shrink:0">
+            <div class="fr" style="width:78px"><label class="f" style="margin-bottom:3px">Nuevo</label>
+              <input class="inp mono" style="padding:7px 8px;font-size:12px" type="number" step="0.1"
+                value="${esc(b.an)}" oninput="editarTasa(${i},'an',this.value)"></div>
+            <div class="fr" style="width:78px"><label class="f" style="margin-bottom:3px">Usado</label>
+              <input class="inp mono" style="padding:7px 8px;font-size:12px" type="number" step="0.1"
+                value="${esc(b.au)}" oninput="editarTasa(${i},'au',this.value)"></div>
+          </div>
+        </div>`).join('')}</div></div>`;}).join('')}
+
+    <div class="card">
+      <button class="btn full lg" onclick="publicarTasas()">${ic('Cloud')}Publicar para todo el equipo</button>
+      <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+        En cuanto publiques, cada vendedor las recibe la próxima vez que abra el CRM.
+        No tienen que hacer nada ni enterarse.</p>
+    </div>
+  </div>`;
+};
+function editarTasa(i,campo,v){
+  if(!TEDIT)TEDIT=JSON.parse(JSON.stringify(TASAS.data));
+  if(TEDIT[i])TEDIT[i][campo]=v;
+}
+function cargarBaseTasas(){
+  const d=leerDesk();
+  const base=(d&&Array.isArray(d.bancos)&&d.bancos.length)?d.bancos:null;
+  if(!base){
+    alert('No encuentro la lista de bancos.\n\nAbre Desking una vez (se crea sola) y vuelve aquí.');return;
+  }
+  TEDIT=JSON.parse(JSON.stringify(base));
+  TASAS.data=TEDIT;
+  if(!TASAS.fecha&&d.bancosFecha)TASAS.fecha=d.bancosFecha;
+  toast('Lista cargada — ajusta y publica');
+  render();
+}
+async function publicarTasas(){
+  const lista=TEDIT||TASAS.data;
+  if(!lista.length){alert('No hay tasas que publicar.');return;}
+  const fecha=$('tFecha')?$('tFecha').value.trim():TASAS.fecha;
+  try{
+    /* return=representation: si vuelve vacio es que el servidor no dejo escribir */
+    const res=await sbRest('/tasas?id=eq.1',{method:'PATCH',prefer:'return=representation',
+      body:{data:lista,fecha:fecha,actualizado:nowISO(),por:miId()}});
+    if(!res||!res.length){
+      alert(['El servidor no aceptó el cambio.','',
+        'Tu cuenta no tiene rol=admin, así que no puede publicar tasas.'].join('\n'));
+      return;
+    }
+    TEDIT=null;TASAS.cargado=false;
+    await bajarTasas();TASAS.cargado=true;
+    toast('Publicado — les llega al entrar');
+    render();
+  }catch(e){
+    alert('No se pudo publicar:\n\n'+(e&&e.message?e.message:e)+
+      '\n\nSi dice 403, es que tu cuenta no tiene rol=admin en el servidor.');
+  }
+}
+
 /* ═══════════ NAVEGACIÓN ═══════════ */
 let TAB='dashboard', LEADID=null, CLIID=null, STEP=1, Q='', QLIB='';
 let FSRC='Todos', FEST='Todos';
@@ -1867,6 +2029,7 @@ function openDeal(id,step){LEADID=id;STEP=step||1;TAB='deal';drawer(false);$('co
 function renderNav(){
   let h='';
   NAV.forEach(n=>{
+    if(n.soloAdmin&&!esAdmin())return;
     if(n.sec)h+=`<div class="nvsec">${esc(n.sec)}</div>`;
     if(n.href){ /* herramienta aparte: se abre en otra pestaña para no perder el CRM */
       h+=`<button class="nvi" onclick="abrirHerramienta('${n.href}')">
@@ -2679,6 +2842,7 @@ function soonView(id){
   </div>`;
 }
 VIEWS.ayuda=vistaAyuda;
+VIEWS.tasas=vistaTasas;
 VIEWS.campaigns=()=>soonView('campaigns');
 /* ═══ VISTA · RENDIMIENTO ═══
    Tu mes contra tu meta, y tu historial real. Todo sale de lo que
