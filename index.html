@@ -349,6 +349,7 @@ select.inp{-webkit-appearance:none;appearance:none;
 <div class="onb" id="onb" style="display:none"></div>
 <div class="toast" id="toast"></div>
 <input type="file" id="impFile" accept=".json,application/json" style="display:none" onchange="importar(event)">
+<input type="file" id="impCsv" accept=".csv,.tsv,.txt,.xlsx,.xls" style="display:none" onchange="importarArchivo(event)">
 
 <script>
 /* ═══════════════════════════════════════════════════════════
@@ -2360,6 +2361,257 @@ async function salirDelEquipo(){
   }catch(e){alert('No se pudo: '+(e&&e.message?e.message:e));}
 }
 
+/* ═══ IMPORTAR CLIENTES DESDE EXCEL / CSV ═══
+   El vendedor sube lo que exportó de su CRM viejo. La app reconoce las
+   columnas sola, deja corregirlas, avisa de los repetidos y solo entonces
+   importa. Nada entra sin que lo vea antes. */
+
+/* ── Los campos nuestros y cómo se llaman en otros sistemas ── */
+const CAMPOS_IMP=[
+  {k:'',      t:'— no importar —'},
+  {k:'nom',   t:'Nombre',        a:['nombre','first name','firstname','first','primer nombre','cliente','customer','nombre del cliente','name']},
+  {k:'nombreCompleto',t:'Nombre completo (se parte)',a:['nombre completo','full name','fullname','nombre y apellido','customer name','client name']},
+  {k:'apellido',t:'Apellidos',   a:['apellido','apellidos','last name','lastname','last','surname','apellido paterno']},
+  {k:'tel',   t:'Teléfono',      a:['telefono','teléfono','phone','cell','cellphone','mobile','celular','tel','phone number','cell phone','movil','móvil','contacto']},
+  {k:'email', t:'Correo',        a:['correo','email','e-mail','mail','correo electronico','correo electrónico','email address']},
+  {k:'dir',   t:'Dirección',     a:['direccion','dirección','address','street','domicilio','address 1','street address','calle']},
+  {k:'marca', t:'Marca',         a:['marca','make','brand','fabricante']},
+  {k:'mod',   t:'Modelo',        a:['modelo','model','vehiculo','vehículo','vehicle']},
+  {k:'ano',   t:'Año',           a:['año','ano','year','yr','model year']},
+  {k:'stock', t:'Stock #',       a:['stock','stock #','stock number','stock no','inventario']},
+  {k:'vin',   t:'VIN',           a:['vin','vin number','vin #','serial','numero de serie','número de serie']},
+  {k:'agencia',t:'Agencia de seguro',a:['agencia','seguro','insurance','aseguradora','insurance agency','agencia de seguro']},
+  {k:'tipo',  t:'Tipo (lease/finance/cash)',a:['tipo','type','deal type','tipo de negocio','financing','financiamiento']},
+  {k:'fecha', t:'Mes de venta',  a:['fecha','fecha de venta','sale date','sold date','delivery date','date sold','fecha entrega','date','deal date','purchase date']},
+  {k:'plazo', t:'Plazo (meses)', a:['plazo','term','meses','months','term months','plazo meses']},
+  {k:'cumple',t:'Cumpleaños',    a:['cumpleaños','cumpleanos','birthday','dob','date of birth','fecha de nacimiento','nacimiento']},
+  {k:'notas', t:'Notas',         a:['notas','notes','comments','comentarios','observaciones','remarks','comment']}
+];
+const normCab=s=>String(s||'').trim().toLowerCase()
+  .normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+
+function adivinarCampo(cabecera){
+  const c=normCab(cabecera); if(!c)return '';
+  for(const f of CAMPOS_IMP){
+    if(!f.a)continue;
+    if(f.a.some(x=>normCab(x)===c))return f.k;
+  }
+  for(const f of CAMPOS_IMP){
+    if(!f.a)continue;
+    if(f.a.some(x=>{const n=normCab(x);return n.length>3&&(c.includes(n)||n.includes(c));}))return f.k;
+  }
+  return '';
+}
+
+/* ── Lector de CSV que aguanta comillas, comas dentro y saltos de línea ── */
+function leerCSV(txt){
+  txt=String(txt||'').replace(/^﻿/,'');
+  const cand=[',',';','\t','|'];
+  const primera=txt.split(/\r?\n/)[0]||'';
+  let sep=',',mejor=-1;
+  cand.forEach(s=>{const n=(primera.split(s).length-1);if(n>mejor){mejor=n;sep=s;}});
+  const filas=[];let campo='',fila=[],comillas=false;
+  for(let i=0;i<txt.length;i++){
+    const ch=txt[i];
+    if(comillas){
+      if(ch==='"'){ if(txt[i+1]==='"'){campo+='"';i++;} else comillas=false; }
+      else campo+=ch;
+    }else{
+      if(ch==='"')comillas=true;
+      else if(ch===sep){fila.push(campo);campo='';}
+      else if(ch==='\n'){fila.push(campo);filas.push(fila);fila=[];campo='';}
+      else if(ch==='\r'){/* nada */}
+      else campo+=ch;
+    }
+  }
+  if(campo!==''||fila.length){fila.push(campo);filas.push(fila);}
+  return filas.filter(f=>f.some(c=>String(c).trim()!==''));
+}
+
+/* ── Excel de verdad: se carga la librería solo si hace falta ── */
+function cargarXLSX(){
+  if(window.XLSX)return Promise.resolve(true);
+  return new Promise(res=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=()=>res(!!window.XLSX);
+    s.onerror=()=>res(false);
+    document.head.appendChild(s);
+  });
+}
+
+let IMP=null;   /* {cabeceras, filas, mapa, nombreArchivo} */
+
+function abrirImportador(){ $('impCsv').click(); }
+
+async function importarArchivo(ev){
+  const f=ev.target.files&&ev.target.files[0]; if(!f)return;
+  ev.target.value='';
+  try{
+    let filas=null;
+    if(/\.(xlsx|xls)$/i.test(f.name)){
+      toast('Leyendo el Excel…');
+      const listo=await cargarXLSX();
+      if(!listo){
+        alert(['No pude cargar el lector de Excel (¿sin internet?).','',
+          'Solución rápida: en Excel usa Archivo → Guardar como → CSV y sube ese archivo.'].join('\n'));
+        return;
+      }
+      const buf=await f.arrayBuffer();
+      const wb=XLSX.read(buf,{type:'array'});
+      const hoja=wb.Sheets[wb.SheetNames[0]];
+      filas=XLSX.utils.sheet_to_json(hoja,{header:1,raw:false,defval:''});
+      filas=filas.filter(r=>r.some(c=>String(c).trim()!==''));
+    }else{
+      const txt=await f.text();
+      filas=leerCSV(txt);
+    }
+    if(!filas||filas.length<2){
+      alert('El archivo no tiene filas que importar.\n\nNecesita una fila de títulos y al menos un cliente.');
+      return;
+    }
+    const cabeceras=filas[0].map(c=>String(c).trim());
+    IMP={nombreArchivo:f.name, cabeceras:cabeceras, filas:filas.slice(1),
+         mapa:cabeceras.map(c=>adivinarCampo(c))};
+    /* si no hay nombre pero sí nombre completo, ya está resuelto */
+    modalImportar();
+  }catch(e){
+    alert('No pude leer el archivo:\n\n'+(e&&e.message?e.message:e));
+  }
+}
+
+function filaAcliente(fila){
+  const d={};
+  IMP.mapa.forEach((k,i)=>{
+    if(!k)return;
+    const v=String(fila[i]==null?'':fila[i]).trim();
+    if(!v)return;
+    if(k==='nombreCompleto'){
+      const p=v.split(/\s+/);
+      d.nom=d.nom||p[0]||'';
+      if(p.length>1)d.apellido=d.apellido||p.slice(1).join(' ');
+    }else d[k]=v;
+  });
+  if(d.tel)d.tel=String(d.tel).replace(/[^\d+]/g,'');
+  if(d.email)d.email=d.email.toLowerCase();
+  if(d.vin)d.vin=d.vin.toUpperCase().replace(/\s/g,'');
+  if(d.stock)d.stock=d.stock.toUpperCase();
+  if(d.plazo)d.plazo=num(d.plazo);
+  if(d.ano)d.ano=String(num(d.ano)||'');
+  if(d.tipo){
+    const t=normCab(d.tipo);
+    d.tipo=/lease|arrend/.test(t)?'lease':/cash|contado|efectivo/.test(t)?'cash':'finance';
+  }
+  if(d.fecha)d.fecha=aMesVenta(d.fecha);
+  if(d.cumple)d.cumple=aFechaISO(d.cumple);
+  return d;
+}
+function aMesVenta(v){
+  const s=String(v).trim();
+  let m=s.match(/^(\d{4})[-/](\d{1,2})/);            if(m)return m[1]+'-'+String(m[2]).padStart(2,'0');
+  m=s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);   if(m)return m[3]+'-'+String(m[1]).padStart(2,'0');
+  m=s.match(/^(\d{1,2})[-/](\d{4})$/);               if(m)return m[2]+'-'+String(m[1]).padStart(2,'0');
+  const d=new Date(s);
+  return isNaN(d)?'':d.toISOString().slice(0,7);
+}
+function aFechaISO(v){
+  const s=String(v).trim();
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m)return m[1]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0');
+  m=s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+  if(m)return m[3]+'-'+String(m[1]).padStart(2,'0')+'-'+String(m[2]).padStart(2,'0');
+  const d=new Date(s);
+  return isNaN(d)?'':d.toISOString().slice(0,10);
+}
+
+function analizarImport(){
+  const buenos=[],sinDatos=[],repetidosArchivo=[],yaEnLibro=[];
+  const vistos=[];
+  IMP.filas.forEach((fila,idx)=>{
+    const d=filaAcliente(fila);
+    if(!d.nom&&!d.apellido){sinDatos.push({idx,motivo:'sin nombre'});return;}
+    if(!d.tel){sinDatos.push({idx,motivo:'sin teléfono',nom:(d.nom||'')+' '+(d.apellido||'')});return;}
+    const enLibro=buscarDuplicado(S.clientes,d,null);
+    if(enLibro){yaEnLibro.push({d,campo:enLibro.campo});return;}
+    const enArchivo=buscarDuplicado(vistos,d,null);
+    if(enArchivo){repetidosArchivo.push({d,campo:enArchivo.campo});return;}
+    d.id=uid('c'); d.createdAt=nowISO();
+    vistos.push(d); buenos.push(d);
+  });
+  return {buenos,sinDatos,repetidosArchivo,yaEnLibro};
+}
+
+function modalImportar(){
+  const r=analizarImport();
+  const usados=IMP.mapa.filter(Boolean).length;
+  const ej=r.buenos.slice(0,3);
+  openModal('Importar clientes',
+   `<div class="card" style="background:var(--bg3);margin-bottom:14px">
+      <div class="sumrow"><span style="color:var(--tx3)">Archivo</span>
+        <span style="color:var(--tx2)">${esc(IMP.nombreArchivo)}</span></div>
+      <div class="sumrow"><span style="color:var(--tx3)">Filas en el archivo</span>
+        <span style="color:var(--tx2)">${IMP.filas.length}</span></div>
+      <div class="sumrow"><span style="color:var(--tx3)">Columnas reconocidas</span>
+        <span style="color:var(--tx2)">${usados} de ${IMP.cabeceras.length}</span></div>
+      <div class="sumrow b"><span style="color:var(--tx3)">Se van a importar</span>
+        <span style="color:${r.buenos.length?C.ok:C.dan};font-weight:800">${r.buenos.length} clientes</span></div>
+    </div>
+
+    ${(r.yaEnLibro.length||r.repetidosArchivo.length||r.sinDatos.length)?`
+    <div class="card" style="background:rgba(234,179,8,.06);border-color:rgba(234,179,8,.22);margin-bottom:14px">
+      <div style="font-weight:700;font-size:12.5px;color:${C.warn};margin-bottom:7px">Se van a saltar</div>
+      ${r.yaEnLibro.length?`<div class="sumrow"><span style="color:var(--tx3)">Ya están en tu libro</span>
+        <span style="color:var(--tx2)">${r.yaEnLibro.length}</span></div>`:''}
+      ${r.repetidosArchivo.length?`<div class="sumrow"><span style="color:var(--tx3)">Repetidos dentro del archivo</span>
+        <span style="color:var(--tx2)">${r.repetidosArchivo.length}</span></div>`:''}
+      ${r.sinDatos.length?`<div class="sumrow"><span style="color:var(--tx3)">Sin nombre o sin teléfono</span>
+        <span style="color:var(--tx2)">${r.sinDatos.length}</span></div>`:''}
+      <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:8px">
+        Nadie se duplica: si ya lo tienes, se respeta lo que ya está en tu libro.</p>
+    </div>`:''}
+
+    <div class="mlab" style="margin-top:0">Cómo quedaron las columnas</div>
+    <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-bottom:9px">
+      Las reconocí solas. Corrige la que esté mal antes de importar.</p>
+    <div style="max-height:230px;overflow-y:auto;border:1px solid var(--bd);border-radius:9px">
+      ${IMP.cabeceras.map((c,i)=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 10px;
+        border-bottom:1px solid var(--bd)">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11.5px;font-weight:700;color:var(--tx);overflow:hidden;
+            text-overflow:ellipsis;white-space:nowrap">${esc(c||'(sin título)')}</div>
+          <div style="font-size:10px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;
+            white-space:nowrap">${esc(String((IMP.filas[0]||[])[i]||'').slice(0,40))}</div>
+        </div>
+        <select class="inp" style="width:170px;padding:6px 8px;font-size:11.5px"
+          onchange="IMP.mapa[${i}]=this.value;modalImportar()">
+          ${CAMPOS_IMP.map(f=>`<option value="${f.k}" ${IMP.mapa[i]===f.k?'selected':''}>${esc(f.t)}</option>`).join('')}
+        </select>
+      </div>`).join('')}
+    </div>
+
+    ${ej.length?`<div class="mlab">Así van a entrar los primeros</div>
+      ${ej.map(d=>`<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;margin-bottom:6px">
+        <div style="font-size:12.5px;font-weight:700">${esc((d.nom||'')+' '+(d.apellido||''))}</div>
+        <div style="font-size:11px;color:var(--tx3);line-height:1.5">
+          ${esc(d.tel||'sin teléfono')}${d.email?' · '+esc(d.email):''}
+          ${d.marca||d.mod?'<br>'+esc([d.ano,d.marca,d.mod].filter(Boolean).join(' ')):''}
+          ${d.fecha?' · vendido '+esc(d.fecha):''}</div>
+      </div>`).join('')}`:''}`,
+   `<button class="btn sec" onclick="closeModal();IMP=null">Cancelar</button>
+    <button class="btn" ${r.buenos.length?'':'disabled'} onclick="confirmarImport()">
+      ${ic('Upload')}Importar ${r.buenos.length}</button>`);
+}
+
+function confirmarImport(){
+  const r=analizarImport();
+  if(!r.buenos.length){alert('No hay nada que importar.');return;}
+  S.clientes=r.buenos.concat(S.clientes);
+  save();
+  closeModal();IMP=null;
+  toast(r.buenos.length+' clientes importados');
+  TAB='libro';render();
+}
+
 /* ═══════════ NAVEGACIÓN ═══════════ */
 let TAB='dashboard', LEADID=null, CLIID=null, STEP=1, Q='', QLIB='';
 let FSRC='Todos', FEST='Todos';
@@ -2606,7 +2858,9 @@ VIEWS.libro=function(){
   let out=`<div class="stack">
     <div class="rowb"><div><h2 class="vh">Libro de clientes</h2>
       <div class="vsub">${S.clientes.length} cliente${S.clientes.length===1?'':'s'} · de aquí salen las alertas y los programas</div></div>
-      <button class="btn sm" onclick="openCliente()">${ic('Plus')}Cliente</button></div>
+      <div style="display:flex;gap:7px">
+        <button class="btn sec sm" onclick="abrirImportador()">${ic('Upload')}Importar</button>
+        <button class="btn sm" onclick="openCliente()">${ic('Plus')}Cliente</button></div></div>
     <input class="inp" placeholder="Buscar nombre, teléfono, marca…" value="${esc(QLIB)}"
       oninput="QLIB=this.value;document.getElementById('libroList').innerHTML=libroList()">
     <div id="libroList">${libroList()}</div></div>`;
