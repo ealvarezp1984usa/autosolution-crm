@@ -2110,6 +2110,9 @@ function vistaEquipo(){
     {u:0,c:0,l:0,v:0,t:0});
   const cierre=tot.l?Math.round(tot.v/tot.l*100):0;
   const pend=EQ.miembros.filter(m=>m.estado==='invitado');
+  const yoEnResumen=filas.find(f=>f.user_id===miId());
+  const yoPedi=yoEnResumen?yoEnResumen.salida_pedida:null;
+  const pidenSalir=filas.filter(f=>f.salida_pedida&&f.user_id!==miId());
 
   return `<div class="stack">
     <div class="rowb"><div><h2 class="vh">${esc(EQ.equipo.nombre||'Mi equipo')}</h2>
@@ -2153,6 +2156,18 @@ function vistaEquipo(){
         :empty('Users','Todavía no hay nadie','Invita a tu primer vendedor abajo.')}</div>
     </div>
 
+    ${soyJefe&&pidenSalir.length?`<div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('LogOut',15,C.warn)}Piden salir del equipo (${pidenSalir.length})</div>
+        <div class="s">Se lleva su libro completo. Tú decides cuándo.</div></div>
+      <div>${pidenSalir.map(f=>`<div class="admrow" style="align-items:center">
+        <div class="admav" style="background:${C.warn}18;color:${C.warn}">${esc(ini(f.nombre)||'?')}</div>
+        <div style="min-width:0;flex:1"><div class="admnom">${esc(f.nombre||'')}</div>
+          <div class="admsub">lo pidió el ${esc(fDate(String(f.salida_pedida).slice(0,10)))}</div></div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="btn ghost xs" onclick="negarSalida('${esc(f.user_id)}')">Negar</button>
+          <button class="btn sm" onclick="sacarDelEquipo('${esc(f.user_id)}','${esc(f.nombre||'')}')">Autorizar</button>
+        </div></div>`).join('')}</div></div>`:''}
+
     ${soyJefe?`
     ${pend.length?`<div class="card pad0">
       <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('Clock',15,C.warn)}Invitaciones sin aceptar (${pend.length})</div>
@@ -2185,15 +2200,25 @@ function vistaEquipo(){
     <div class="card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)">
       <div style="display:flex;gap:9px;align-items:flex-start">${ic('Lock',15,C.info)}
         <p style="font-size:12px;color:var(--tx2);line-height:1.6">
-          El jefe ve tus unidades, leads, cierre y tareas — <b>no ve tu dinero</b> ni puede
-          entrar a tus clientes. Tu libro es tuyo y te lo llevas completo si te sales.</p></div></div>`}
+          El jefe ve tus unidades, leads, cierre y tareas <b>desde el día que entraste</b> —
+          lo de antes no cuenta. <b>No ve tu dinero</b> ni puede entrar a tus clientes.
+          Tu libro es tuyo y te lo llevas completo cuando salgas.</p></div></div>`}
 
     <div class="card">
-      <button class="btn dan sm full" onclick="salirDelEquipo()">
-        ${ic('LogOut')}${soyJefe?'Disolver el equipo':'Salirme del equipo'}</button>
-      <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:9px">
-        ${soyJefe?'Se disuelve para todos. Cada uno se queda con su libro completo.'
-                 :'Te llevas tu libro entero. El jefe deja de ver tus números.'}</p>
+      ${soyJefe
+        ? `<button class="btn dan sm full" onclick="salirDelEquipo()">${ic('LogOut')}Disolver el equipo</button>
+           <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:9px">
+             Se disuelve para todos. Cada uno se queda con su libro completo.</p>`
+        : (yoPedi
+          ? `<div style="display:flex;gap:9px;align-items:flex-start">${ic('Clock',15,C.warn)}
+               <p style="font-size:12px;color:var(--tx2);line-height:1.6">
+                 Pediste salir del equipo el ${esc(fDate(String(yoPedi).slice(0,10)))}.
+                 Queda en manos del jefe autorizarlo.</p></div>
+             <button class="btn sec sm full" style="margin-top:11px" onclick="pedirSalida(true)">Retirar la solicitud</button>`
+          : `<button class="btn sec sm full" onclick="pedirSalida(false)">${ic('LogOut')}Pedir salida del equipo</button>
+             <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:9px">
+               Del equipo se sale con el visto bueno del jefe. Le llega tu solicitud y él la autoriza.
+               Cuando salgas, te llevas tu libro entero.</p>`)}
     </div>
   </div>`;
 };
@@ -2278,6 +2303,24 @@ async function sacarDelEquipo(uid,nombre){
     await sbRest('/team_members?team_id=eq.'+encodeURIComponent(EQ.equipo.id)+'&user_id=eq.'+encodeURIComponent(uid),
       {method:'DELETE',prefer:'return=minimal'});
     EQ.cargado=false;toast('Fuera del equipo');render();
+  }catch(e){alert('No se pudo: '+(e&&e.message?e.message:e));}
+}
+async function pedirSalida(retirar){
+  if(!retirar&&!confirm(`¿Pedirle al jefe que te deje salir del equipo?
+
+Cuando lo autorice, te llevas tu libro completo.`))return;
+  try{
+    const r=await sbRest('/team_members?team_id=eq.'+encodeURIComponent(EQ.equipo.id)+'&user_id=eq.'+encodeURIComponent(miId()),
+      {method:'PATCH',prefer:'return=representation',body:{salida_pedida:retirar?null:nowISO()}});
+    if(!r||!r.length)throw new Error('El servidor no registró la solicitud.');
+    EQ.cargado=false;toast(retirar?'Solicitud retirada':'Solicitud enviada al jefe');render();
+  }catch(e){alert('No se pudo: '+(e&&e.message?e.message:e));}
+}
+async function negarSalida(uid){
+  try{
+    await sbRest('/team_members?team_id=eq.'+encodeURIComponent(EQ.equipo.id)+'&user_id=eq.'+encodeURIComponent(uid),
+      {method:'PATCH',prefer:'return=minimal',body:{salida_pedida:null}});
+    EQ.cargado=false;toast('Solicitud negada');render();
   }catch(e){alert('No se pudo: '+(e&&e.message?e.message:e));}
 }
 async function salirDelEquipo(){
