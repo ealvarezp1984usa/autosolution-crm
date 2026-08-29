@@ -1733,7 +1733,7 @@ VIEWS.dashboard=function(){
       <div>
         <div style="font-size:10.5px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.08em">${saludo},</div>
         <h1 style="font-size:25px;font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-top:3px">${esc((S.cfg.nombre||'Bienvenido').split(' ')[0])}</h1>
-        <div style="font-size:11.5px;color:var(--tx3);margin-top:4px">Tu cartera es privada. Vive en este dispositivo.</div>
+        <div style="font-size:11.5px;color:var(--tx3);margin-top:4px">${SYNC.modo==='supabase'?'Tu cartera es tuya y viaja contigo: teléfono, tablet y PC.':'Tu cartera es privada. Vive en este dispositivo.'}</div>
       </div>
     </div>
 
@@ -2661,6 +2661,7 @@ VIEWS.settings=function(){
       <p style="font-size:12px;color:var(--tx3);line-height:1.6;margin:6px 0 13px">
         ${SYNC.modo==='github'?`Sincronizado con <b style="color:var(--tx2)">${esc(SYNC.gh.owner)}/${esc(SYNC.gh.repo)}</b>. Se abre igual desde el teléfono y desde la PC.`
          :SYNC.modo==='archivo'?`Guardándose en <b style="color:var(--tx2)">${esc(SYNC.archivo.nombre)}</b> en esta computadora.`
+         :SYNC.modo==='supabase'?`En tu cuenta <b style="color:var(--tx2)">${esc((SES&&SES.user&&SES.user.email)||'')}</b>. Se abre igual desde el teléfono y desde la PC.`
          :`<span style="color:${C.warn}">Ahora mismo los datos viven solo en este navegador.</span> Conéctalo a la nube para no perder nada.`}</p>
       <button class="btn ${SYNC.modo==='local'?'':'sec'} full" onclick="go('nube')">${ic('Cloud')}Nube y respaldo</button>
     </div>
@@ -2676,11 +2677,12 @@ VIEWS.settings=function(){
     <div class="card" style="background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.18)">
       <div style="font-weight:700;font-size:12px;color:var(--dan);margin-bottom:8px">Zona peligrosa</div>
       <p style="font-size:11.5px;color:var(--tx3);line-height:1.55;margin-bottom:12px">
-        Borra clientes, leads, programas y tareas de este dispositivo. Exporta un respaldo antes.</p>
+        Borra clientes, leads, programas y tareas${SYNC.modo==='supabase'?' de tu cuenta — también en la nube':' de este dispositivo'}. Exporta un respaldo antes.</p>
       <button class="btn dan sm" onclick="borrarTodo()">${ic('Trash2')}Borrar todo</button>
     </div>
     <p style="font-size:11px;color:var(--tx3);text-align:center;line-height:1.6;padding:4px 0 10px">
-      Los datos viven solo en este navegador. Nadie más los ve.<br>AutoSolution Miami · CRM v1.0</p>
+      ${SYNC.modo==='supabase'?'Tus datos viajan cifrados a tu cuenta. Ningún otro vendedor los ve.'
+        :'Los datos viven solo en este navegador. Nadie más los ve.'}<br>AutoSolution Miami · CRM v1.1</p>
   </div>`;
 };
 function saveCfg(){
@@ -3095,7 +3097,7 @@ function showOnb(){
           Motor de urgencia en tiempo real, flujo de 8 pasos con F&amp;I, y alertas automáticas de fin de lease, refi y aniversario sobre tu propio libro de clientes.</p>
       </div>
       <div class="dtonly" style="font-size:10px;color:var(--tx3);border-top:1px solid var(--bd);padding-top:16px">
-        © 2026 AutoSolution Miami CRM · Tus datos viven solo en este dispositivo</div>
+        © 2026 AutoSolution Miami CRM · Tu cartera es tuya y viaja contigo</div>
     </div>
     <div class="onbwrap"><div class="onbform">
       <h2 style="font-size:23px;font-weight:900;letter-spacing:-.02em;margin-bottom:6px">Empecemos</h2>
