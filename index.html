@@ -391,7 +391,7 @@ const NAV=[
   {id:'promos',icon:'Tag',label:'Programas'},
   {id:'reports',icon:'BarChart2',label:'Reportes',sec:'Análisis'},
   {id:'campaigns',icon:'Megaphone',label:'Campañas',soon:1},
-  {id:'performance',icon:'TrendingUp',label:'Rendimiento',soon:1},
+  {id:'performance',icon:'TrendingUp',label:'Rendimiento'},
   {id:'connections',icon:'Share2',label:'Equipo',soon:1,sec:'Equipo'},
   {id:'nextup',icon:'RotateCcw',label:'Next-Up',soon:1},
   {id:'admin',icon:'Shield',label:'Admin',soon:1},
@@ -504,7 +504,7 @@ const LOGO=`<svg width="136" height="21" viewBox="0 0 148 22" fill="none">
 <script>
 /* ═══════════ ESTADO Y PERSISTENCIA ═══════════ */
 const K='asm_libro_v1';
-const BLANK=()=>({cfg:{nombre:'',wa:'',dealer:'AutoSolution Miami',onboarded:false},
+const BLANK=()=>({cfg:{nombre:'',wa:'',dealer:'AutoSolution Miami',onboarded:false,metaMes:{u:0,g:0}},
   clientes:[],leads:[],promos:[],tareas:[],
   meta:{rev:0,updatedAt:'',device:''}});
 let S=BLANK();
@@ -2360,7 +2360,181 @@ function soonView(id){
   </div>`;
 }
 VIEWS.campaigns=()=>soonView('campaigns');
-VIEWS.performance=()=>soonView('performance');
+/* ═══ VISTA · RENDIMIENTO ═══
+   Tu mes contra tu meta, y tu historial real. Todo sale de lo que
+   ya está en el libro: clientes con fecha de venta y leads cerrados.
+   Nada estimado, nada inventado. */
+function guardarMetaMes(){
+  S.cfg.metaMes={u:Math.max(0,num($('metaU').value)),g:Math.max(0,num($('metaG').value))};
+  save();toast('Meta guardada');render();
+}
+function mesesAtras(n){
+  const d=new Date(), out=[];
+  for(let i=n-1;i>=0;i--){const x=new Date(d.getFullYear(),d.getMonth()-i,1);
+    out.push({ym:x.toISOString().slice(0,7),d:x});}
+  return out;
+}
+VIEWS.performance=function(){
+  const meta=S.cfg.metaMes||{u:0,g:0};
+  const ym=thisMonth();
+
+  /* unidades por mes: de los clientes del libro (c.fecha es AAAA-MM) */
+  const uMes={};
+  S.clientes.forEach(c=>{const m=String(c.fecha||'').slice(0,7);
+    if(/^\d{4}-\d{2}$/.test(m))uMes[m]=(uMes[m]||0)+1;});
+
+  /* gross por mes: de los leads que llegaron a Vendido */
+  const gMes={}, cerrados=[];
+  S.leads.filter(l=>ETAPAS[l.etapa]==='Vendido').forEach(l=>{
+    const m=String(l.updatedAt||l.createdAt||'').slice(0,7);
+    if(/^\d{4}-\d{2}$/.test(m))gMes[m]=(gMes[m]||0)+finanzas(l).totalGross;
+    if(l.createdAt&&l.updatedAt){
+      const d=dias(new Date(l.updatedAt),new Date(l.createdAt));
+      if(d>=0&&d<400)cerrados.push(d);
+    }
+  });
+
+  const uHoy=uMes[ym]||0, gHoy=gMes[ym]||0;
+  const h=new Date();
+  const diasMes=new Date(h.getFullYear(),h.getMonth()+1,0).getDate();
+  const diaActual=h.getDate();
+  const restan=diasMes-diaActual;
+  const proy=diaActual?Math.round(uHoy/diaActual*diasMes*10)/10:0;
+  const faltanU=Math.max(0,meta.u-uHoy), faltanG=Math.max(0,meta.g-gHoy);
+  const pctU=meta.u?Math.min(100,Math.round(uHoy/meta.u*100)):0;
+  const pctG=meta.g?Math.min(100,Math.round(gHoy/meta.g*100)):0;
+  /* ¿va en ritmo? el listón del día de hoy */
+  const esperado=meta.u?meta.u*(diaActual/diasMes):0;
+  const enRitmo=!meta.u||uHoy>=esperado;
+
+  const hist=mesesAtras(12).map(m=>({...m,u:uMes[m.ym]||0,g:gMes[m.ym]||0}));
+  const maxU=Math.max(1,...hist.map(x=>x.u));
+  const conVentas=hist.filter(x=>x.u>0);
+  const mejor=hist.reduce((a,b)=>b.u>((a&&a.u)||0)?b:a,null);
+  const prom=conVentas.length?Math.round(conVentas.reduce((s,x)=>s+x.u,0)/conVentas.length*10)/10:0;
+  const totalAno=hist.reduce((s,x)=>s+x.u,0);
+  const grossAno=hist.reduce((s,x)=>s+x.g,0);
+  const cicloProm=cerrados.length?Math.round(cerrados.reduce((a,b)=>a+b,0)/cerrados.length):null;
+  const abiertos=S.leads.filter(l=>!['Vendido','Perdido'].includes(ETAPAS[l.etapa])).length;
+  const totalLeads=S.leads.length;
+  const conv=totalLeads?Math.round(S.leads.filter(l=>ETAPAS[l.etapa]==='Vendido').length/totalLeads*100):0;
+
+  const barra=(pct,color)=>`<div style="height:8px;border-radius:99px;background:var(--bg3);overflow:hidden">
+    <div style="height:100%;background:${color};border-radius:99px;width:${Math.max(0,Math.min(100,pct))}%"></div></div>`;
+
+  const sinMeta=!meta.u&&!meta.g;
+
+  return `<div class="stack">
+    <div><h2 class="vh">Rendimiento</h2>
+      <div class="vsub">Tu mes contra tu meta y tu historial real. Sale de tu libro, no de estimaciones.</div></div>
+
+    ${sinMeta?`<div class="card" style="background:rgba(234,179,8,.06);border-color:rgba(234,179,8,.22)">
+      <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.warn)}
+        <p style="font-size:12px;color:var(--tx2);line-height:1.6">
+          Todavía no pusiste meta del mes. Sin meta esto solo cuenta lo que ya pasó;
+          con meta te dice si vas en ritmo y cuánto te falta por día.</p></div></div>`:`
+    <div class="card" style="border-color:${enRitmo?C.ok:C.warn}38;background:${enRitmo?C.ok:C.warn}0d">
+      <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px">
+        <div style="width:38px;height:38px;border-radius:10px;background:${enRitmo?C.ok:C.warn}18;
+          display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          ${ic(enRitmo?'TrendingUp':'AlertCircle',19,enRitmo?C.ok:C.warn)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:14px;color:${enRitmo?C.ok:C.warn}">
+            ${enRitmo?'Vas en ritmo':'Vas por debajo del ritmo'}</div>
+          <div style="font-size:11.5px;color:var(--tx3);margin-top:2px">
+            Día ${diaActual} de ${diasMes} · ${restan} día${restan===1?'':'s'} para cerrar el mes</div>
+        </div>
+      </div>
+      ${meta.u?`<div style="margin-bottom:13px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+          <span style="color:var(--tx2)">Unidades</span>
+          <span><span style="color:var(--tx)">${uHoy}</span><span style="color:var(--tx3)"> / ${meta.u}</span>
+          · <span style="color:${enRitmo?C.ok:C.warn};font-weight:700">${pctU}%</span></span></div>
+        ${barra(pctU,enRitmo?C.ok:C.warn)}
+        <div style="font-size:11px;color:var(--tx3);margin-top:5px">
+          ${faltanU?`Faltan <b style="color:var(--tx2)">${faltanU}</b> · proyección al cierre: <b style="color:var(--tx2)">${proy}</b>`
+                   :'<b style="color:'+C.ok+'">Meta cumplida.</b> Lo que entre ahora es de más.'}</div>
+      </div>`:''}
+      ${meta.g?`<div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+          <span style="color:var(--tx2)">Gross</span>
+          <span><span style="color:var(--tx)">${fm(gHoy)}</span><span style="color:var(--tx3)"> / ${fm(meta.g)}</span>
+          · <span style="color:${C.p};font-weight:700">${pctG}%</span></span></div>
+        ${barra(pctG,C.p)}
+        ${faltanG?`<div style="font-size:11px;color:var(--tx3);margin-top:5px">
+          Faltan <b style="color:var(--tx2)">${fm(faltanG)}</b></div>`:''}
+      </div>`:''}
+    </div>`}
+
+    <div class="grid2">
+      ${kpi('Trophy','Este mes',uHoy,fm(gHoy)+' de gross',C.p)}
+      ${kpi('BarChart2','Últimos 12 meses',totalAno,fm(grossAno)+' acumulado',C.info)}
+      ${kpi('TrendingUp','Promedio mensual',prom||'—',conVentas.length?'sobre '+conVentas.length+' mes'+(conVentas.length>1?'es':'')+' con ventas':'sin historial',C.vio)}
+      ${kpi('Clock','Ciclo de cierre',cicloProm!==null?cicloProm+'d':'—',cicloProm!==null?'de lead a vendido':'sin cierres medidos',C.ora)}
+    </div>
+
+    <div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('BarChart2',15,C.tx)}Últimos 12 meses</div>
+        <div class="s">Unidades entregadas por mes, contadas desde la fecha de venta de cada cliente del libro.</div></div>
+      <div style="padding:15px 16px">
+        ${totalAno?hist.map(x=>{
+          const act=x.ym===ym;
+          return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+            <span style="font-size:11px;color:${act?C.p:'var(--tx3)'};min-width:62px;${act?'font-weight:700':''}">${fmtM(x.d)}</span>
+            <div style="flex:1;height:8px;background:var(--bg3);border-radius:99px;overflow:hidden">
+              <div style="height:100%;background:${act?C.p:C.info};border-radius:99px;width:${x.u/maxU*100}%"></div></div>
+            <span class="mono" style="font-size:11px;font-weight:700;color:${act?C.p:'var(--tx2)'};min-width:20px;text-align:right">${x.u}</span>
+            <span class="mono" style="font-size:10px;color:var(--tx3);min-width:56px;text-align:right">${x.g?fm(x.g):''}</span>
+          </div>`;}).join('')
+        :empty('BarChart2','Sin historial todavía',
+          'Aparece solo, en cuanto tus clientes del libro tengan fecha de venta.')}
+      </div>
+    </div>
+
+    ${mejor&&mejor.u>0?`<div class="card">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;margin-bottom:10px">
+        ${ic('Trophy',14,C.warn)}Tu mejor mes</div>
+      <div class="sumrow"><span style="color:var(--tx3)">Mes</span>
+        <span style="color:var(--tx2)">${fmtM(mejor.d)}</span></div>
+      <div class="sumrow"><span style="color:var(--tx3)">Unidades</span>
+        <span style="color:var(--tx);font-weight:700">${mejor.u}</span></div>
+      ${mejor.g?`<div class="sumrow"><span style="color:var(--tx3)">Gross</span>
+        <span style="color:var(--tx2)">${fm(mejor.g)}</span></div>`:''}
+      <div class="sumrow b"><span style="color:var(--tx3)">Este mes va</span>
+        <span style="color:${uHoy>=mejor.u?C.ok:'var(--tx2)'}">${uHoy>=mejor.u?'por encima de tu récord':(mejor.u-uHoy)+' por debajo'}</span></div>
+    </div>`:''}
+
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;margin-bottom:10px">
+        ${ic('Activity',14,C.info)}Cómo estás trabajando</div>
+      <div class="sumrow"><span style="color:var(--tx3)">Leads en juego</span>
+        <span style="color:var(--tx2)">${abiertos} de ${totalLeads}</span></div>
+      <div class="sumrow"><span style="color:var(--tx3)">Conversión histórica</span>
+        <span style="color:var(--tx2)">${totalLeads?conv+'%':'—'}</span></div>
+      <div class="sumrow"><span style="color:var(--tx3)">Ciclo promedio de cierre</span>
+        <span style="color:var(--tx2)">${cicloProm!==null?cicloProm+' días':'—'}</span></div>
+      ${meta.u&&faltanU&&restan>0?`<div class="sumrow b">
+        <span style="color:var(--tx3)">Para llegar a la meta</span>
+        <span style="color:${C.p};font-weight:700">${faltanU} en ${restan} día${restan===1?'':'s'}</span></div>`:''}
+    </div>
+
+    <div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('Tag',15,C.tx)}Tu meta del mes</div>
+        <div class="s">Ponla tú. Se guarda con tu libro y viaja a todos tus dispositivos.</div></div>
+      <div style="padding:15px 16px">
+        <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fr"><label class="f">Unidades al mes</label>
+            <input class="inp" id="metaU" inputmode="numeric" placeholder="12" value="${meta.u||''}"></div>
+          <div class="fr"><label class="f">Gross al mes</label>
+            <input class="inp" id="metaG" inputmode="numeric" placeholder="30000" value="${meta.g||''}"></div>
+        </div>
+        <button class="btn full" style="margin-top:12px" onclick="guardarMetaMes()">${ic('Save')}Guardar meta</button>
+        <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+          Deja un campo en cero si no quieres medir esa parte.</p>
+      </div>
+    </div>
+  </div>`;
+};
 VIEWS.connections=()=>soonView('connections');
 VIEWS.nextup=()=>soonView('nextup');
 /* ═══ VISTA · ADMIN (solo rol=admin) — vista admin_resumen ═══ */
