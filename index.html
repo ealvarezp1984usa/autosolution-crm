@@ -3416,6 +3416,14 @@ render();
 pintarPill();
 arrancar();
 
+/* Guarda la app en el telefono: abre sin senal y se puede instalar como programa.
+   Los datos no pasan por aqui, solo la app en si. */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW no registrado',e));
+  });
+}
+
 /* Nadie ve el CRM sin cuenta. Con sesión guardada la app abre YA con la
    caché local y sincroniza detrás: sin internet se sigue trabajando. */
 async function arrancar(){
