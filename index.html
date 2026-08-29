@@ -238,6 +238,29 @@ select.inp{-webkit-appearance:none;appearance:none;
   text-transform:uppercase;letter-spacing:.08em}
 .onbform{padding:26px 22px calc(30px + var(--sb));max-width:440px;width:100%;margin:0 auto}
 
+/* ═══ ENTRADA (login / registro) ═══ */
+.auh{font-size:23px;font-weight:900;letter-spacing:-.02em;margin-bottom:6px}
+.aup{color:var(--tx3);font-size:13px;margin-bottom:20px;line-height:1.6}
+.aunota{font-size:11px;color:var(--tx3);text-align:center;margin-top:14px;line-height:1.6}
+.aumsg{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:9px;
+  font-size:12px;line-height:1.55;margin-bottom:14px}
+.aumsg.dan{background:rgba(239,68,68,.09);border:1px solid rgba(239,68,68,.25);color:#fca5a5}
+.aumsg.ok{background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.25);color:#86efac}
+.aumsg svg.ic{flex-shrink:0;margin-top:1px}
+.inp.au{font-size:15px;padding:12px 14px}
+.ausep{display:flex;align-items:center;gap:10px;margin:20px 0 12px;color:var(--tx3);font-size:11px}
+.ausep:before,.ausep:after{content:'';flex:1;height:1px;background:var(--bd)}
+.sbacc{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:9px;
+  background:var(--bg3);margin-bottom:7px}
+
+/* ═══ DASH DE ADMIN ═══ */
+.admrow{display:flex;gap:11px;padding:12px 14px;border-bottom:1px solid var(--bd);align-items:flex-start}
+.admrow:last-child{border-bottom:none}
+.admav{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.admnom{font-size:13px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.admsub{font-size:11px;color:var(--tx3);line-height:1.5}
+
 /* ═══ DESKTOP ═══ */
 @media(min-width:1000px){
   aside{position:static;transform:none;width:212px}
@@ -278,14 +301,15 @@ select.inp{-webkit-appearance:none;appearance:none;
         <div class="sbav" id="sbAv">AS</div>
         <div style="min-width:0;flex:1">
           <div id="sbName" style="font-size:11.5px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Mi cartera</div>
-          <div style="font-size:9px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Vendedor</div>
+          <div id="sbRol" style="font-size:9px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Vendedor</div>
         </div>
       </div>
     </div>
     <nav class="sbnav sh" id="sbNav"></nav>
     <div class="sbfoot">
+      <div id="sbAcc"></div>
       <div style="font-size:9.5px;color:var(--tx3);line-height:1.6;padding:2px 4px">
-        AutoSolution Miami · v1.0<br>Tus datos viven solo en este dispositivo.
+        AutoSolution Miami · v1.1<br>Tu cartera se guarda en tu cuenta.
       </div>
     </div>
   </aside>
@@ -321,6 +345,7 @@ select.inp{-webkit-appearance:none;appearance:none;
   </div>
 </div>
 
+<div class="onb" id="auth" style="display:none"></div>
 <div class="onb" id="onb" style="display:none"></div>
 <div class="toast" id="toast"></div>
 <input type="file" id="impFile" accept=".json,application/json" style="display:none" onchange="importar(event)">
@@ -459,7 +484,8 @@ Loader:'<path d="M12 2v4M12 18v4M4.9 4.9l2.9 2.9M16.2 16.2l2.9 2.9M2 12h4M18 12h
 History:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>',
 ExternalLink:'<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/>',
 Wa:'<path d="M20.5 3.5A10 10 0 0 0 3.6 15.4L2.5 21.5l6.3-1.1A10 10 0 1 0 20.5 3.5z"/><path d="M8.5 8c.3-.6.6-.6.9-.6h.7c.2 0 .5 0 .8.6l.8 1.9c.1.3 0 .5-.1.7l-.5.6c-.2.2-.3.4-.1.7a7 7 0 0 0 3.1 3c.3.2.5.1.7-.1l.6-.6c.2-.2.4-.2.7-.1l1.9.9c.3.1.5.3.5.5v.7c0 .8-.7 1.5-1.5 1.6-.6.1-1.4 0-3.4-.9a11 11 0 0 1-5-5c-.9-2-1-2.8-.9-3.4"/>',
-Sparkle:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>'};
+Sparkle:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>',
+LogOut:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/>'};
 
 function ic(n,size,color,style){
   const p=ICONS[n]||ICONS.Circle;
@@ -670,8 +696,9 @@ function finanzas(l){
 ═══════════════════════════════════════════════════════════ */
 const SK='asm_sync_v1';
 const SYNC_BLANK=()=>({
-  modo:'local',            /* 'local' | 'github' | 'archivo' */
+  modo:'local',            /* 'local' | 'supabase' | 'github' | 'archivo' */
   device:'',
+  uid:'',                  /* de quién es el libro guardado en este navegador */
   baseRev:0,               /* rev ya confirmada en el remoto */
   ultima:'',
   gh:{owner:'',repo:'',path:'datos/autosolution-crm.json',branch:'main',token:'',sha:''},
@@ -855,7 +882,9 @@ async function sincronizar(manual){
     if(SYNC.modo==='archivo'){
       if(!await fsPermiso(!!manual)){sincronizando=false;setEstado('permiso');return;}
     }
-    const rem = SYNC.modo==='github' ? await ghPull() : await fsLeer();
+    const rem = SYNC.modo==='supabase' ? await sbPull()
+              : SYNC.modo==='github'   ? await ghPull()
+                                       : await fsLeer();
 
     if(!rem.existe){                       /* primera vez: creamos el archivo */
       await enviar(); sincronizando=false; return;
@@ -902,7 +931,9 @@ async function sincronizar(manual){
   }
 }
 async function enviar(sha){
-  if(SYNC.modo==='github')await ghPush(sha); else await fsEscribir();
+  if(SYNC.modo==='supabase')await sbPush();
+  else if(SYNC.modo==='github')await ghPush(sha);
+  else await fsEscribir();
   SYNC.baseRev=S.meta.rev; SYNC.ultima=nowISO(); SYNC.deskSig=deskSig(); saveSync();
   setEstado('ok');
 }
@@ -1033,6 +1064,517 @@ window.addEventListener('beforeunload',e=>{
 });
 </script>
 <script>
+/* ═══════════════════════════════════════════════════════════
+   CUENTAS REALES — Supabase (Auth + API REST)
+   Sin librerías: fetch directo. El servidor ya trae el schema,
+   el trigger que crea perfil/libro/desk y el RLS.
+   La nube es la verdad; localStorage queda como caché offline.
+═══════════════════════════════════════════════════════════ */
+const SB_URL='https://hecobttjclvtgblincuh.supabase.co';
+const SB_KEY='sb_publishable_h27ZCXVeeO7ffcvX7x6JpA_hqDJ3iZU';
+const SESK='asm_sesion_v1';
+
+let SES=null;   /* {access_token, refresh_token, expires_at, user:{id,email}, perfil:{}} */
+try{const r=localStorage.getItem(SESK);if(r)SES=JSON.parse(r);}catch(e){SES=null;}
+if(SES&&!SES.refresh_token)SES=null;
+
+function guardarSes(){try{localStorage.setItem(SESK,JSON.stringify(SES));}catch(e){}}
+const esAdmin=()=>!!(SES&&SES.perfil&&SES.perfil.rol==='admin');
+const miId=()=>(SES&&SES.user&&SES.user.id)||'';
+
+/* ── Mensajes del servidor, en cristiano ── */
+function msgAuth(j,status){
+  const code=(j&&(j.error_code||j.code))||'';
+  const m=(j&&(j.msg||j.error_description||j.message||j.error))||'';
+  const M={
+    invalid_credentials:'Correo o contraseña incorrectos.',
+    email_not_confirmed:'Falta confirmar tu correo. Abre el enlace que te mandamos y vuelve a entrar.',
+    user_already_exists:'Ese correo ya tiene cuenta. Entra con tu contraseña.',
+    email_exists:'Ese correo ya tiene cuenta. Entra con tu contraseña.',
+    weak_password:'La contraseña es muy corta. Usa 8 caracteres o más.',
+    over_email_send_rate_limit:'Muchos correos seguidos. Espera unos minutos y reintenta.',
+    over_request_rate_limit:'Demasiados intentos. Espera un minuto.',
+    signup_disabled:'El registro está cerrado. Pídele a Eduardo que te dé de alta.',
+    user_banned:'Esta cuenta está bloqueada. Habla con Eduardo.'
+  };
+  if(M[code])return M[code];
+  if(/already registered|already been registered/i.test(m))return 'Ese correo ya tiene cuenta. Entra con tu contraseña.';
+  if(/password should be at least/i.test(m))return 'La contraseña es muy corta. Usa 8 caracteres o más.';
+  if(/invalid.*email|email.*invalid/i.test(m))return 'Ese correo no parece válido.';
+  return m||('Error del servidor ('+status+').');
+}
+const errRed=()=>new Error('Sin conexión con el servidor. Revisa el internet.');
+
+/* ── /auth/v1 ── */
+async function sbAuth(ruta,body,metodo){
+  let r;
+  try{
+    r=await fetch(SB_URL+'/auth/v1'+ruta,{
+      method:metodo||'POST',
+      headers:{'apikey':SB_KEY,'Content-Type':'application/json'},
+      body:body?JSON.stringify(body):undefined
+    });
+  }catch(e){throw errRed();}
+  const t=await r.text();
+  let j=null;try{j=t?JSON.parse(t):null;}catch(e){}
+  if(!r.ok){const err=new Error(msgAuth(j,r.status));err.status=r.status;throw err;}
+  return j;
+}
+
+/* ── Token vivo (refresca solo, una vez a la vez) ── */
+let refrescando=null;
+async function sbToken(){
+  if(!SES||!SES.refresh_token)return null;
+  if(SES.access_token&&SES.expires_at&&Date.now()<SES.expires_at-60000)return SES.access_token;
+  if(!refrescando){
+    refrescando=(async()=>{
+      try{
+        const j=await sbAuth('/token?grant_type=refresh_token',{refresh_token:SES.refresh_token});
+        adoptarSesion(j);
+        return SES.access_token;
+      }catch(e){
+        /* Solo se mata la sesión si el SERVIDOR la rechazó. Si fue falta de
+           internet, la sesión sigue viva y la app trabaja con la caché. */
+        if(e&&e.status&&e.status<500)sesionMuerta();
+        throw e;
+      }finally{refrescando=null;}
+    })();
+  }
+  return refrescando;
+}
+function adoptarSesion(j){
+  if(!j||!j.access_token)return false;
+  const antes=SES||{};
+  SES={
+    access_token:j.access_token,
+    refresh_token:j.refresh_token||antes.refresh_token||'',
+    expires_at:Date.now()+((num(j.expires_in)||3600)*1000),
+    user:{id:(j.user&&j.user.id)||(antes.user&&antes.user.id)||'',
+          email:(j.user&&j.user.email)||(antes.user&&antes.user.email)||''},
+    perfil:antes.perfil||null
+  };
+  guardarSes();
+  return true;
+}
+
+/* ── /rest/v1 ── */
+async function sbRest(ruta,opts){
+  opts=opts||{};
+  const tk=await sbToken();
+  if(!tk)throw new Error('Sesión cerrada. Entra otra vez.');
+  const pide=async(token)=>{
+    const h={'apikey':SB_KEY,'Authorization':'Bearer '+token};
+    if(opts.prefer)h['Prefer']=opts.prefer;
+    if(opts.body)h['Content-Type']='application/json';
+    try{
+      return await fetch(SB_URL+'/rest/v1'+ruta,{method:opts.method||'GET',headers:h,
+        body:opts.body?JSON.stringify(opts.body):undefined,cache:'no-store'});
+    }catch(e){throw errRed();}
+  };
+  let r=await pide(tk);
+  if(r.status===401&&SES){                 /* venció antes de tiempo */
+    SES.expires_at=0;guardarSes();
+    const tk2=await sbToken();
+    if(!tk2)throw new Error('Sesión cerrada. Entra otra vez.');
+    r=await pide(tk2);
+  }
+  if(!r.ok){
+    let d='';try{const j=await r.json();d=j.message||j.msg||j.hint||'';}catch(e){}
+    throw new Error('Servidor '+r.status+(d?': '+d:''));
+  }
+  if(r.status===204)return null;
+  const t=await r.text();
+  return t?JSON.parse(t):null;
+}
+
+/* ── Perfil del vendedor ── */
+async function cargarPerfil(){
+  const f=await sbRest('/profiles?select=*&user_id=eq.'+encodeURIComponent(miId()));
+  SES.perfil=(f&&f[0])||null;
+  guardarSes();
+  return SES.perfil;
+}
+/* El nombre y el WhatsApp del registro alimentan la firma de los mensajes. */
+function aplicarPerfil(){
+  const p=SES&&SES.perfil;if(!p)return;
+  let ch=false;
+  if(p.nombre&&!S.cfg.nombre){S.cfg.nombre=p.nombre;ch=true;}
+  if(p.whatsapp&&!S.cfg.wa){S.cfg.wa=p.whatsapp;ch=true;}
+  if(p.dealer&&!S.cfg.dealer){S.cfg.dealer=p.dealer;ch=true;}
+  if(!S.cfg.onboarded){S.cfg.onboarded=true;ch=true;}
+  if(ch)saveLocal();
+}
+
+/* ═══ SINCRONIZACIÓN CON LAS TABLAS ═══
+   books.data ← asm_libro_v1   ·   desks.data ← asm_desk_v1
+   Las dos filas comparten el contador S.meta.rev, el mismo que el
+   orquestador ya usaba para detectar conflictos entre dispositivos. */
+async function sbPull(){
+  const id=encodeURIComponent(miId());
+  const [b,d]=await Promise.all([
+    sbRest('/books?select=data,rev,updated_at&user_id=eq.'+id),
+    sbRest('/desks?select=data,rev&user_id=eq.'+id)
+  ]);
+  const fb=(b&&b[0])||null, fd=(d&&d[0])||null;
+  const libro=fb&&fb.data&&Object.keys(fb.data).length?fb.data:null;
+  if(!libro)return {existe:false};
+  const datos=JSON.parse(JSON.stringify(libro));
+  if(fd&&fd.data&&Object.keys(fd.data).length)datos.desk=fd.data;
+  if(!datos.meta||typeof datos.meta!=='object')datos.meta={rev:0,updatedAt:'',device:''};
+  /* La columna rev manda: es lo que se compara contra baseRev. */
+  datos.meta.rev=Math.max(num(fb.rev),num(datos.meta.rev));
+  return {existe:true,rev:num(fb.rev),datos:datos};
+}
+async function sbPush(){
+  const id=miId();
+  if(!id)throw new Error('Sesión cerrada. Entra otra vez.');
+  const snap=snapshot();
+  const desk=snap.desk||null;
+  const libro=Object.assign({},snap);delete libro.desk;
+  const rev=S.meta.rev||0, ahora=nowISO();
+  await sbRest('/books',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',
+    body:{user_id:id,data:libro,rev:rev,device:SYNC.device,updated_at:ahora}});
+  await sbRest('/desks',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',
+    body:{user_id:id,data:desk||{},rev:rev,updated_at:ahora}});
+  return true;
+}
+
+/* ═══ ENTRAR · SALIR ═══ */
+/* Si en este navegador quedó el libro de OTRO vendedor, se limpia:
+   nadie debe abrir la cartera ajena. */
+function limpiarSiEsOtro(){
+  const id=miId();
+  if(SYNC.uid&&SYNC.uid!==id){
+    try{localStorage.removeItem(K);localStorage.removeItem(DK);}catch(e){}
+    S=BLANK();
+    SYNC.baseRev=0;SYNC.ultima='';SYNC.deskSig=null;
+  }
+  SYNC.uid=id;SYNC.modo='supabase';saveSync();
+}
+async function entrarConSesion(){
+  limpiarSiEsOtro();
+  try{await cargarPerfil();}catch(e){}
+  aplicarPerfil();
+  ocultarAuth();
+  render();pintarPill();
+  try{await sincronizar(true);}catch(e){}
+  aplicarPerfil();
+  render();
+}
+function sesionMuerta(){
+  SES=null;
+  try{localStorage.removeItem(SESK);}catch(e){}
+  SYNC.modo='local';saveSync();setEstado('local');
+  AUERR='Tu sesión venció. Entra otra vez — tus datos siguen aquí y en la nube.';
+  mostrarAuth();
+}
+async function salir(){
+  const pend=Math.max(0,(S.meta.rev||0)-(SYNC.baseRev||0));
+  if(!confirm(pend
+     ? 'Hay '+pend+' cambio(s) sin enviar. Se suben a la nube y después se cierra la sesión.\n\nEste dispositivo queda limpio; al volver a entrar todo se descarga otra vez.\n\n¿Cerrar sesión?'
+     : '¿Cerrar sesión?\n\nEste dispositivo queda limpio; al volver a entrar todo se descarga de la nube.'))return;
+  if(pend){
+    try{await sincronizar(true);}
+    catch(e){
+      if(!confirm('No se pudieron enviar los cambios:\n'+(e&&e.message?e.message:e)+
+        '\n\nSi cierras sesión ahora, esos cambios se pierden. ¿Cerrar de todos modos?'))return;
+    }
+  }
+  try{
+    const tk=SES&&SES.access_token;
+    if(tk)fetch(SB_URL+'/auth/v1/logout',{method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+tk}}).catch(()=>{});
+  }catch(e){}
+  try{localStorage.removeItem(SESK);localStorage.removeItem(K);localStorage.removeItem(DK);}catch(e){}
+  SES=null;
+  SYNC.modo='local';SYNC.baseRev=0;SYNC.ultima='';SYNC.uid='';SYNC.deskSig=null;saveSync();
+  location.reload();
+}
+
+/* ═══════════════════════════════════════════
+   PANTALLA DE ENTRADA
+═══════════════════════════════════════════ */
+let AUTAB='entrar', AUERR='', AUMSG='', AUBUSY=false, AUCONF='';
+const AUVAL={email:'',nombre:'',wa:''};
+
+function mostrarAuth(){
+  $('auth').style.display='flex';
+  if($('onb'))$('onb').style.display='none';
+  pintarAuth();
+}
+function ocultarAuth(){
+  $('auth').style.display='none';
+  AUERR='';AUMSG='';AUCONF='';
+}
+function auTab(t){AUTAB=t;AUERR='';AUMSG='';AUCONF='';pintarAuth();}
+function auEnter(e,fn){if(e.key==='Enter'){e.preventDefault();window[fn]();}}
+function auBusy(v){AUBUSY=v;pintarAuth();}
+
+function pintarAuth(){
+  const busy=AUBUSY;
+  const aviso=AUERR
+    ? '<div class="aumsg dan">'+ic('AlertCircle',14,C.dan)+'<span>'+esc(AUERR)+'</span></div>'
+    : AUMSG?'<div class="aumsg ok">'+ic('CheckCircle2',14,C.ok)+'<span>'+esc(AUMSG)+'</span></div>':'';
+
+  let form;
+  if(AUCONF){
+    form=`<h2 class="auh">Revisa tu correo</h2>
+      <p class="aup">Mandamos un enlace de confirmación a
+        <b style="color:var(--tx)">${esc(AUCONF)}</b>. Ábrelo y después entra con tu contraseña.</p>
+      ${aviso}
+      <button class="btn lg full" ${busy?'disabled':''} onclick="auTab('entrar')">${ic('ChevronRight')}Ya lo confirmé — entrar</button>
+      <button class="btn sec sm full" style="margin-top:10px" ${busy?'disabled':''} onclick="authReenviar()">
+        ${ic('Mail')}Reenviar el correo</button>
+      <p class="aunota">¿No llega? Mira en Spam o Promociones. Si sigue sin llegar, escríbele a Eduardo.</p>`;
+  }else if(AUTAB==='entrar'){
+    form=`<h2 class="auh">Entra a tu libro</h2>
+      <p class="aup">Tu cartera vive en tu cuenta: la abres desde el teléfono, la tablet o la computadora y siempre es la misma.</p>
+      ${aviso}
+      <div class="fr" style="margin-bottom:12px"><label class="f">Correo</label>
+        <input class="inp au" id="auEmail" type="email" inputmode="email" autocomplete="username"
+          autocapitalize="off" spellcheck="false" placeholder="tucorreo@gmail.com"
+          value="${esc(AUVAL.email)}" oninput="AUVAL.email=this.value" onkeydown="auEnter(event,'authEntrar')"></div>
+      <div class="fr" style="margin-bottom:16px"><label class="f">Contraseña</label>
+        <input class="inp au" id="auPass" type="password" autocomplete="current-password"
+          placeholder="••••••••" onkeydown="auEnter(event,'authEntrar')"></div>
+      <button class="btn lg full" ${busy?'disabled':''} onclick="authEntrar()">
+        ${busy?'Entrando…':ic('Lock')+'Entrar'}</button>
+      <button class="btn ghost sm full" style="margin-top:10px" ${busy?'disabled':''} onclick="authRecuperar()">
+        Olvidé mi contraseña</button>
+      <div class="ausep"><span>¿Todavía no tienes cuenta?</span></div>
+      <button class="btn sec full" ${busy?'disabled':''} onclick="auTab('crear')">
+        ${ic('UserPlus')}Crear mi cuenta — 30 días gratis</button>`;
+  }else{
+    form=`<h2 class="auh">Crea tu cuenta</h2>
+      <p class="aup">Primer mes gratis, sin tarjeta. Tu nombre firma los mensajes de WhatsApp y tu número va en los posts.</p>
+      ${aviso}
+      <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fr"><label class="f">Tu nombre</label>
+          <input class="inp au" id="auNom" autocomplete="name" placeholder="Diana Pérez"
+            value="${esc(AUVAL.nombre)}" oninput="AUVAL.nombre=this.value" onkeydown="auEnter(event,'authRegistrar')"></div>
+        <div class="fr"><label class="f">Tu WhatsApp</label>
+          <input class="inp au" id="auWa" inputmode="tel" autocomplete="tel" placeholder="3055551234"
+            value="${esc(AUVAL.wa)}" oninput="AUVAL.wa=this.value" onkeydown="auEnter(event,'authRegistrar')"></div>
+        <div class="fr" style="grid-column:1/-1"><label class="f">Correo</label>
+          <input class="inp au" id="auEmail2" type="email" inputmode="email" autocomplete="username"
+            autocapitalize="off" spellcheck="false" placeholder="tucorreo@gmail.com"
+            value="${esc(AUVAL.email)}" oninput="AUVAL.email=this.value" onkeydown="auEnter(event,'authRegistrar')"></div>
+        <div class="fr" style="grid-column:1/-1"><label class="f">Contraseña
+          <span class="h">mínimo 8 caracteres</span></label>
+          <input class="inp au" id="auPass2" type="password" autocomplete="new-password"
+            placeholder="••••••••" onkeydown="auEnter(event,'authRegistrar')"></div>
+      </div>
+      <button class="btn lg full" style="margin-top:14px" ${busy?'disabled':''} onclick="authRegistrar()">
+        ${busy?'Creando…':ic('UserPlus')+'Crear cuenta'}</button>
+      <div class="ausep"><span>¿Ya tienes cuenta?</span></div>
+      <button class="btn sec full" ${busy?'disabled':''} onclick="auTab('entrar')">${ic('Lock')}Entrar</button>`;
+  }
+
+  $('auth').innerHTML=`
+    <div class="onbhero">
+      <div class="glow"></div>
+      <div style="position:relative;z-index:1">${LOGO}</div>
+      <div style="position:relative;z-index:1">
+        <div class="onbtag">${ic('Zap',12,C.p)}CRM exclusivo automotriz</div>
+        <h1 style="font-size:34px;font-weight:900;color:#fff;line-height:1.08;text-transform:uppercase;letter-spacing:-.03em;margin-bottom:14px">
+          Cierra más.<br><span style="color:var(--p)">Cada turno.</span></h1>
+        <p style="color:var(--tx3);font-size:13px;line-height:1.7;max-width:340px">
+          Motor de urgencia en tiempo real, flujo de 8 pasos con F&amp;I y alertas automáticas de fin de lease,
+          refi y aniversario sobre tu propio libro de clientes.</p>
+      </div>
+      <div class="dtonly" style="font-size:10px;color:var(--tx3);border-top:1px solid var(--bd);padding-top:16px">
+        © 2026 AutoSolution Miami CRM · Tu cartera es tuya y viaja contigo</div>
+    </div>
+    <div class="onbwrap"><div class="onbform">
+      ${form}
+      <p class="aunota" style="margin-top:18px">
+        Tus clientes, leads y negocios se guardan en tu cuenta y se sincronizan solos entre tus dispositivos.
+        ¿Tienes un respaldo JSON? Entra primero y lo importas desde <b style="color:var(--tx2)">Nube</b>.</p>
+    </div></div>`;
+
+  if(!busy&&window.innerWidth>=1000){
+    const foco=$(AUCONF?'':AUTAB==='entrar'?(AUVAL.email?'auPass':'auEmail'):'auNom');
+    if(foco)foco.focus();
+  }
+}
+
+async function authEntrar(){
+  if(AUBUSY)return;
+  const email=($('auEmail')?$('auEmail').value:AUVAL.email).trim().toLowerCase();
+  const pass=$('auPass')?$('auPass').value:'';
+  AUVAL.email=email;
+  if(!email||!pass){AUERR='Pon tu correo y tu contraseña.';pintarAuth();return;}
+  AUERR='';AUMSG='';auBusy(true);
+  try{
+    const j=await sbAuth('/token?grant_type=password',{email:email,password:pass});
+    adoptarSesion(j);
+    AUBUSY=false;
+    await entrarConSesion();
+    toast('Bienvenido'+(S.cfg.nombre?', '+S.cfg.nombre.split(' ')[0]:''));
+  }catch(e){
+    AUERR=e&&e.message?e.message:String(e);
+    if(/confirmar tu correo/i.test(AUERR))AUCONF=email;
+    auBusy(false);
+  }
+}
+async function authRegistrar(){
+  if(AUBUSY)return;
+  const nombre=$('auNom').value.trim(), wa=$('auWa').value.trim();
+  const email=$('auEmail2').value.trim().toLowerCase(), pass=$('auPass2').value;
+  AUVAL.nombre=nombre;AUVAL.wa=wa;AUVAL.email=email;
+  if(!nombre){AUERR='Pon tu nombre — es el que firma los mensajes que mandas.';pintarAuth();return;}
+  if(!wa||tel10(wa).length<11){AUERR='Pon tu WhatsApp con área, 10 dígitos (ej. 3055551234).';pintarAuth();return;}
+  if(!email||email.indexOf('@')<1){AUERR='Pon un correo válido.';pintarAuth();return;}
+  if(!pass||pass.length<8){AUERR='La contraseña necesita 8 caracteres o más.';pintarAuth();return;}
+  AUERR='';AUMSG='';auBusy(true);
+  try{
+    /* El servidor crea perfil + libro + desk con 30 días gratis a partir de estos datos. */
+    const j=await sbAuth('/signup',{email:email,password:pass,
+      data:{nombre:nombre,whatsapp:tel10(wa)}});
+    if(j&&j.access_token){                 /* sin confirmación por correo: entra directo */
+      adoptarSesion(j);
+      AUBUSY=false;
+      await entrarConSesion();
+      toast('Cuenta creada — 30 días gratis');
+      return;
+    }
+    AUCONF=email;AUMSG='Cuenta creada. Falta un paso.';
+    auBusy(false);
+  }catch(e){
+    AUERR=e&&e.message?e.message:String(e);
+    if(/ya tiene cuenta/i.test(AUERR))AUTAB='entrar';
+    auBusy(false);
+  }
+}
+async function authReenviar(){
+  if(AUBUSY||!AUCONF)return;
+  AUERR='';AUMSG='';auBusy(true);
+  try{
+    await sbAuth('/resend',{type:'signup',email:AUCONF});
+    AUMSG='Te reenviamos el enlace.';
+  }catch(e){AUERR=e&&e.message?e.message:String(e);}
+  auBusy(false);
+}
+async function authRecuperar(){
+  if(AUBUSY)return;
+  const email=($('auEmail')?$('auEmail').value:AUVAL.email).trim().toLowerCase();
+  AUVAL.email=email;
+  if(!email){AUERR='Escribe primero tu correo y vuelve a tocar aquí.';pintarAuth();return;}
+  AUERR='';AUMSG='';auBusy(true);
+  try{
+    await sbAuth('/recover',{email:email});
+    AUMSG='Si ese correo tiene cuenta, ya va en camino el enlace para cambiar la contraseña.';
+  }catch(e){AUERR=e&&e.message?e.message:String(e);}
+  auBusy(false);
+}
+
+/* ── Volver de un enlace de correo: el token llega en el # ── */
+async function revisarEnlace(){
+  const h=String(location.hash||'').replace(/^#/,'');
+  if(!h||(h.indexOf('access_token')<0&&h.indexOf('error')<0))return false;
+  const p={};
+  h.split('&').forEach(kv=>{const i=kv.indexOf('=');
+    if(i>0)p[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1).replace(/\+/g,' '));});
+  try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
+  if(p.error_description||p.error){AUERR=p.error_description||p.error;return false;}
+  if(!p.access_token||!p.refresh_token)return false;
+  adoptarSesion({access_token:p.access_token,refresh_token:p.refresh_token,
+    expires_in:num(p.expires_in)||3600});
+  return p.type||'sesion';
+}
+/* Con el token del enlace todavía no sabemos el user_id: lo pide a /auth/v1/user */
+async function completarUsuario(){
+  const tk=await sbToken();
+  if(!tk)return false;
+  let r;
+  try{
+    r=await fetch(SB_URL+'/auth/v1/user',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+tk}});
+  }catch(e){throw errRed();}
+  if(!r.ok){let j=null;try{j=await r.json();}catch(e){}throw new Error(msgAuth(j,r.status));}
+  const u=await r.json();
+  if(!u||!u.id)return false;
+  SES.user={id:u.id,email:u.email||''};
+  guardarSes();
+  return true;
+}
+function modalClave(){
+  openModal('Elige tu nueva contraseña',
+    `<div class="fr"><label class="f">Contraseña nueva <span class="h">mínimo 8</span></label>
+      <input class="inp" id="pwNueva" type="password" autocomplete="new-password" placeholder="••••••••"></div>
+     <p style="font-size:11.5px;color:var(--tx3);line-height:1.6;margin-top:10px">
+       Se guarda ahora mismo. La próxima vez entras con esta.</p>`,
+    `<button class="btn sec" onclick="closeModal()">Ahora no</button>
+     <button class="btn" onclick="guardarClave()">${ic('Save')}Guardar</button>`);
+}
+async function guardarClave(){
+  const v=$('pwNueva').value;
+  if(!v||v.length<8){alert('La contraseña necesita 8 caracteres o más.');return;}
+  try{
+    const tk=await sbToken();
+    const r=await fetch(SB_URL+'/auth/v1/user',{method:'PUT',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+tk,'Content-Type':'application/json'},
+      body:JSON.stringify({password:v})});
+    if(!r.ok){let j=null;try{j=await r.json();}catch(e){}throw new Error(msgAuth(j,r.status));}
+    closeModal();toast('Contraseña actualizada');
+  }catch(e){alert('No se pudo cambiar: '+(e&&e.message?e.message:e));}
+}
+
+/* ── Plan y período gratis ── */
+function diasGratis(){
+  const p=SES&&SES.perfil;
+  if(!p||!p.gratis_hasta)return null;
+  return dias(new Date(String(p.gratis_hasta).slice(0,10)+'T00:00:00'),hoy());
+}
+function planTxt(){
+  const p=SES&&SES.perfil;if(!p)return '—';
+  if(p.plan==='activo')return 'Activo';
+  if(p.plan==='pausado')return 'Pausado';
+  const d=diasGratis();
+  if(d===null)return 'Gratis';
+  const hasta=fDate(String(p.gratis_hasta).slice(0,10));
+  if(d<0)return 'Prueba vencida el '+hasta;
+  return 'Prueba gratis · '+d+' día'+(d===1?'':'s')+' (hasta '+hasta+')';
+}
+function bannerPlan(){
+  const p=SES&&SES.perfil;if(!p)return '';
+  const caja=(color,icon,titulo,texto)=>`<div class="card" style="border-color:${color}38;background:${color}0d;margin-bottom:14px">
+    <div style="display:flex;gap:10px;align-items:flex-start">${ic(icon,15,color)}
+      <div><div style="font-weight:800;font-size:12.5px;color:${color}">${esc(titulo)}</div>
+      <div style="font-size:11.5px;color:var(--tx2);line-height:1.6;margin-top:3px">${esc(texto)}</div></div></div></div>`;
+  if(p.plan==='pausado')
+    return caja(C.dan,'AlertCircle','Cuenta pausada',
+      'Sigues viendo tu libro, pero la cuenta está pausada. Habla con Eduardo para reactivarla.');
+  if(p.plan==='activo')return '';
+  const d=diasGratis();
+  if(d===null)return '';
+  if(d<0)return caja(C.dan,'Clock','Se acabó tu mes gratis',
+    'Tus datos están completos y a salvo. Habla con Eduardo para activar la cuenta.');
+  if(d===0)return caja(C.warn,'Clock','Hoy es tu último día gratis',
+    'Habla con Eduardo para seguir sin cortes.');
+  if(d<=7)return caja(C.warn,'Clock','Te quedan '+d+' día'+(d>1?'s':'')+' de prueba',
+    'Después de eso habla con Eduardo para activar la cuenta.');
+  return '';
+}
+
+/* ═══════════════════════════════════════════
+   DASH DE ADMIN — lee la vista admin_resumen
+═══════════════════════════════════════════ */
+let ADM={estado:'',filas:[],err:''};
+async function cargarAdmin(forzar){
+  if(ADM.estado==='cargando')return;
+  if(ADM.estado==='listo'&&!forzar)return;
+  ADM.estado='cargando';ADM.err='';
+  if(TAB==='admin')render();
+  try{
+    const f=await sbRest('/admin_resumen?select=*&order=ultima_actividad.desc.nullslast');
+    ADM.filas=f||[];ADM.estado='listo';
+  }catch(e){
+    ADM.err=e&&e.message?e.message:String(e);ADM.estado='error';
+  }
+  if(TAB==='admin')render();
+}
+</script>
+<script>
 /* ═══════════ NAVEGACIÓN ═══════════ */
 let TAB='dashboard', LEADID=null, CLIID=null, STEP=1, Q='', QLIB='';
 let FSRC='Todos', FEST='Todos';
@@ -1085,13 +1627,19 @@ function renderNav(){
     if(n.id==='tasks')bdg=S.tareas.filter(t=>!t.hecha&&t.vence&&t.vence<today()).length;
     h+=`<button class="nvi ${TAB===n.id?'on':''}" onclick="go('${n.id}')">
       ${ic(n.icon,15,TAB===n.id?C.p:C.tx3)}<span class="lb">${esc(n.label)}</span>
-      ${n.soon?'<span class="soon">PRONTO</span>':bdg>0?`<span class="bdg">${bdg}</span>`:''}
+      ${n.soon&&!(n.id==='admin'&&esAdmin())?'<span class="soon">PRONTO</span>':bdg>0?`<span class="bdg">${bdg}</span>`:''}
     </button>`;
   });
   $('sbNav').innerHTML=h;
   $('sbLogo').innerHTML=LOGO;
   $('sbAv').textContent=ini(S.cfg.nombre);
   $('sbName').textContent=S.cfg.nombre||'Mi cartera';
+  if($('sbRol'))$('sbRol').textContent=esAdmin()?'Administrador':'Vendedor';
+  if($('sbAcc'))$('sbAcc').innerHTML=SES?`<div class="sbacc">
+      <div style="min-width:0;flex:1;font-size:10px;color:var(--tx3);overflow:hidden;
+        text-overflow:ellipsis;white-space:nowrap">${esc((SES.user&&SES.user.email)||'')}</div>
+      <button class="btn ghost xs" onclick="salir()" title="Cerrar sesión">${ic('LogOut')}Salir</button>
+    </div>`:'';
 
   const alertN=calcAlertas().length;
   $('bottomnav').innerHTML=TABS.map(t=>{
@@ -1109,7 +1657,7 @@ function render(){
   $('content').classList.toggle('flush',TAB==='deal');
   renderNav();
   const fn=VIEWS[TAB]||VIEWS.dashboard;
-  $('view').innerHTML=fn();
+  $('view').innerHTML=(TAB==='dashboard'||TAB==='nube'?bannerPlan():'')+fn();
   /* La animación usa transform y crearía un bloque contenedor que rompe
      el position:fixed de la barra financiera del Deal Room. */
   $('view').classList.remove('fi');
@@ -1810,7 +2358,88 @@ VIEWS.campaigns=()=>soonView('campaigns');
 VIEWS.performance=()=>soonView('performance');
 VIEWS.connections=()=>soonView('connections');
 VIEWS.nextup=()=>soonView('nextup');
-VIEWS.admin=()=>soonView('admin');
+/* ═══ VISTA · ADMIN (solo rol=admin) — vista admin_resumen ═══ */
+VIEWS.admin=function(){
+  if(!esAdmin())return soonView('admin');
+  if(ADM.estado==='')setTimeout(()=>cargarAdmin(),0);
+
+  const F=ADM.filas||[];
+  const dHoy=hoy();
+  const dGratis=f=>f.gratis_hasta?dias(new Date(String(f.gratis_hasta).slice(0,10)+'T00:00:00'),dHoy):null;
+  const planUI=f=>{
+    if(f.plan==='activo')return{c:C.ok,t:'Activo'};
+    if(f.plan==='pausado')return{c:C.dan,t:'Pausado'};
+    const d=dGratis(f);
+    if(d===null)return{c:C.tx3,t:'Gratis'};
+    if(d<0)return{c:C.dan,t:'Prueba vencida'};
+    return{c:d<=7?C.warn:C.info,t:'Prueba · '+d+'d'};
+  };
+  const vend=F.filter(f=>f.rol!=='admin');
+  const nAct=F.filter(f=>f.plan==='activo').length;
+  const nPrueba=F.filter(f=>f.plan==='gratis'&&dGratis(f)!==null&&dGratis(f)>=0).length;
+  const nVenc=F.filter(f=>f.plan==='gratis'&&dGratis(f)!==null&&dGratis(f)<0).length;
+  const totCli=F.reduce((s,f)=>s+num(f.clientes),0);
+
+  let cuerpo;
+  if(ADM.estado==='cargando'||ADM.estado===''){
+    cuerpo=`<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:12.5px">
+      Cargando cuentas…<span class="spin"></span></div>`;
+  }else if(ADM.estado==='error'){
+    cuerpo=`<div class="card" style="border-color:${C.dan}38;background:${C.dan}0d">
+      <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.dan)}
+        <div><div style="font-weight:800;font-size:12.5px;color:${C.dan}">No se pudo leer el resumen</div>
+        <div style="font-size:11.5px;color:var(--tx2);line-height:1.6;margin-top:3px">${esc(ADM.err)}</div></div></div>
+      <button class="btn sec sm full" style="margin-top:12px" onclick="cargarAdmin(true)">${ic('RefreshCw')}Reintentar</button></div>`;
+  }else if(!F.length){
+    cuerpo=`<div class="card">${empty('Users','Todavía no hay cuentas','Cuando un vendedor se registre aparece aquí.')}</div>`;
+  }else{
+    cuerpo=`<div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <span>Vendedores (${vend.length})</span>
+        <button class="btn ghost xs" onclick="cargarAdmin(true)">${ic('RefreshCw')}Actualizar</button></div>
+        <div class="s">Ordenados por última actividad. La columna "libro" es lo que ese vendedor tiene cargado ahora mismo.</div></div>
+      <div>${F.map(f=>{
+        const u=planUI(f);
+        const act=f.ultima_actividad?fDateTime(f.ultima_actividad):'nunca';
+        const fresco=f.ultima_actividad?dias(dHoy,new Date(String(f.ultima_actividad).slice(0,10)+'T00:00:00')):999;
+        return `<div class="admrow">
+          <div class="admav" style="background:${u.c}18;color:${u.c}">${esc(ini(f.nombre)||'?')}</div>
+          <div style="min-width:0;flex:1">
+            <div class="admnom">${esc(f.nombre||'(sin nombre)')}
+              ${f.rol==='admin'?`<span class="bdg2" style="color:${C.p};background:${C.ps};border-color:${C.p}40">ADMIN</span>`:''}</div>
+            <div class="admsub mono">${esc(f.whatsapp||'sin whatsapp')}${f.dealer?' · '+esc(f.dealer):''}</div>
+            <div class="admsub" style="margin-top:4px">
+              <b style="color:var(--tx2)">${fmN(f.clientes)}</b> clientes ·
+              <b style="color:var(--tx2)">${fmN(f.leads)}</b> leads ·
+              <b style="color:var(--tx2)">${fmN(f.negocios_armados)}</b> negocios</div>
+            <div class="admsub" style="margin-top:2px;color:${fresco>14?C.tx3:C.tx2}">
+              Última actividad: ${esc(act)}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            ${badge(u.t,u.c)}
+            <div class="admsub" style="margin-top:5px">${f.gratis_hasta?'gratis hasta '+fDate(String(f.gratis_hasta).slice(0,10)):'—'}</div>
+            <div class="admsub">alta ${f.registrado?fDate(String(f.registrado).slice(0,10)):'—'}</div>
+          </div>
+        </div>`;}).join('')}</div></div>`;
+  }
+
+  return `<div class="stack">
+    <div><h2 class="vh">Consola de administrador</h2>
+      <div class="vsub">Todas las cuentas del sistema, en vivo desde el servidor.</div></div>
+    <div class="grid2">
+      ${kpi('Users','Cuentas',fmN(F.length),vend.length+' vendedores',C.info)}
+      ${kpi('CheckCircle2','Activos',fmN(nAct),'plan pagando',C.ok)}
+      ${kpi('Clock','En prueba',fmN(nPrueba),nVenc?fmN(nVenc)+' vencida'+(nVenc>1?'s':''):'ninguna vencida',nVenc?C.warn:C.vio)}
+      ${kpi('BookOpen','Clientes',fmN(totCli),'en todos los libros',C.p)}
+    </div>
+    ${cuerpo}
+    <div class="card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)">
+      <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.info)}
+        <p style="font-size:12px;color:var(--tx2);line-height:1.6">
+          Solo lectura. El plan y el período gratis se cambian en Supabase (tabla <span class="mono">profiles</span>),
+          y aquí se ve el efecto en cuanto actualizas.</p></div></div>
+  </div>`;
+};
 
 /* ═══════════════════════════════════════════
    VISTA · NUBE (respaldo y sincronización)
@@ -1823,6 +2452,26 @@ VIEWS.nube=function(){
     <div><h2 class="vh">Nube y respaldo</h2>
       <div class="vsub">Dónde viven tus datos y cómo llegan de un dispositivo a otro.</div></div>
 
+    ${SES?`<div class="card pad0">
+      <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('User',15,C.tx)}Tu cuenta</div>
+        <div class="s">Con esto entras desde cualquier dispositivo.</div></div>
+      <div style="padding:13px 16px">
+        <div class="sumrow"><span style="color:var(--tx3)">Correo</span>
+          <span style="color:var(--tx2)">${esc((SES.user&&SES.user.email)||'—')}</span></div>
+        <div class="sumrow"><span style="color:var(--tx3)">Nombre</span>
+          <span style="color:var(--tx2)">${esc((SES.perfil&&SES.perfil.nombre)||'—')}</span></div>
+        <div class="sumrow"><span style="color:var(--tx3)">WhatsApp</span>
+          <span class="mono" style="color:var(--tx2)">${esc((SES.perfil&&SES.perfil.whatsapp)||'—')}</span></div>
+        <div class="sumrow"><span style="color:var(--tx3)">Rol</span>
+          <span style="color:var(--tx2)">${esAdmin()?'Administrador':'Vendedor'}</span></div>
+        <div class="sumrow"><span style="color:var(--tx3)">Plan</span>
+          <span style="color:var(--tx2)">${esc(planTxt())}</span></div>
+        <div style="display:flex;gap:8px;margin-top:13px">
+          <button class="btn sec sm" style="flex:1" onclick="modalClave()">${ic('Lock')}Cambiar contraseña</button>
+          <button class="btn dan sm" onclick="salir()">${ic('LogOut')}Cerrar sesión</button>
+        </div>
+      </div></div>`:''}
+
     <div class="card" style="border-color:${u.c}40;background:${u.c}0d">
       <div style="display:flex;align-items:center;gap:11px">
         <div style="width:38px;height:38px;border-radius:10px;background:${u.c}18;display:flex;
@@ -1830,7 +2479,8 @@ VIEWS.nube=function(){
         <div style="flex:1;min-width:0">
           <div style="font-weight:800;font-size:14px;color:${u.c}">${u.t}</div>
           <div style="font-size:11.5px;color:var(--tx3);margin-top:2px">
-            ${SYNC.modo==='github'?`${esc(g.owner)}/${esc(g.repo)} · ${esc(g.path)}`
+            ${SYNC.modo==='supabase'?`Tu cuenta · ${esc((SES&&SES.user&&SES.user.email)||'')}`
+             :SYNC.modo==='github'?`${esc(g.owner)}/${esc(g.repo)} · ${esc(g.path)}`
              :SYNC.modo==='archivo'?esc(SYNC.archivo.nombre||'archivo local')
              :'Los datos solo están en este navegador'}
           </div>
@@ -1849,7 +2499,7 @@ VIEWS.nube=function(){
           <span style="color:var(--tx2)">${S.clientes.length} clientes · ${S.leads.length} leads · ${nDesk(leerDesk())} negocios</span></div>
         <div style="display:flex;gap:8px;margin-top:12px">
           <button class="btn sm" style="flex:1" onclick="sincronizar(true)">${ic('RefreshCw')}Sincronizar ahora</button>
-          <button class="btn sec sm" onclick="desconectar()">Desconectar</button>
+          ${SYNC.modo==='supabase'?'':`<button class="btn sec sm" onclick="desconectar()">Desconectar</button>`}
         </div>`:''}
     </div>`;
 
@@ -2475,10 +3125,36 @@ function doOnb(){
 /* ═══════════════════════════════════════════
    ARRANQUE
 ═══════════════════════════════════════════ */
-if(!S.cfg.onboarded && !S.clientes.length && !S.leads.length){ showOnb(); }
 render();
 pintarPill();
-iniciarSync();
+arrancar();
+
+/* Nadie ve el CRM sin cuenta. Con sesión guardada la app abre YA con la
+   caché local y sincroniza detrás: sin internet se sigue trabajando. */
+async function arrancar(){
+  let tipo=false;
+  try{tipo=await revisarEnlace();}catch(e){AUERR=e&&e.message?e.message:String(e);}
+  if(tipo){
+    try{
+      await completarUsuario();
+      await entrarConSesion();
+      if(tipo==='recovery')setTimeout(modalClave,450);
+      else toast('Correo confirmado — bienvenido');
+      return;
+    }catch(e){AUERR=e&&e.message?e.message:String(e);}
+  }
+  if(!SES||!SES.refresh_token){mostrarAuth();return;}
+
+  SYNC.modo='supabase'; if(!SYNC.uid)SYNC.uid=miId(); saveSync();
+  aplicarPerfil(); render(); setEstado('pendiente');
+  try{await sbToken();}
+  catch(e){
+    if(!SES)return;                 /* el servidor rechazó la sesión: ya se pidió entrar */
+    setEstado('error','Sin conexión — trabajando con la copia de este dispositivo');
+    return;
+  }
+  await entrarConSesion();
+}
 </script>
 </body>
 </html>
