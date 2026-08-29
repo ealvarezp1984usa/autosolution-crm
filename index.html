@@ -884,6 +884,24 @@ async function sincronizar(manual){
     if(SYNC.modo==='archivo'){
       if(!await fsPermiso(!!manual)){sincronizando=false;setEstado('permiso');return;}
     }
+    /* Atajo barato: preguntamos SOLO el numero de version. Si nadie cambio
+       nada, se acaba aqui sin bajar la cartera. Es el 95% de las veces, y es
+       lo que hace que 10 vendedores no se coman la cuota de transferencia. */
+    if(SYNC.modo==='supabase'){
+      const rv=await sbRev();
+      const base0=SYNC.baseRev||0, lRev0=S.meta.rev||0;
+      if(rv!==null&&rv<=base0&&lRev0<=base0){
+        SYNC.ultima=nowISO(); SYNC.deskSig=deskSig(); saveSync();
+        sincronizando=false; setEstado('ok');
+        if(manual)toast('Todo al día');
+        return;
+      }
+      if(rv!==null&&rv<=base0&&lRev0>base0){   /* solo yo cambie: subo y ya */
+        await enviar(); sincronizando=false;
+        if(manual)toast('Guardado en la nube');
+        return;
+      }
+    }
     const rem = SYNC.modo==='supabase' ? await sbPull()
               : SYNC.modo==='github'   ? await ghPull()
                                        : await fsLeer();
@@ -1212,6 +1230,12 @@ function aplicarPerfil(){
    books.data ← asm_libro_v1   ·   desks.data ← asm_desk_v1
    Las dos filas comparten el contador S.meta.rev, el mismo que el
    orquestador ya usaba para detectar conflictos entre dispositivos. */
+/* Solo el numero de version: unos pocos bytes en vez del libro entero.
+   Con esto la comprobacion cada 2 minutos deja de descargar toda la cartera. */
+async function sbRev(){
+  const r=await sbRest('/books?select=rev&user_id=eq.'+encodeURIComponent(miId()));
+  return (r&&r[0])?num(r[0].rev):null;
+}
 async function sbPull(){
   const id=encodeURIComponent(miId());
   const [b,d]=await Promise.all([
