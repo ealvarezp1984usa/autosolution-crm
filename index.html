@@ -230,7 +230,12 @@ select.inp{-webkit-appearance:none;appearance:none;
 
 /* ═══ ONBOARDING ═══ */
 .onb{position:fixed;inset:0;z-index:400;background:var(--bg);overflow-y:auto;display:flex;flex-direction:column}
-.onbhero{background:#0d0909;border-bottom:1px solid var(--bd);padding:34px 22px 30px;position:relative;overflow:hidden}
+/* flex-shrink:0 en los dos: sin esto, en telefono el hero se comprime para
+   caber y como tiene overflow:hidden (por el glow) RECORTA el titular en vez
+   de dejar que .onb haga scroll. Se veia "CIERRA MAS. / CADA TU—" cortado. */
+.onbhero{background:#0d0909;border-bottom:1px solid var(--bd);padding:34px 22px 30px;
+  position:relative;overflow:hidden;flex-shrink:0}
+.onbwrap{flex-shrink:0}
 .onbhero .glow{position:absolute;bottom:-90px;right:-60px;width:240px;height:240px;
   background:rgba(227,28,28,.06);border-radius:50%}
 .onbtag{display:inline-flex;align-items:center;gap:6px;background:var(--ps);border:1px solid rgba(227,28,28,.19);
@@ -1493,7 +1498,7 @@ function pintarAuth(){
       <div style="position:relative;z-index:1">${LOGO}</div>
       <div style="position:relative;z-index:1">
         <div class="onbtag">${ic('Zap',12,C.p)}CRM exclusivo automotriz</div>
-        <h1 style="font-size:38px;font-weight:900;color:#fff;line-height:1.08;text-transform:uppercase;letter-spacing:-.03em;margin-bottom:14px">
+        <h1 style="font-size:clamp(30px,8.5vw,38px);font-weight:900;color:#fff;line-height:1.08;text-transform:uppercase;letter-spacing:-.03em;margin-bottom:14px">
           Cierra más.<br><span style="color:var(--p)">Cada turno.</span></h1>
         <p style="color:var(--tx3);font-size:14.5px;line-height:1.7;max-width:340px">
           Motor de urgencia en tiempo real, flujo de 8 pasos con F&amp;I y alertas automáticas de fin de lease,
@@ -5593,7 +5598,7 @@ function showOnb(){
       <div style="position:relative;z-index:1">${LOGO}</div>
       <div style="position:relative;z-index:1">
         <div class="onbtag">${ic('Zap',12,C.p)}CRM exclusivo automotriz</div>
-        <h1 style="font-size:38px;font-weight:900;color:#fff;line-height:1.08;text-transform:uppercase;letter-spacing:-.03em;margin-bottom:14px">
+        <h1 style="font-size:clamp(30px,8.5vw,38px);font-weight:900;color:#fff;line-height:1.08;text-transform:uppercase;letter-spacing:-.03em;margin-bottom:14px">
           Cierra más.<br><span style="color:var(--p)">Cada turno.</span></h1>
         <p style="color:var(--tx3);font-size:14.5px;line-height:1.7;max-width:340px">
           Motor de urgencia en tiempo real, flujo de 8 pasos con F&amp;I, y alertas automáticas de fin de lease, refi y aniversario sobre tu propio libro de clientes.</p>
