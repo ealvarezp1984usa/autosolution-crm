@@ -716,6 +716,7 @@ function nuevoLead(o){
     post:{resena:false,referidos:[],equityDate:'',refiDate:'',renewDate:''},
     acts:[]};
 }
+const TAX_FL=6;   /* Florida: 6% estatal. Editable por negocio. */
 function finanzas(l){
   const o=l.oferta||{},t=l.trade||{},d=l.deal||{};
   const precio=num(o.precio),msrp=num(o.msrp),fees=num(o.fees),tax=num(o.tax),
@@ -728,9 +729,35 @@ function finanzas(l){
   const frontGross=precio-msrp-over;
   const backGross=(l.recap&&l.recap.fni||[]).reduce((s,f)=>s+num(f.profit),0);
   const apr=num(d.apr),plazo=num(d.plazo)||60;
-  return{precio,msrp,fees,tax,rebates,desc,down,allowance,payoff,acv,totalDue,amtFin,equity,over,
-    frontGross,backGross,totalGross:frontGross+backGross,apr,plazo,
-    pago:Math.round(calcPmt(amtFin,apr,plazo))};
+
+  /* Un lease NO se calcula con fórmula de préstamo. Es depreciación + renta
+     sobre el residual, con el tax encima de cada pago. Sin residual ni money
+     factor no hay pago que dar — mejor no enseñar nada que enseñar un número
+     inventado. */
+  const esLease=String(d.tipo||'').toLowerCase()==='lease';
+  const base={precio,msrp,fees,tax,rebates,desc,down,allowance,payoff,acv,totalDue,amtFin,equity,over,
+    frontGross,backGross,totalGross:frontGross+backGross,apr,plazo,esLease};
+  if(!esLease)
+    return Object.assign(base,{pago:Math.round(calcPmt(amtFin,apr,plazo)),pagoOk:true,
+      alFirmar:down});
+
+  const residPct=num(d.residPct), mf=num(d.mf), acq=num(d.acqFee);
+  const taxR=(d.taxPct==null||d.taxPct==='')?TAX_FL/100:num(d.taxPct)/100;
+  const n=plazo||36;
+  const residual=msrp*residPct/100;
+  const capRed=down+Math.max(0,equity)+rebates+desc;
+  const capCost=precio+acq-capRed+Math.max(0,-equity);
+  const dep=(capCost-residual)/n;
+  const renta=(capCost+residual)*mf;
+  const pagoBase=dep+renta;
+  const pagoLease=pagoBase*(1+taxR);
+  const pagoOk=residPct>0&&mf>0&&msrp>0&&n>0;
+  return Object.assign(base,{
+    pago:pagoOk?Math.round(pagoLease):0, pagoOk:pagoOk,
+    residual, capCost, mf, residPct, acqFee:acq, millas:num(d.millas),
+    aprEq:Math.round(mf*2400*100)/100, taxPct:Math.round(taxR*10000)/100,
+    alFirmar:pagoOk?Math.round(pagoLease+down+fees):0,
+    faltan:[residPct>0?'':'residual', mf>0?'':'money factor', msrp>0?'':'MSRP'].filter(Boolean)});
 }
 </script>
 <script>
@@ -3326,6 +3353,69 @@ function cotsDe(kind,id){
   }catch(e){return [];}
 }
 
+/* Traer a la Oferta y al Cierre los numeros que se armaron en Desking.
+   Desking es el motor; el Deal Room recibe. Se pide confirmacion porque
+   pisa lo que haya escrito a mano. */
+function traerDeDesking(){
+  const l=L(); if(!l)return;
+  const cots=cotsDe('lead',l.id);
+  if(!cots.length){alert('Este negocio no tiene cotizaciones de Desking todavía.');return;}
+  const q=cots[0], w=q.w||{};
+  const veh=[w.ano,w.marca,w.modelo].filter(Boolean).join(' ');
+  const c=calcDesk(w);
+  const resumen=[
+    'Cotización del '+(q.fecha||'')+(veh?' · '+veh:''),
+    '',
+    'Tipo: '+(w.tipo==='lease'?'Lease':w.tipo==='cash'?'Contado':'Financiado'),
+    'Precio: '+fm(w.precio),
+    w.tipo==='lease' ? 'Pago: '+fm(c.pago)+'/mes con tax · '+fm(c.alFirmar)+' al firmar'
+                     : 'Pago: '+fm(c.pago)+'/mes · '+fm(c.financiar)+' a financiar',
+    '',
+    'Esto reemplaza los números que tengas escritos aquí. ¿Seguir?'
+  ].join(String.fromCharCode(10));
+  if(!confirm(resumen))return;
+
+  l.oferta=l.oferta||{};
+  l.oferta.precio=num(w.precio);
+  l.oferta.msrp=num(w.msrp)||num(w.precio);
+  l.oferta.fees=num(w.docFee)+num(w.tagFee)+num(w.otros);
+  l.oferta.rebates=num(w.rebates);
+  l.oferta.down=num(w.down);
+  if(w.tipo!=='lease')l.oferta.tax=Math.round(c.tax||0);
+  if(w.stock)l.oferta.stock=w.stock;
+  if(w.vin)l.oferta.vin=w.vin;
+
+  l.trade=l.trade||{};
+  if(num(w.tradeAllow)||num(w.tradePayoff)){
+    l.trade.has=true;
+    l.trade.allowance=num(w.tradeAllow);
+    l.trade.payoff=num(w.tradePayoff);
+    if(!num(l.trade.acv))l.trade.acv=num(w.tradeAllow);
+  }
+
+  l.deal=l.deal||{};
+  l.deal.tipo = w.tipo==='lease'?'Lease' : w.tipo==='cash'?'Contado' : 'Financiado';
+  l.deal.taxPct=num(w.taxPct)||TAX_FL;
+  if(w.tipo==='lease'){
+    l.deal.plazo=num(w.plazoL)||36;
+    l.deal.residPct=num(w.residPct);
+    l.deal.mf=w.mf;
+    l.deal.acqFee=num(w.acqFee);
+    l.deal.millas=num(w.millas);
+  }else{
+    l.deal.plazo=num(w.plazoF)||60;
+    l.deal.apr=num(w.apr);
+  }
+  if(!l.veh)l.veh={};
+  if(w.ano)l.veh.ano=w.ano;
+  if(w.marca)l.veh.marca=w.marca;
+  if(w.modelo)l.veh.mod=w.modelo;
+
+  l.updatedAt=nowISO(); save();
+  toast('Números traídos de Desking');
+  render();
+}
+
 function bloqueWorksheet(l){
   const cots=cotsDe('lead',l.id);
   const esLease=String((l.deal&&l.deal.tipo)||'').toLowerCase()==='lease';
@@ -5190,14 +5280,33 @@ STEPV[6]=function(l,f){
   <div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
     ${fld('Banco / Financiera',selT([{v:'',l:'Seleccionar banco…'}].concat(BANCOS),l.deal.banco,"updN('deal','banco',this.value);render()"))}
     ${fld('Tipo de negocio',selT(['Financiado','Contado','Lease'],l.deal.tipo,"updN('deal','tipo',this.value)"))}
-    ${fld('APR %',inpN(l.deal.apr,"updNum('deal','apr',this.value);render()"))}
+    ${f.esLease?fld('Money factor',inpT(l.deal.mf,"updNum('deal','mf',this.value);render()",'0.00125'))
+               :fld('APR %',inpN(l.deal.apr,"updNum('deal','apr',this.value);render()"))}
     ${fld('Término',selT(['24','36','48','60','72','84'],l.deal.plazo,"updNum('deal','plazo',this.value);render()"),'meses')}
   </div>
+  ${f.esLease?`<div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
+    ${fld('Residual % <span class="h">sobre MSRP</span>',inpN(l.deal.residPct,"updNum('deal','residPct',this.value);render()"))}
+    ${fld('Acquisition fee $',inpN(l.deal.acqFee,"updNum('deal','acqFee',this.value);render()"))}
+    ${fld('Millas al año',inpN(l.deal.millas,"updNum('deal','millas',this.value);render()"))}
+    ${fld('Tax % <span class="h">FL: 6</span>',inpT(l.deal.taxPct==null?TAX_FL:l.deal.taxPct,"updNum('deal','taxPct',this.value);render()",'6'))}
+  </div>
+  ${f.mf?`<div style="font-size:11px;color:var(--tx3);margin:-4px 0 4px">
+    Money factor ${esc(f.mf)} ≈ <b style="color:var(--tx2)">${f.aprEq}% APR</b> equivalente${f.residual?` · residual ${fm(f.residual)}`:''}</div>`:''}
+  ${cotsDe('lead',l.id).length?`<button class="btn sec sm full" style="margin-bottom:4px"
+    onclick="traerDeDesking()">${ic('Download')}Traer los números de Desking</button>`:''}`:''}
   <div class="card" style="background:#0c0c0c;border-color:var(--bd2)">
     <div class="rowb" style="align-items:flex-end">
-      <div><div style="font-size:9px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Pago mensual estimado</div>
-        <div class="mono" style="font-size:38px;font-weight:900;color:var(--p);letter-spacing:-.04em;line-height:1">${fm(f.pago)}</div>
-        <div style="font-size:11px;color:var(--tx3);margin-top:6px">${f.plazo} meses · ${f.apr}% APR · ${fm(f.amtFin)} financiado</div></div>
+      <div style="min-width:0"><div style="font-size:9px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">
+        ${f.esLease?'Pago mensual con tax':'Pago mensual estimado'}</div>
+        ${f.pagoOk!==false
+          ? `<div class="mono" style="font-size:38px;font-weight:900;color:var(--p);letter-spacing:-.04em;line-height:1">${fm(f.pago)}</div>
+             <div style="font-size:11px;color:var(--tx3);margin-top:6px">${f.esLease
+               ? f.plazo+' meses'+(f.millas?' · '+fmN(f.millas)+' mi/año':'')+' · '+fm(f.alFirmar)+' al firmar'
+               : f.plazo+' meses · '+f.apr+'% APR · '+fm(f.amtFin)+' financiado'}</div>`
+          : `<div class="mono" style="font-size:34px;font-weight:900;color:var(--tx3);letter-spacing:-.04em;line-height:1">—</div>
+             <div style="font-size:11px;color:${C.warn};margin-top:6px;line-height:1.5;max-width:230px">
+               Un lease no se calcula como préstamo. Falta ${esc((f.faltan||[]).join(' y '))}.</div>`}
+      </div>
       <div style="text-align:right"><div style="font-size:9px;color:var(--tx3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Backend</div>
         <div class="mono" style="font-size:20px;font-weight:800;color:${C.ok}">${fm(f.backGross)}</div></div>
     </div></div>
