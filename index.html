@@ -1178,6 +1178,7 @@ window.addEventListener('beforeunload',e=>{
    el trigger que crea perfil/libro/desk y el RLS.
    La nube es la verdad; localStorage queda como caché offline.
 ═══════════════════════════════════════════════════════════ */
+const APP_VER='2.2';
 const SB_URL='https://hecobttjclvtgblincuh.supabase.co';
 const SB_KEY='sb_publishable_h27ZCXVeeO7ffcvX7x6JpA_hqDJ3iZU';
 const SESK='asm_sesion_v1';
@@ -1883,7 +1884,7 @@ function vistaAyuda(){
         <div class="s">Lo que escribas aquí lo leemos y se arregla. Di qué esperabas y qué pasó.</div></div>
       <div style="padding:15px 16px">
         <textarea class="inp" id="sugTxt" rows="4" placeholder="Ej: cuando pongo un cliente sin apellido no me deja…"></textarea>
-        <button class="btn full" style="margin-top:10px" onclick="mandarSugerencia()">${ic('Send')}Enviar sugerencia</button>
+        <button class="btn full" id="sugBtn" style="margin-top:10px" onclick="mandarSugerencia()">${ic('Send')}Enviar sugerencia</button>
         ${(S.cfg.sugerencias||[]).length?`<div class="mlab">Las que ya mandaste</div>
           ${(S.cfg.sugerencias||[]).slice().reverse().map(s=>`<div class="sumrow" style="align-items:flex-start">
             <span style="color:var(--tx2);flex:1">${esc(s.t)}</span>
@@ -1891,14 +1892,79 @@ function vistaAyuda(){
       </div></div>
   </div>`;
 };
-function mandarSugerencia(){
+/* La sugerencia va a la tabla sugerencias, NO al libro. El libro es privado
+   del vendedor: si la sugerencia se queda ahi, el admin nunca la ve y la app
+   estaria mintiendo cuando dice "la leemos". Copia local para que el vendedor
+   vea las suyas aunque este sin senal. */
+async function mandarSugerencia(){
   const t=$('sugTxt').value.trim();
   if(!t){alert('Escribe la sugerencia primero.');return;}
-  S.cfg.sugerencias=(S.cfg.sugerencias||[]).concat([{t:t,f:nowISO(),v:'1.2'}]);
+  const b=$('sugBtn');
+  if(b){b.disabled=true;b.innerHTML=ic('Loader')+'Mandando…';}
+  let enviada=false;
+  try{
+    if(SES&&SES.access_token){
+      const r=await sbRest('/sugerencias',{method:'POST',prefer:'return=representation',
+        body:{autor:miId(), nombre:(S.cfg.nombre||(SES.perfil&&SES.perfil.nombre)||''),
+              texto:t, version:APP_VER}});
+      enviada=!!(r&&r.length);
+    }
+  }catch(e){ enviada=false; }
+  S.cfg.sugerencias=(S.cfg.sugerencias||[]).concat([{t:t,f:nowISO(),v:APP_VER,ok:enviada}]);
   save();
   $('sugTxt').value='';
-  toast('Gracias — la leemos');
+  if(b){b.disabled=false;b.innerHTML=ic('Send')+'Enviar sugerencia';}
+  toast(enviada?'Gracias — ya llegó':'Guardada. Se manda cuando vuelva la señal');
   render();
+}
+
+/* ── Las sugerencias que llegaron, solo para el admin ── */
+const SUG={cargado:false,lista:[],err:''};
+async function cargarSugerencias(){
+  SUG.err='';
+  try{
+    SUG.lista=await sbRest('/sugerencias?select=*&order=creado.desc&limit=200')||[];
+  }catch(e){ SUG.lista=[]; SUG.err='No se pudieron traer: '+(e&&e.message?e.message:e); }
+  SUG.cargado=true;
+}
+async function marcarSugVista(id,v){
+  try{
+    await sbRest('/sugerencias?id=eq.'+encodeURIComponent(id),
+      {method:'PATCH',prefer:'return=representation',body:{visto:!!v}});
+    const s=SUG.lista.find(x=>x.id===id); if(s)s.visto=!!v;
+    render();
+  }catch(e){ alert('No se pudo marcar: '+(e&&e.message?e.message:e)); }
+}
+function bloqueSugerencias(){
+  if(!esAdmin())return '';
+  if(!SUG.cargado){setTimeout(async()=>{await cargarSugerencias();if(TAB==='admin')render();},0);
+    return `<div class="card" style="text-align:center;padding:24px;color:var(--tx3);font-size:12.5px">
+      Cargando las sugerencias…<span class="spin"></span></div>`;}
+  const nuevas=SUG.lista.filter(s=>!s.visto).length;
+  return `<div class="card pad0">
+    <div class="chead"><div style="display:flex;align-items:center;gap:8px">
+        ${ic('MessageSquare',15,C.tx)}Sugerencias del equipo
+        ${nuevas?`<span class="bdg2" style="color:${C.p};background:${C.ps};border-color:${C.p}40">${nuevas} sin leer</span>`:''}</div>
+      <div class="s">Lo que mandan los vendedores desde Ayuda. Llega aquí, no se pierde.</div></div>
+    <div style="padding:14px 16px">
+      ${SUG.err?`<div style="font-size:12px;color:${C.dan};margin-bottom:10px">${esc(SUG.err)}</div>`:''}
+      ${SUG.lista.length?SUG.lista.map(s=>`
+        <div class="sumrow" style="align-items:flex-start;gap:10px;${s.visto?'opacity:.55':''}">
+          <div style="flex:1;min-width:0">
+            <div style="color:var(--tx);line-height:1.6;white-space:pre-wrap">${esc(s.texto||'')}</div>
+            <div style="color:var(--tx3);font-size:11px;margin-top:5px">
+              ${esc(s.nombre||'sin nombre')} · ${fDateTime(s.creado)}${s.version?' · v'+esc(s.version):''}</div>
+          </div>
+          <button class="btn ghost sm" style="flex-shrink:0"
+            onclick="marcarSugVista('${esc(s.id)}',${s.visto?'false':'true'})">
+            ${s.visto?'Reabrir':'Listo'}</button>
+        </div>`).join('')
+        :`<div style="font-size:12.5px;color:var(--tx3);line-height:1.6">
+           Todavía no ha llegado ninguna. Cuando un vendedor mande una desde
+           <b>Ayuda</b>, aparece aquí.</div>`}
+      <button class="btn sec full" style="margin-top:12px"
+        onclick="SUG.cargado=false;render()">${ic('RefreshCw')}Actualizar</button>
+    </div></div>`;
 }
 
 /* ═══ TOUR DE BIENVENIDA ═══ */
@@ -4818,6 +4884,8 @@ VIEWS.admin=function(){
         </div>
         <button class="btn full" style="margin-top:12px" onclick="invitarVendedor()">${ic('Wa')}Mandarle el link por WhatsApp</button>
       </div></div>
+
+    ${bloqueSugerencias()}
 
     <div class="card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)">
       <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.info)}
