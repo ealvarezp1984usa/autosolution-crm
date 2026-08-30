@@ -393,7 +393,8 @@ const NAV=[
   {id:'reports',icon:'BarChart2',label:'Reportes',sec:'Análisis'},
   {id:'campaigns',icon:'Megaphone',label:'Campañas',soon:1},
   {id:'performance',icon:'TrendingUp',label:'Rendimiento'},
-  {id:'equipo',icon:'Share2',label:'Equipo',sec:'Equipo'},
+  {id:'novedades',icon:'Megaphone',label:'Novedades',sec:'Equipo'},
+  {id:'equipo',icon:'Share2',label:'Equipo'},
   {id:'nextup',icon:'RotateCcw',label:'Next-Up',soon:1},
   {id:'admin',icon:'Shield',label:'Admin',soon:1},
   {id:'tasas',icon:'Landmark',label:'Tasas',soloAdmin:1},
@@ -2612,6 +2613,257 @@ function confirmarImport(){
   TAB='libro';render();
 }
 
+/* ═══ NOVEDADES ═══
+   El jefe manda especiales a su equipo; el admin manda el boletín a todos.
+   El vendedor lo recibe con el texto ya armado para sus redes, con SU
+   número de WhatsApp — mismo formato para todo el equipo.
+   Reglas de la casa: número completo siempre (pago + al firmar + plazo +
+   millas), sin urgencia falsa, y el CTA va a WhatsApp. */
+let NOV={cargado:false,lista:[],err:''};
+const TIPO_NOV={
+  especial :{t:'Especial',      c:'#e31c1c', i:'Tag'},
+  incentivo:{t:'Incentivo',     c:'#8b5cf6', i:'Trophy'},
+  lease    :{t:'Programa lease',c:'#f97316', i:'Landmark'},
+  tasas    :{t:'Tasas',         c:'#3b82f6', i:'BarChart2'},
+  aviso    :{t:'Aviso',         c:'#22c55e', i:'Bell'}
+};
+
+async function cargarNovedades(forzar){
+  if(NOV.cargado&&!forzar)return;
+  NOV.err='';
+  try{
+    NOV.lista=await sbRest('/comunicados?select=*&order=creado.desc&limit=60')||[];
+  }catch(e){NOV.err=e&&e.message?e.message:String(e);}
+  NOV.cargado=true;
+}
+const puedoPublicar=()=>esAdmin()||(EQ.equipo&&EQ.miRol==='manager');
+
+/* El texto que el vendedor pega en sus redes, con SU número */
+function textoRedes(n){
+  const d=n.data||{};
+  const veh=[d.ano,d.marca,d.modelo,d.trim].filter(Boolean).join(' ');
+  const wa=tel10(S.cfg.wa||'');
+  const L=[];
+  L.push('🚗 '+(veh||n.titulo));
+  if(d.tipo==='lease'){
+    if(d.pago)L.push(fm(d.pago)+'/mes + tax');
+    if(d.alFirmar)L.push(fm(d.alFirmar)+' al firmar');
+    const t=[]; if(d.plazo)t.push(d.plazo+' meses');
+    if(d.millas)t.push(Number(d.millas).toLocaleString('en-US')+' millas/año');
+    if(t.length)L.push(t.join(' · '));
+  }else if(d.tipo==='finance'){
+    if(d.pago)L.push(fm(d.pago)+'/mes');
+    if(d.alFirmar)L.push(fm(d.alFirmar)+' de entrada');
+    if(d.plazo)L.push(d.plazo+' meses');
+    if(d.apr)L.push(d.apr+'% APR');
+  }else if(d.precio){L.push(fm(d.precio)+' de contado');}
+  if(d.condiciones)L.push(d.condiciones);
+  if(n.vence)L.push('Hasta el '+fDate(String(n.vence).slice(0,10)));
+  L.push('');
+  L.push(wa?'Escríbeme y te digo si calificas 👉 wa.me/'+wa
+           :'Escríbeme y te digo si calificas (pon tu WhatsApp en Config)');
+  return L.join('\n');
+}
+
+function vistaNovedades(){
+  if(!NOV.cargado){setTimeout(async()=>{
+      if(!EQ.cargado)await cargarEquipo();
+      await cargarNovedades(); if(TAB==='novedades')render();},0);
+    return `<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:12.5px">
+      Cargando novedades…<span class="spin"></span></div>`;}
+
+  const hoyD=hoy();
+  const vivos=NOV.lista.filter(n=>!n.vence||dias(new Date(String(n.vence).slice(0,10)+'T00:00:00'),hoyD)>=0);
+  const vencidos=NOV.lista.filter(n=>n.vence&&dias(new Date(String(n.vence).slice(0,10)+'T00:00:00'),hoyD)<0);
+
+  const tarjeta=(n,viejo)=>{
+    const u=TIPO_NOV[n.tipo]||TIPO_NOV.aviso;
+    const d=n.data||{};
+    const veh=[d.ano,d.marca,d.modelo,d.trim].filter(Boolean).join(' ');
+    const mio=n.autor===miId();
+    return `<div class="card" style="border-color:${viejo?'var(--bd)':u.c+'38'};${viejo?'opacity:.55':'background:'+u.c+'08'}">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div style="width:34px;height:34px;border-radius:9px;background:${u.c}18;display:flex;
+          align-items:center;justify-content:center;flex-shrink:0">${ic(u.i,17,u.c)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            ${badge(u.t,u.c)}
+            ${n.alcance==='global'?badge('De la oficina',C.info):badge('De tu jefe',C.vio)}
+            ${n.vence?badge(viejo?'Vencido':'Hasta '+fDate(String(n.vence).slice(0,10)),viejo?C.tx3:C.warn):''}
+          </div>
+          <div style="font-weight:800;font-size:14px;margin-top:7px">${esc(n.titulo||veh||'Sin título')}</div>
+          ${veh&&n.titulo?`<div style="font-size:12px;color:var(--tx2);margin-top:2px">${esc(veh)}</div>`:''}
+          ${d.tipo?`<div class="mono" style="font-size:12.5px;color:var(--tx2);margin-top:6px;line-height:1.6">
+            ${d.pago?'<b style="color:var(--tx)">'+fm(d.pago)+'</b>/mes':''}
+            ${d.alFirmar?' · '+fm(d.alFirmar)+(d.tipo==='lease'?' al firmar':' de entrada'):''}
+            ${d.plazo?' · '+d.plazo+' meses':''}
+            ${d.millas?' · '+Number(d.millas).toLocaleString('en-US')+' mi/año':''}
+            ${d.apr?' · '+d.apr+'% APR':''}</div>`:''}
+          ${d.condiciones?`<div style="font-size:11.5px;color:var(--tx3);margin-top:5px;line-height:1.5">${esc(d.condiciones)}</div>`:''}
+          <div style="font-size:10.5px;color:var(--tx3);margin-top:7px">${fDateTime(n.creado)}</div>
+          ${!viejo?`<div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">
+            <button class="btn sec sm" onclick="copiarRedes('${esc(n.id)}')">${ic('Copy')}Copiar para mis redes</button>
+            <button class="btn wa sm" onclick="mandarNovedad('${esc(n.id)}')">${ic('Wa')}Mandar a un cliente</button>
+            ${mio?`<button class="btn ghost sm" onclick="borrarNovedad('${esc(n.id)}')">${ic('Trash2')}Quitar</button>`:''}
+          </div>`:(mio?`<button class="btn ghost xs" style="margin-top:9px" onclick="borrarNovedad('${esc(n.id)}')">Quitar</button>`:'')}
+        </div>
+      </div></div>`;
+  };
+
+  return `<div class="stack">
+    <div class="rowb"><div><h2 class="vh">Novedades</h2>
+      <div class="vsub">Especiales, incentivos y programas. Listos para tus redes con tu número.</div></div>
+      <button class="btn ghost sm" onclick="NOV.cargado=false;render()">${ic('RefreshCw')}Actualizar</button></div>
+
+    ${!S.cfg.wa?`<div class="card" style="background:rgba(234,179,8,.06);border-color:rgba(234,179,8,.22)">
+      <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.warn)}
+        <p style="font-size:12px;color:var(--tx2);line-height:1.6">
+          Pon tu WhatsApp en <b>Config</b> para que el texto de redes salga con tu número.</p></div></div>`:''}
+
+    ${puedoPublicar()?`<div class="card">
+      <button class="btn full" onclick="modalNovedad()">${ic('Plus')}Publicar ${esAdmin()&&!EQ.equipo?'para todos':'para mi equipo'}</button>
+      ${esAdmin()&&EQ.equipo&&EQ.miRol==='manager'?`<p style="font-size:11px;color:var(--tx3);margin-top:8px;line-height:1.6">
+        Puedes publicar para todo el sistema o solo para tu equipo — lo eliges al publicar.</p>`:''}
+    </div>`:''}
+
+    ${NOV.err?`<div class="card" style="border-color:${C.dan}38;background:${C.dan}0d">
+      <div style="font-size:12px;color:var(--tx2)">${esc(NOV.err)}</div></div>`:''}
+
+    ${vivos.length?vivos.map(n=>tarjeta(n,false)).join('')
+      :`<div class="card">${empty('Tag','Todavía no hay novedades',
+        puedoPublicar()?'Publica el primer especial para tu equipo.'
+        :'Cuando tu jefe o la oficina publiquen algo, te sale aquí.')}</div>`}
+
+    ${vencidos.length?`<div class="mlab">Ya vencidos</div>${vencidos.slice(0,5).map(n=>tarjeta(n,true)).join('')}`:''}
+  </div>`;
+};
+
+function copiarRedes(id){
+  const n=NOV.lista.find(x=>x.id===id); if(!n)return;
+  copiarTexto(textoRedes(n));
+}
+function mandarNovedad(id){
+  const n=NOV.lista.find(x=>x.id===id); if(!n)return;
+  openMsg('Mandar el especial','',textoRedes(n));
+}
+async function borrarNovedad(id){
+  if(!confirm('¿Quitar esta novedad? Deja de verla todo el equipo.'))return;
+  try{ await sbRest('/comunicados?id=eq.'+encodeURIComponent(id),{method:'DELETE',prefer:'return=minimal'});
+    NOV.cargado=false;toast('Quitada');render();
+  }catch(e){alert('No se pudo: '+(e&&e.message?e.message:e));}
+}
+
+function modalNovedad(){
+  const puedeGlobal=esAdmin();
+  const puedeEquipo=EQ.equipo&&EQ.miRol==='manager';
+  openModal('Publicar novedad',
+   `<div class="mlab" style="margin-top:0">Qué es</div>
+    <select class="inp" id="nvTipo" onchange="pintarCamposNovedad()">
+      ${Object.keys(TIPO_NOV).map(k=>`<option value="${k}">${TIPO_NOV[k].t}</option>`).join('')}
+    </select>
+
+    ${(puedeGlobal&&puedeEquipo)?`<div class="mlab">Para quién</div>
+      <select class="inp" id="nvAlcance">
+        <option value="equipo">Solo mi equipo</option>
+        <option value="global">Todos los vendedores del sistema</option>
+      </select>`:`<input type="hidden" id="nvAlcance" value="${puedeGlobal?'global':'equipo'}">`}
+
+    <div class="mlab">Título</div>
+    <input class="inp" id="nvTitulo" placeholder="Corolla LE — especial de septiembre">
+
+    <div id="nvCampos"></div>
+
+    <div class="mlab">Vence</div>
+    <input class="inp" id="nvVence" type="date">
+    <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+      Pon siempre el <b>número completo</b>: pago, al firmar, plazo y millas.
+      Es la regla de la casa y es lo que hace que el cliente confíe.</p>`,
+   `<button class="btn sec" onclick="closeModal()">Cancelar</button>
+    <button class="btn" onclick="publicarNovedad()">${ic('Send')}Publicar</button>`);
+  pintarCamposNovedad();
+}
+function pintarCamposNovedad(){
+  const t=$('nvTipo')?$('nvTipo').value:'especial';
+  const c=$('nvCampos'); if(!c)return;
+  if(t==='tasas'||t==='aviso'){
+    c.innerHTML=`<div class="mlab">Qué quieres decirles</div>
+      <textarea class="inp" id="nvCond" rows="4" placeholder="Escríbelo tal cual quieres que lo lean…"></textarea>`;
+    return;
+  }
+  c.innerHTML=`<div class="mlab">El vehículo</div>
+    <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fr"><label class="f">Año</label><input class="inp" id="nvAno" inputmode="numeric" placeholder="2025"></div>
+      <div class="fr"><label class="f">Marca</label><input class="inp" id="nvMarca" placeholder="Toyota"></div>
+      <div class="fr"><label class="f">Modelo</label><input class="inp" id="nvModelo" placeholder="Corolla"></div>
+      <div class="fr"><label class="f">Versión</label><input class="inp" id="nvTrim" placeholder="LE"></div>
+    </div>
+    <div class="mlab">El número</div>
+    <select class="inp" id="nvNeg" onchange="pintarCamposNovedad2()">
+      <option value="lease">Lease</option><option value="finance">Financiado</option><option value="cash">Contado</option>
+    </select>
+    <div id="nvNums"></div>
+    <div class="mlab">Condiciones <span class="h">tal cual se las dices al cliente</span></div>
+    <textarea class="inp" id="nvCond" rows="2" placeholder="Con crédito aprobado. Más tax y tag."></textarea>`;
+  pintarCamposNovedad2();
+}
+function pintarCamposNovedad2(){
+  const n=$('nvNeg')?$('nvNeg').value:'lease';
+  const c=$('nvNums'); if(!c)return;
+  if(n==='cash'){
+    c.innerHTML=`<div class="fr" style="margin-top:8px"><label class="f">Precio de contado</label>
+      <input class="inp" id="nvPrecio" inputmode="numeric" placeholder="18995"></div>`;return;
+  }
+  c.innerHTML=`<div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+    <div class="fr"><label class="f">Pago al mes</label><input class="inp" id="nvPago" inputmode="numeric" placeholder="199"></div>
+    <div class="fr"><label class="f">${n==='lease'?'Al firmar':'De entrada'}</label>
+      <input class="inp" id="nvFirmar" inputmode="numeric" placeholder="3999"></div>
+    <div class="fr"><label class="f">Plazo <span class="h">meses</span></label>
+      <input class="inp" id="nvPlazo" inputmode="numeric" placeholder="${n==='lease'?'36':'72'}"></div>
+    ${n==='lease'?`<div class="fr"><label class="f">Millas al año</label>
+      <input class="inp" id="nvMillas" inputmode="numeric" placeholder="10000"></div>`
+     :`<div class="fr"><label class="f">APR %</label><input class="inp" id="nvApr" inputmode="numeric" placeholder="6.9"></div>`}
+  </div>`;
+}
+async function publicarNovedad(){
+  const tipo=$('nvTipo').value;
+  const alcance=$('nvAlcance').value;
+  const titulo=$('nvTitulo').value.trim();
+  const v=id=>$(id)?$(id).value.trim():'';
+  const data={};
+  if(tipo==='tasas'||tipo==='aviso'){ data.condiciones=v('nvCond'); }
+  else{
+    data.ano=v('nvAno'); data.marca=v('nvMarca'); data.modelo=v('nvModelo'); data.trim=v('nvTrim');
+    data.tipo=$('nvNeg')?$('nvNeg').value:'lease';
+    if(data.tipo==='cash')data.precio=num(v('nvPrecio'));
+    else{
+      data.pago=num(v('nvPago')); data.alFirmar=num(v('nvFirmar')); data.plazo=num(v('nvPlazo'));
+      if(data.tipo==='lease')data.millas=num(v('nvMillas')); else data.apr=v('nvApr');
+    }
+    data.condiciones=v('nvCond');
+    /* la regla de la casa: el numero completo */
+    if(data.tipo==='lease'&&data.pago&&(!data.alFirmar||!data.plazo||!data.millas)){
+      if(!confirm(['Falta parte del número: al firmar, plazo o millas.','',
+        'La regla de la casa es dar el número completo — es lo que evita que el cliente se sienta engañado.','',
+        '¿Publicar así de todos modos?'].join('\n')))return;
+    }
+  }
+  if(!titulo&&!data.marca){alert('Ponle al menos un título o el vehículo.');return;}
+  const body={alcance:alcance, autor:miId(), tipo:tipo, titulo:titulo,
+    data:data, vence:v('nvVence')||null};
+  if(alcance==='equipo'){
+    if(!EQ.equipo){alert('No tienes equipo al que publicar.');return;}
+    body.team_id=EQ.equipo.id;
+  }
+  try{
+    const r=await sbRest('/comunicados',{method:'POST',prefer:'return=representation',body:body});
+    if(!r||!r.length)throw new Error('El servidor no aceptó la publicación.');
+    closeModal();NOV.cargado=false;toast('Publicado — ya lo ve tu gente');render();
+  }catch(e){
+    alert('No se pudo publicar:\n\n'+(e&&e.message?e.message:e)+
+      '\n\nSi dice 403: solo el jefe de equipo publica para su equipo, y solo el admin para todos.');
+  }
+}
+
 /* ═══════════ NAVEGACIÓN ═══════════ */
 let TAB='dashboard', LEADID=null, CLIID=null, STEP=1, Q='', QLIB='';
 let FSRC='Todos', FEST='Todos';
@@ -3469,6 +3721,7 @@ function soonView(id){
 VIEWS.ayuda=vistaAyuda;
 VIEWS.tasas=vistaTasas;
 VIEWS.equipo=vistaEquipo;
+VIEWS.novedades=vistaNovedades;
 VIEWS.campaigns=()=>soonView('campaigns');
 /* ═══ VISTA · RENDIMIENTO ═══
    Tu mes contra tu meta, y tu historial real. Todo sale de lo que
