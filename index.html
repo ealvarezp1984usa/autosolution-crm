@@ -594,6 +594,8 @@ const fmN=n=>new Intl.NumberFormat('en-US').format(Math.round(num(n)));
 const ini=s=>String(s||'').split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('')||'AS';
 function fDate(iso){if(!iso)return'—';const d=new Date(iso.length===10?iso+'T00:00:00':iso);
   return isNaN(d)?iso:d.toLocaleDateString('es-US',{month:'short',day:'numeric',year:'numeric'});}
+function fDateEN(iso){if(!iso)return '';const d=new Date(iso.length===10?iso+'T00:00:00':iso);
+  return isNaN(d)?iso:d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});}
 function fDateTime(iso){const d=new Date(iso);return isNaN(d)?'—':
   d.toLocaleDateString('es-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
 function fmtM(d){return d.toLocaleDateString('es-US',{month:'short',year:'numeric'});}
@@ -606,6 +608,10 @@ function tel10(t){let d=String(t||'').replace(/\D/g,'');
   if(d.length===11&&d[0]==='1')return d;
   return d;}
 const firma=()=>S.cfg.nombre?', soy '+S.cfg.nombre:'';
+/* El idioma del cliente. Se marca una vez en su ficha y todo lo que le
+   salga — alertas, hoja del negocio, especiales — va en el suyo. */
+const enIngles=o=>!!(o&&o.idioma==='en');
+const firmaEN=()=>S.cfg.nombre?', this is '+S.cfg.nombre:'';
 function calcPmt(amt,apr,mo){if(!amt||!mo)return 0;const r=(apr/100)/12;
   return r>0?amt*(r*Math.pow(1+r,mo))/(Math.pow(1+r,mo)-1):amt/mo;}
 function toast(m){const e=$('toast');e.textContent=m;e.classList.add('on');
@@ -661,16 +667,19 @@ function calcAlertas(){
         else if(d<=60){tag='Lease vence en '+d+' días';hot=true;}
         else if(d<=125){tag='Lease vence en ~'+Math.round(d/30)+' meses';}
         else{tag='Lease vence en ~6 meses';}
-        out.push({cid:c.id,nom:c.nom,tel:c.tel,veh:vehCli(c),tag,hot,ord:d,tipo:'lease',
-          msg:`Hola ${c.nom}${firma()} 👋 Te aviso con tiempo: el lease de tu ${vehCli(c)} ${d<0?'ya se venció':'se vence en unos '+Math.max(1,Math.round(d/30))+' meses'}. Los que empiezan a ver opciones con tiempo consiguen mucho mejor deal que los que esperan al final. ¿Quieres que te vaya buscando opciones?`});
+        const meses=Math.max(1,Math.round(d/30));
+        out.push({cid:c.id,nom:c.nom,tel:c.tel,veh:vehCli(c),tag,hot,ord:d,tipo:'lease',idioma:c.idioma,
+          msg:`Hola ${c.nom}${firma()} 👋 Te aviso con tiempo: el lease de tu ${vehCli(c)} ${d<0?'ya se venció':meses===1?'se vence el mes que viene':'se vence en unos '+meses+' meses'}. Los que empiezan a ver opciones con tiempo consiguen mucho mejor deal que los que esperan al final. ¿Quieres que te vaya buscando opciones?`,
+          msgEN:`Hi ${c.nom}${firmaEN()} 👋 Giving you a heads-up: the lease on your ${vehCli(c)} ${d<0?'already ended':meses===1?'ends next month':'ends in about '+meses+' months'}. People who start looking early get a much better deal than the ones who wait until the last minute. Want me to start looking at options for you?`});
       }
     }
     if(c.tipo==='finance'){
       const refi=addMonths(c.fecha,12),d=dias(refi,H);
       if(d<=30&&d>=-180){
-        out.push({cid:c.id,nom:c.nom,tel:c.tel,veh:vehCli(c),hot:false,ord:d+1000,tipo:'refi',
+        out.push({cid:c.id,nom:c.nom,tel:c.tel,veh:vehCli(c),hot:false,ord:d+1000,tipo:'refi',idioma:c.idioma,
           tag:d<=0?'Cumplió 1 año · revisar refi':'Cumple 1 año en '+d+' días',
-          msg:`Hola ${c.nom}${firma()} 👋 Ya ${d<=0?'llevas':'casi llevas'} un año con tu ${vehCli(c)}. A veces a esta altura conviene revisar la tasa — hay casos donde baja el pago. Si quieres le doy un vistazo sin compromiso.`});
+          msg:`Hola ${c.nom}${firma()} 👋 Ya ${d<=0?'llevas':'casi llevas'} un año con tu ${vehCli(c)}. A veces a esta altura conviene revisar la tasa — hay casos donde baja el pago. Si quieres le doy un vistazo sin compromiso.`,
+          msgEN:`Hi ${c.nom}${firmaEN()} 👋 You've ${d<=0?'had':'almost had'} your ${vehCli(c)} for a year now. Around this point it's often worth checking the rate — sometimes the payment comes down. Happy to take a look, no strings attached.`});
       }
     }
     const H2=hoy();
@@ -678,24 +687,31 @@ function calcAlertas(){
     if(dias(aniv,H2)<-30)aniv=new Date(H2.getFullYear()+1,base.getMonth(),1);
     const da=dias(aniv,H2),years=aniv.getFullYear()-base.getFullYear();
     if(da>=0&&da<=30&&years>=1&&!(c.tipo==='finance'&&years===1)){
-      out.push({cid:c.id,nom:c.nom,tel:c.tel,veh:vehCli(c),hot:false,ord:da+2000,tipo:'aniv',
+      out.push({cid:c.id,nom:c.nom,tel:c.tel,veh:vehCli(c),hot:false,ord:da+2000,tipo:'aniv',idioma:c.idioma,
         tag:'Aniversario · '+years+' año'+(years>1?'s':''),
-        msg:`¡Hola ${c.nom}! 🎉 Ya se cumple${years>1?'n':''} ${years} año${years>1?'s':''} de tu ${vehCli(c)}. ¿Cómo te ha tratado? Cualquier cosa que necesites — o si alguien cercano anda buscando carro — aquí estoy.`});
+        msg:`¡Hola ${c.nom}! 🎉 Ya se cumple${years>1?'n':''} ${years} año${years>1?'s':''} de tu ${vehCli(c)}. ¿Cómo te ha tratado? Cualquier cosa que necesites — o si alguien cercano anda buscando carro — aquí estoy.`,
+        msgEN:`Hi ${c.nom}! 🎉 It's been ${years} year${years>1?'s':''} with your ${vehCli(c)}. How's it treating you? Anything you need — or if someone close to you is looking for a car — I'm here.`});
     }
   }
   /* Alertas de post-venta cargadas en el paso 8 del Deal Room */
-  const PS=[['equityDate','Equity','equity',c=>`Hola ${c} 👋 Te escribo por algo puntual: tu carro está en un punto donde puede tener equity a tu favor. Si quieres reviso los números sin compromiso y te digo qué opciones tienes.`],
-            ['refiDate','Refinanciamiento','refi',c=>`Hola ${c} 👋 Se abrió ventana para revisar tu tasa. En varios casos baja el pago mensual. ¿Te lo reviso sin compromiso?`],
-            ['renewDate','Renovación','renov',c=>`Hola ${c} 👋 Ya viene el momento de renovar. Si empezamos ahora te consigo mejores números que esperando al final. ¿Miramos opciones?`]];
+  const PS=[['equityDate','Equity','equity',
+      c=>`Hola ${c} 👋 Te escribo por algo puntual: tu carro está en un punto donde puede tener equity a tu favor. Si quieres reviso los números sin compromiso y te digo qué opciones tienes.`,
+      c=>`Hi ${c} 👋 Quick note: your car is at a point where it may have equity working in your favor. If you want, I'll run the numbers with no obligation and tell you what your options are.`],
+            ['refiDate','Refinanciamiento','refi',
+      c=>`Hola ${c} 👋 Se abrió ventana para revisar tu tasa. En varios casos baja el pago mensual. ¿Te lo reviso sin compromiso?`,
+      c=>`Hi ${c} 👋 A window just opened to review your rate. In a lot of cases the monthly payment comes down. Want me to check it, no obligation?`],
+            ['renewDate','Renovación','renov',
+      c=>`Hola ${c} 👋 Ya viene el momento de renovar. Si empezamos ahora te consigo mejores números que esperando al final. ¿Miramos opciones?`,
+      c=>`Hi ${c} 👋 Renewal time is coming up. If we start now I can get you better numbers than waiting until the end. Want to look at options?`]];
   for(const l of S.leads){
     if(!l.post)continue;
     for(const row of PS){
       const f=l.post[row[0]]; if(!f)continue;
       const d=dias(new Date(f+'T00:00:00'),hoy());
       if(d<=45){
-        out.push({lid:l.id,nom:l.nom,tel:l.tel,veh:vehLead(l),hot:d<=14,ord:d+3000,tipo:row[2],
+        out.push({lid:l.id,nom:l.nom,tel:l.tel,veh:vehLead(l),hot:d<=14,ord:d+3000,tipo:row[2],idioma:l.idioma,
           tag:'Post-venta · '+row[1]+(d<0?' (hace '+Math.abs(d)+' días)':d===0?' — hoy':' en '+d+' días'),
-          msg:row[3](l.nom)});
+          msg:row[3](l.nom), msgEN:row[4](l.nom)});
       }
     }
   }
@@ -2720,12 +2736,32 @@ function miWa(){
   return tel10(S.cfg.wa || (SES&&SES.perfil&&SES.perfil.whatsapp) || '');
 }
 /* El texto que el vendedor pega en sus redes, con SU número */
-function textoRedes(n){
+function textoRedes(n,en){
   const d=n.data||{};
   const veh=[d.ano,d.marca,d.modelo,d.trim].filter(Boolean).join(' ');
   const wa=miWa();
   const L=[];
   L.push('🚗 '+(veh||n.titulo));
+  if(en){
+    if(d.tipo==='lease'){
+      if(d.pago)L.push(fm(d.pago)+'/mo + tax');
+      if(d.alFirmar)L.push(fm(d.alFirmar)+' due at signing');
+      const t=[]; if(d.plazo)t.push(d.plazo+' months');
+      if(d.millas)t.push(Number(d.millas).toLocaleString('en-US')+' miles/year');
+      if(t.length)L.push(t.join(' · '));
+    }else if(d.tipo==='finance'){
+      if(d.pago)L.push(fm(d.pago)+'/mo');
+      if(d.alFirmar)L.push(fm(d.alFirmar)+' down');
+      if(d.plazo)L.push(d.plazo+' months');
+      if(d.apr)L.push(d.apr+'% APR');
+    }else if(d.precio){L.push(fm(d.precio)+' cash');}
+    if(d.condiciones)L.push(d.condiciones);
+    if(n.vence)L.push('Through '+fDateEN(String(n.vence).slice(0,10)));
+    L.push('');
+    L.push(wa?'Message me and I will tell you if you qualify 👉 wa.me/'+wa
+             :'Message me and I will tell you if you qualify');
+    return L.join(String.fromCharCode(10));
+  }
   if(d.tipo==='lease'){
     if(d.pago)L.push(fm(d.pago)+'/mes + tax');
     if(d.alFirmar)L.push(fm(d.alFirmar)+' al firmar');
@@ -2833,7 +2869,7 @@ function copiarRedes(id){
 function mandarNovedad(id){
   const n=NOV.lista.find(x=>x.id===id); if(!n)return;
   if(!miWa())return pedirWa(()=>mandarNovedad(id));
-  openMsg('Mandar el especial','',textoRedes(n));
+  openMsg('Mandar el especial','',textoRedes(n),textoRedes(n,true),'es');
 }
 /* Sin numero no se copia: un anuncio sin WhatsApp es un lead perdido.
    Se lo pedimos aqui mismo, no lo mandamos a buscarlo a Config. */
@@ -3568,8 +3604,9 @@ function imprimirWorksheet(){
 }
 
 /* El texto corto, para mandar. Regla de la casa: el número COMPLETO. */
-function textoWorksheet(l){
+function textoWorksheet(l,en){
   const {c,w}=numsWorksheet(l);
+  if(en)return textoWorksheetEN(l,c,w);
   const veh=w?[w.ano,w.marca,w.modelo].filter(Boolean).join(' ')
             :[l.veh&&l.veh.ano,l.veh&&l.veh.marca,l.veh&&l.veh.mod].filter(Boolean).join(' ');
   const L2=[];
@@ -3590,20 +3627,45 @@ function textoWorksheet(l){
   if(S.cfg.nombre)L2.push('— '+S.cfg.nombre+', AutoSolution Miami');
   return L2.join('\n');
 }
+function textoWorksheetEN(l,c,w){
+  const veh=w?[w.ano,w.marca,w.modelo].filter(Boolean).join(' ')
+            :[l.veh&&l.veh.ano,l.veh&&l.veh.marca,l.veh&&l.veh.mod].filter(Boolean).join(' ');
+  const A=[];
+  A.push('🚗 '+(veh||'Your vehicle'));
+  if(c.tipo==='lease'){
+    A.push('LEASE: '+fm(c.pago)+'/mo WITH tax');
+    A.push(fm(c.alFirmar)+' due at signing (1st payment + down + fees)');
+    A.push(c.plazo+' months'+(c.millas?' · '+Number(c.millas).toLocaleString('en-US')+' miles/year':''));
+  }else if(c.tipo==='cash'){
+    A.push('CASH: '+fm(c.alFirmar)+' all in');
+  }else{
+    A.push('FINANCED: '+fm(c.pago)+'/mo');
+    A.push(fm(c.down)+' down · '+c.plazo+' months · '+c.apr+'% APR');
+    A.push('Amount financed: '+fm(c.financiar));
+  }
+  A.push('');
+  A.push('The complete number, fees and taxes included. Subject to credit approval.');
+  if(S.cfg.nombre)A.push('— '+S.cfg.nombre+', AutoSolution Miami');
+  return A.join(String.fromCharCode(10));
+}
 function worksheetWa(){
   const l=L(); if(!l)return;
   if(!num(numsWorksheet(l).c.precio)){alert('Todavía no hay precio en la oferta.');return;}
-  openMsg('Mandar la hoja del negocio', l.tel, textoWorksheet(l));
+  const es=textoWorksheet(l,false), en=textoWorksheet(l,true);
+  const ing=enIngles(l);
+  openMsg('Mandar la hoja del negocio', l.tel, ing?en:es, ing?es:en, l.idioma||'es');
 }
 function worksheetMail(){
   const l=L(); if(!l)return;
   if(!num(numsWorksheet(l).c.precio)){alert('Todavía no hay precio en la oferta.');return;}
   const to=l.email||(l.perfil&&l.perfil.email)||'';
   const veh=[l.veh&&l.veh.ano,l.veh&&l.veh.marca,l.veh&&l.veh.mod].filter(Boolean).join(' ');
-  const asunto='Tu número para el '+(veh||'vehículo')+' — AutoSolution Miami';
+  const ing=enIngles(l);
+  const asunto=ing?('Your numbers on the '+(veh||'vehicle')+' — AutoSolution Miami')
+                  :('Tu número para el '+(veh||'vehículo')+' — AutoSolution Miami');
   window.location.href='mailto:'+encodeURIComponent(to)+
     '?subject='+encodeURIComponent(asunto)+
-    '&body='+encodeURIComponent(textoWorksheet(l));
+    '&body='+encodeURIComponent(textoWorksheet(l,ing));
 }
 
 /* ═══════════ NAVEGACIÓN ═══════════ */
@@ -3641,7 +3703,9 @@ function go(tab,opts){
   TAB=tab; if(opts&&opts.lead)LEADID=opts.lead; if(opts&&opts.step)STEP=opts.step;
   drawer(false); $('content').scrollTop=0; render();
 }
-function openDeal(id,step){LEADID=id;STEP=step||1;TAB='deal';drawer(false);$('content').scrollTop=0;render();}
+function openDeal(id,step){LEADID=id;STEP=step||1;TAB='deal';drawer(false);
+  completarLead(S.leads.find(x=>x.id===id));
+  $('content').scrollTop=0;render();}
 
 function renderNav(){
   let h='';
@@ -3711,10 +3775,18 @@ function closeModal(){$('mask').classList.remove('on');MODAL_CTX={};}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();drawer(false);}});
 
 /* ═══════════ WHATSAPP ═══════════ */
-function openMsg(titulo,tel,texto){
+function openMsg(titulo,tel,texto,alt,idioma){
+  window.__msgES = idioma==='en' ? (alt||texto) : texto;
+  window.__msgEN = idioma==='en' ? texto : (alt||'');
   const t=tel10(tel);
   openModal(titulo,
-    `<label class="f">Mensaje — edítalo si quieres</label>
+    `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px">
+       <label class="f" style="margin:0">Mensaje — edítalo si quieres</label>
+       ${window.__msgEN?`<div style="display:flex;gap:4px">
+         <button class="btn ${idioma==='en'?'sec':''} xs" id="btES" onclick="cambiarIdiomaMsg('es')">Español</button>
+         <button class="btn ${idioma==='en'?'':'sec'} xs" id="btEN" onclick="cambiarIdiomaMsg('en')">English</button>
+       </div>`:''}
+     </div>
      <textarea class="inp" id="msgTxt" rows="7">${esc(texto)}</textarea>
      <p style="font-size:13px;color:var(--tx3);margin-top:10px;line-height:1.6">
      ${t?`Se abre TU WhatsApp con el mensaje listo para <b style="color:var(--tx2)">+${esc(t)}</b>. Uno por uno, natural — sin riesgo de bloqueo.`
@@ -3722,6 +3794,13 @@ function openMsg(titulo,tel,texto){
     `<button class="btn sec" onclick="copiarTexto(document.getElementById('msgTxt').value)">${ic('Copy')}Copiar</button>
      <button class="btn wa" ${t?'':'disabled'} onclick="mandarWa()">${ic('Wa')}Abrir WhatsApp</button>`,
     {tel:t});
+}
+function cambiarIdiomaMsg(l){
+  const t=$('msgTxt'); if(!t)return;
+  t.value = l==='en' ? (window.__msgEN||t.value) : (window.__msgES||t.value);
+  const es=$('btES'), en=$('btEN');
+  if(es)es.className='btn '+(l==='en'?'sec ':'')+'xs';
+  if(en)en.className='btn '+(l==='en'?'':'sec ')+'xs';
 }
 function mandarWa(){
   const t=MODAL_CTX.tel; if(!t)return;
@@ -3742,7 +3821,7 @@ function copiarTexto(txt){
 }
 function msgAlerta(i){
   const a=calcAlertas()[i]; if(!a)return;
-  openMsg(a.nom,a.tel,a.msg);
+  openMsg(a.nom,a.tel,enIngles(a)?(a.msgEN||a.msg):a.msg,enIngles(a)?a.msg:a.msgEN,a.idioma||'es');
 }
 </script>
 <script>
@@ -3925,6 +4004,12 @@ function openCliente(id){
         autocapitalize="off" spellcheck="false" value="${g('email')}" placeholder="cliente@gmail.com"></div>
       <div class="fr" style="grid-column:1/-1"><label class="f">Dirección</label>
         <input class="inp" id="cDir" value="${g('dir')}" placeholder="1234 SW 8th St, Miami FL 33135"></div>
+      <div class="fr" style="grid-column:1/-1"><label class="f">En qué idioma le escribes
+        <span class="h">todos sus mensajes salen así</span></label>
+        <select class="inp" id="cIdioma">
+          <option value="es" ${(!c||c.idioma!=='en')?'selected':''}>Español</option>
+          <option value="en" ${(c&&c.idioma==='en')?'selected':''}>English</option>
+        </select></div>
     </div>
 
     <div class="mlab">Su vehículo</div>
@@ -3971,6 +4056,7 @@ function saveCliente(){
     if(!confirm('El VIN tiene '+vin.length+' caracteres y deberían ser 17.\n\n¿Guardar así de todos modos?'))return;
   }
   const data={nom, apellido:$('cApe').value.trim(), tel, email:$('cEmail').value.trim().toLowerCase(),
+    idioma:$('cIdioma')?$('cIdioma').value:'es',
     dir:$('cDir').value.trim(), marca:$('cMarca').value.trim(), mod:$('cMod').value.trim(),
     ano:$('cAno').value.trim(), stock:$('cStock').value.trim().toUpperCase(), vin:vin,
     agencia:$('cAgencia').value.trim(), tipo:$('cTipo').value, fecha:$('cFecha').value,
@@ -4022,14 +4108,16 @@ function openFicha(id){
     </div>`:''}
     ${mine.length?`<div class="mlab">Alertas activas</div>`+mine.map(a=>`<div class="card arow ${a.hot?'hot':''}" style="margin-top:8px">
         <div class="atag">${esc(a.tag)}</div>
-        <button class="btn wa sm" style="margin-top:9px" onclick="openMsg(${jsq(c.nom)},${jsq(c.tel)},${jsq(a.msg)})">${ic('Wa')}Escribirle</button>
+        <button class="btn wa sm" style="margin-top:9px" onclick="openMsg(${jsq(c.nom)},${jsq(c.tel)},${jsq(enIngles(c)?(a.msgEN||a.msg):a.msg)},${jsq(enIngles(c)?a.msg:a.msgEN)},${jsq(c.idioma||'es')})">${ic('Wa')}Escribirle</button>
       </div>`).join(''):''}`,
    `<button class="btn sec" onclick="openCliente('${c.id}')">${ic('Edit2')}Editar</button>
     <button class="btn wa" onclick="msgReconectar('${c.id}')">${ic('Wa')}Reconectar</button>`);
 }
 function msgReconectar(id){
   const c=S.clientes.find(x=>x.id===id); if(!c)return;
-  openMsg(c.nom,c.tel,`Hola ${c.nom}${firma()} 👋 ¿Cómo te ha ido con el ${vehCli(c)}? Te escribo para saludarte y que sepas que aquí sigo para lo que necesites. Y si alguien cercano anda buscando carro, me lo pasas con confianza — lo trato igual que a ti.`);
+  const esTxt=`Hola ${c.nom}${firma()} 👋 ¿Cómo te ha ido con el ${vehCli(c)}? Te escribo para saludarte y que sepas que aquí sigo para lo que necesites. Y si alguien cercano anda buscando carro, me lo pasas con confianza — lo trato igual que a ti.`;
+  const enTxt=`Hi ${c.nom}${firmaEN()} 👋 How's the ${vehCli(c)} treating you? Just checking in so you know I'm still here for whatever you need. And if someone close to you is car shopping, send them my way — I'll take care of them like I did with you.`;
+  openMsg(c.nom,c.tel,enIngles(c)?enTxt:esTxt,enIngles(c)?esTxt:enTxt,c.idioma||'es');
 }
 
 /* ═══════════════════════════════════════════
@@ -5043,7 +5131,19 @@ function L(){return S.leads.find(x=>x.id===LEADID);}
 function upd(patch){const l=L();if(!l)return;Object.assign(l,patch);l.updatedAt=nowISO();save();}
 function updN(key,k,v){const l=L();if(!l)return;l[key]=l[key]||{};l[key][k]=v;l.updatedAt=nowISO();save();}
 function updNum(key,k,v){updN(key,k,num(v));}
+/* Un lead importado o de una versión vieja puede no traer estos bloques.
+   Sin esto, el Deal Room se cae al abrirlo. */
+function completarLead(l){
+  if(!l)return l;
+  ['oferta','trade','perfil','deal','recap','post','veh'].forEach(k=>{
+    if(!l[k]||typeof l[k]!=='object')l[k]={};
+  });
+  if(!Array.isArray(l.acts))l.acts=[];
+  if(!Array.isArray(l.recap.fni))l.recap.fni=[];
+  return l;
+}
 function stepDone(l,s){
+  completarLead(l);
   const f=finanzas(l);
   if(s===1)return !!(l.nom&&l.tel);
   if(s===2)return (l.acts||[]).length>0;
@@ -5106,7 +5206,9 @@ function delLead(){
 function leadWa(){
   const l=L();if(!l)return;
   const v=vehLead(l);
-  openMsg(l.nom,l.tel,`Hola ${l.nom}${firma()} 👋 ${(l.veh&&l.veh.marca)?'Te escribo por el '+v+'.':'Vi que andas buscando carro.'} Trabajo con todas las marcas y te consigo el número completo — con la letra chica, sin sorpresas al firmar. ¿Qué buscas y cuánto quieres pagar al mes?`);
+  const esTxt=`Hola ${l.nom}${firma()} 👋 ${(l.veh&&l.veh.marca)?'Te escribo por el '+v+'.':'Vi que andas buscando carro.'} Trabajo con todas las marcas y te consigo el número completo — con la letra chica, sin sorpresas al firmar. ¿Qué buscas y cuánto quieres pagar al mes?`;
+  const enTxt=`Hi ${l.nom}${firmaEN()} 👋 ${(l.veh&&l.veh.marca)?'Reaching out about the '+v+'.':'Saw you are looking for a car.'} I work with every brand and I'll get you the complete number — fine print included, no surprises at signing. What are you looking for, and what do you want to pay a month?`;
+  openMsg(l.nom,l.tel,enIngles(l)?enTxt:esTxt,enIngles(l)?esTxt:enTxt,l.idioma||'es');
 }
 const secTit=(icon,color,txt)=>`<div style="display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;color:var(--tx2);margin-bottom:12px">${ic(icon,14,color)}${txt}</div>`;
 const fld=(lab,inner,help)=>`<div class="fr"><label class="f">${lab}${help?`<span class="h">· ${help}</span>`:''}</label>${inner}</div>`;
