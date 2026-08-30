@@ -344,8 +344,8 @@ select.inp{-webkit-appearance:none;appearance:none;
     <nav class="sbnav sh" id="sbNav"></nav>
     <div class="sbfoot">
       <div id="sbAcc"></div>
-      <div style="font-size:10px;color:var(--tx3);line-height:1.6;padding:2px 4px">
-        AutoSolution Miami · v1.2<br>Tu cartera se guarda en tu cuenta.
+      <div style="font-size:10px;color:var(--tx3);line-height:1.6;padding:2px 4px" id="sbVer">
+        AutoSolution Miami<br>Tu cartera se guarda en tu cuenta.
       </div>
     </div>
   </aside>
@@ -3798,6 +3798,9 @@ function renderNav(){
   $('sbAv').textContent=ini(S.cfg.nombre);
   $('sbName').textContent=S.cfg.nombre||'Mi cartera';
   if($('sbRol'))$('sbRol').textContent=esAdmin()?'Administrador':'Vendedor';
+  /* la version sale de APP_VER, no escrita a mano: se quedaba vieja */
+  if($('sbVer'))$('sbVer').innerHTML='AutoSolution Miami · v'+APP_VER+
+    '<br>Tu cartera se guarda en tu cuenta.';
   if($('sbAcc'))$('sbAcc').innerHTML=SES?`<div class="sbacc">
       <div style="min-width:0;flex:1;font-size:11.5px;color:var(--tx3);overflow:hidden;
         text-overflow:ellipsis;white-space:nowrap">${esc((SES.user&&SES.user.email)||'')}</div>
@@ -5136,7 +5139,7 @@ VIEWS.settings=function(){
     </div>
     <p style="font-size:13px;color:var(--tx3);text-align:center;line-height:1.6;padding:4px 0 10px">
       ${SYNC.modo==='supabase'?'Tus datos viajan cifrados a tu cuenta. Ningún otro vendedor los ve.'
-        :'Los datos viven solo en este navegador. Nadie más los ve.'}<br>AutoSolution Miami · CRM v1.2</p>
+        :'Los datos viven solo en este navegador. Nadie más los ve.'}<br>AutoSolution Miami · CRM v${APP_VER}</p>
   </div>`;
 };
 function saveCfg(){
