@@ -311,6 +311,12 @@ select.inp{-webkit-appearance:none;appearance:none;
   #impresion .fecha{color:#666}
   #impresion .pie{margin-top:20px;padding-top:8px;border-top:1px solid #ccc;
     font-size:7.5pt;color:#666;line-height:1.4}
+  #impresion .destaca{display:flex;gap:14px;margin:12px 0 4px}
+  #impresion .destaca>div{flex:1;border:2px solid #000;border-radius:4px;padding:9px 12px}
+  #impresion .destaca span{display:block;font-size:8pt;text-transform:uppercase;
+    letter-spacing:.08em;color:#555;margin-bottom:3px}
+  #impresion .destaca b{font-size:17pt;font-weight:900;letter-spacing:-.02em}
+  #impresion .nota{font-size:8pt;color:#666;margin-top:5px}
 }
 </style>
 </head>
@@ -3270,6 +3276,246 @@ function docCredito(l,ssn1,ssn2){
   </div>`;
 }
 
+/* ═══ WORKSHEET — la hoja del negocio ═══
+   Se imprime, se manda por WhatsApp o por correo. Sin Social: aquí no
+   hay nada sensible, así que sí se puede enviar.
+   Si el negocio se armó en Desking, se usan SUS números — para lease son
+   los buenos (money factor y residual). El Deal Room calcula el pago con
+   una fórmula de préstamo, que para lease no aplica. */
+
+/* Mismo cálculo que hace Desking, leyendo la cotización guardada */
+function calcDesk(W){
+  const N=v=>num(v);
+  const precio=N(W.precio), msrp=N(W.msrp)||precio;
+  const fees=N(W.docFee)+N(W.tagFee)+N(W.otros);
+  const allow=N(W.tradeAllow), payoff=N(W.tradePayoff), equity=allow-payoff;
+  const rebates=N(W.rebates), down=N(W.down), taxR=N(W.taxPct)/100;
+  if(W.tipo==='finance'||W.tipo==='cash'){
+    const taxBase=Math.max(0,precio-allow);
+    const tax=taxBase*taxR;
+    const otd=precio+fees+tax-rebates;
+    const financiar=Math.max(0,otd-equity-down);
+    let pago=0;
+    if(W.tipo==='finance'){
+      const r=N(W.apr)/100/12, n=N(W.plazoF)||60;
+      pago=r>0?financiar*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1):financiar/n;
+    }
+    return {tipo:W.tipo,precio,msrp,fees,tax,otd,financiar,pago,equity,down,rebates,allow,payoff,
+      apr:N(W.apr),plazo:N(W.plazoF)||60,
+      alFirmar:W.tipo==='cash'?Math.max(0,otd-equity):down};
+  }
+  const residual=msrp*N(W.residPct)/100;
+  const capRed=down+Math.max(0,equity)+rebates;
+  const capCost=precio+N(W.acqFee)-capRed+Math.max(0,-equity);
+  const n=N(W.plazoL)||36, mf=N(W.mf);
+  const dep=(capCost-residual)/n;
+  const renta=(capCost+residual)*mf;
+  const base=dep+renta;
+  const pago=base*(1+taxR);
+  return {tipo:'lease',precio,msrp,fees,residual,capCost,pago,base,down,rebates,equity,allow,payoff,
+    plazo:n,millas:N(W.millas),mf,aprEq:mf*2400,acqFee:N(W.acqFee),
+    alFirmar:pago+down+fees};
+}
+/* Las cotizaciones que Desking guardó para este lead o cliente */
+function cotsDe(kind,id){
+  try{
+    const r=localStorage.getItem('asm_desk_v1'); if(!r)return [];
+    const d=JSON.parse(r);
+    return (d&&Array.isArray(d.cotizaciones)?d.cotizaciones:[])
+      .filter(q=>q&&q.vinculo&&q.vinculo.kind===kind&&q.vinculo.id===id&&q.w);
+  }catch(e){return [];}
+}
+
+function bloqueWorksheet(l){
+  const cots=cotsDe('lead',l.id);
+  const esLease=String((l.deal&&l.deal.tipo)||'').toLowerCase()==='lease';
+  return `<div class="card pad0">
+    <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('FileCheck',15,C.tx)}Hoja del negocio</div>
+      <div class="s">Para dársela al cliente: impresa, por WhatsApp o por correo.</div></div>
+    <div style="padding:14px 16px">
+      ${cots.length?`<div class="mlab" style="margin-top:0">De cuál cotización</div>
+        <select class="inp" id="wsCot">
+          ${cots.map((q,i)=>`<option value="${i}">${esc(q.fecha)} · ${esc(q.w.tipo==='lease'?'Lease':q.w.tipo==='cash'?'Contado':'Financiado')} · ${esc([q.w.ano,q.w.marca,q.w.modelo].filter(Boolean).join(' '))}</option>`).join('')}
+          <option value="-1">Los números de este Deal Room</option>
+        </select>
+        <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:8px">
+          Las de Desking traen el cálculo bueno de lease (money factor y residual).</p>`
+       :(esLease?`<div style="display:flex;gap:9px;align-items:flex-start;background:rgba(234,179,8,.07);
+          border:1px solid rgba(234,179,8,.22);border-radius:9px;padding:11px 12px;margin-bottom:12px">
+          ${ic('AlertCircle',15,C.warn)}
+          <p style="font-size:11.5px;color:var(--tx2);line-height:1.65">
+            Este negocio es <b>lease</b> y todavía no lo armaste en Desking. El pago que sale aquí
+            se calcula como préstamo, que <b>no es el pago real de un lease</b>. Ármalo en Desking
+            y vuelve — la hoja saldrá con el número bueno.</p></div>`:'')}
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn" style="flex:1;min-width:130px" onclick="imprimirWorksheet()">${ic('FileText')}Imprimir</button>
+        <button class="btn wa sm" onclick="worksheetWa()">${ic('Wa')}WhatsApp</button>
+        <button class="btn sec sm" onclick="worksheetMail()">${ic('Mail')}Correo</button>
+      </div>
+    </div></div>`;
+}
+
+/* Devuelve {c, fuente} con los numeros a usar */
+function numsWorksheet(l){
+  const cots=cotsDe('lead',l.id);
+  const sel=$('wsCot')?parseInt($('wsCot').value,10):(cots.length?0:-1);
+  if(cots.length&&sel>=0&&cots[sel])return {c:calcDesk(cots[sel].w), w:cots[sel].w, fuente:'desking'};
+  const f=finanzas(l);
+  const tipo=String((l.deal&&l.deal.tipo)||'').toLowerCase();
+  return {c:{tipo:tipo==='lease'?'lease':tipo==='contado'?'cash':'finance',
+    precio:f.precio,msrp:f.msrp,fees:f.fees,tax:f.tax,rebates:f.rebates,down:f.down,
+    allow:f.allowance,payoff:f.payoff,equity:f.equity,otd:f.totalDue,financiar:f.amtFin,
+    pago:f.pago,apr:f.apr,plazo:f.plazo,alFirmar:f.down},
+    w:null, fuente:'crm'};
+}
+
+function docWorksheet(l,c,w,fuente){
+  const veh=w?[w.ano,w.marca,w.modelo].filter(Boolean).join(' ')
+            :[l.veh&&l.veh.ano,l.veh&&l.veh.marca,l.veh&&l.veh.mod].filter(Boolean).join(' ');
+  const hoyTxt=new Date().toLocaleDateString('es-US',{year:'numeric',month:'long',day:'numeric'});
+  const r=(a,b,fuerte)=>`<tr><td class="et">${esc(a)}</td><td class="va"${fuerte?' style="font-size:12pt;font-weight:800"':''}>${b==null||b===''?'&nbsp;':esc(String(b))}</td></tr>`;
+  const fni=(l.recap&&l.recap.fni)||[];
+  const esLease=c.tipo==='lease';
+
+  const numeros = esLease ? `
+    <table class="t">
+      ${r('Precio negociado',fm(c.precio))}
+      ${r('MSRP',fm(c.msrp))}
+      ${r('Valor residual',fm(c.residual))}
+      ${c.acqFee?r('Acquisition fee',fm(c.acqFee)):''}
+      ${c.rebates?r('Rebates',fm(c.rebates)):''}
+      ${c.allow?r('Trade-in',fm(c.allow)+(c.payoff?'  ·  payoff '+fm(c.payoff):'')):''}
+      ${c.down?r('Entrada',fm(c.down)):''}
+      ${r('Capitalized cost',fm(c.capCost))}
+      ${r('Plazo',c.plazo+' meses')}
+      ${c.millas?r('Millas al año',Number(c.millas).toLocaleString('en-US')):''}
+      ${c.mf?r('Money factor',c.mf+'   (≈ '+(Math.round(c.aprEq*100)/100)+'% APR)'):''}
+    </table>
+    <div class="destaca">
+      <div><span>Pago mensual CON tax</span><b>${fm(c.pago)}</b></div>
+      <div><span>Al firmar</span><b>${fm(c.alFirmar)}</b></div>
+    </div>
+    <p class="nota">Al firmar incluye el primer pago, la entrada y los fees.</p>`
+  : `
+    <table class="t">
+      ${r('Precio de venta',fm(c.precio))}
+      ${c.fees?r('Fees y documentación',fm(c.fees)):''}
+      ${c.tax?r('Impuestos',fm(c.tax)):''}
+      ${c.rebates?r('Rebates',' − '+fm(c.rebates)):''}
+      ${c.allow?r('Trade-in',fm(c.allow)+(c.payoff?'  ·  payoff '+fm(c.payoff):'')):''}
+      ${r('Total','' + fm(c.otd))}
+      ${c.down?r('Entrada',' − '+fm(c.down)):''}
+      ${c.tipo!=='cash'?r('Monto a financiar',fm(c.financiar),true):''}
+      ${c.tipo!=='cash'?r('Plazo / APR',c.plazo+' meses  ·  '+c.apr+'%'):''}
+    </table>
+    ${c.tipo!=='cash'?`<div class="destaca">
+      <div><span>Pago mensual</span><b>${fm(c.pago)}</b></div>
+      <div><span>Entrada</span><b>${fm(c.down)}</b></div>
+    </div>`:`<div class="destaca"><div><span>Total de contado</span><b>${fm(c.alFirmar)}</b></div></div>`}`;
+
+  return `
+  <div class="hoja">
+    <div class="cab">
+      <div>
+        <div class="marca">AUTOSOLUTION MIAMI</div>
+        <div class="sub">Hoja del negocio · Deal Worksheet</div>
+      </div>
+      <div class="fechad">${esc(hoyTxt)}</div>
+    </div>
+
+    <div class="sec">Cliente</div>
+    <table class="t">
+      ${r('Nombre',[l.nom,(l.perfil&&l.perfil.apellido)||''].filter(Boolean).join(' '))}
+      ${r('Teléfono',l.tel)}
+      ${l.email||(l.perfil&&l.perfil.email)?r('Correo',l.email||l.perfil.email):''}
+    </table>
+
+    <div class="sec">Vehículo</div>
+    <table class="t">
+      ${r('Vehículo',veh)}
+      ${(l.oferta&&l.oferta.stock)?r('Stock #',l.oferta.stock):''}
+      ${(l.oferta&&l.oferta.vin)?r('VIN',l.oferta.vin):''}
+      ${r('Tipo de negocio',esLease?'Lease':c.tipo==='cash'?'Contado':'Financiado')}
+      ${(l.deal&&l.deal.banco)?r('Banco',l.deal.banco):''}
+    </table>
+
+    <div class="sec">El número</div>
+    ${numeros}
+
+    ${fni.length?`<div class="sec">Protección incluida</div>
+      <table class="t">${fni.map(p=>r(p.name,'incluido')).join('')}</table>`:''}
+
+    <div class="sec">Su asesor</div>
+    <table class="t">
+      ${r('Asesor',S.cfg.nombre||'')}
+      ${r('WhatsApp',miWa()?'+'+miWa():'')}
+      ${r('Concesionario',S.cfg.dealer||'AutoSolution Miami')}
+    </table>
+
+    <p class="legal">
+      Estos números son una <b>cotización</b> sujeta a aprobación de crédito y a la disponibilidad del
+      vehículo. No constituyen un contrato. Los impuestos y cargos oficiales pueden variar según el
+      condado de registro.
+    </p>
+    <p class="legal en">
+      These figures are a <b>quote</b>, subject to credit approval and vehicle availability. They do not
+      constitute a contract. Taxes and official fees may vary by county of registration.
+    </p>
+    <div class="pie">${esc(hoyTxt)} · ${esc(S.cfg.nombre||'')} · AutoSolution Miami${
+      fuente==='desking'?' · calculado en Desking':''}</div>
+  </div>`;
+}
+
+function imprimirWorksheet(){
+  const l=L(); if(!l)return;
+  const {c,w,fuente}=numsWorksheet(l);
+  if(!num(c.precio)){alert('Todavía no hay precio en la oferta.');return;}
+  const cont=$('impresion');
+  cont.innerHTML=docWorksheet(l,c,w,fuente);
+  const limpiar=()=>{cont.innerHTML='';window.removeEventListener('afterprint',limpiar);};
+  window.addEventListener('afterprint',limpiar);
+  setTimeout(()=>{window.print();setTimeout(limpiar,60000);},120);
+}
+
+/* El texto corto, para mandar. Regla de la casa: el número COMPLETO. */
+function textoWorksheet(l){
+  const {c,w}=numsWorksheet(l);
+  const veh=w?[w.ano,w.marca,w.modelo].filter(Boolean).join(' ')
+            :[l.veh&&l.veh.ano,l.veh&&l.veh.marca,l.veh&&l.veh.mod].filter(Boolean).join(' ');
+  const L2=[];
+  L2.push('🚗 '+(veh||'Tu vehículo'));
+  if(c.tipo==='lease'){
+    L2.push('LEASE: '+fm(c.pago)+'/mes CON tax');
+    L2.push(fm(c.alFirmar)+' al firmar (1er pago + entrada + fees)');
+    L2.push(c.plazo+' meses'+(c.millas?' · '+Number(c.millas).toLocaleString('en-US')+' millas/año':''));
+  }else if(c.tipo==='cash'){
+    L2.push('CONTADO: '+fm(c.alFirmar)+' todo incluido');
+  }else{
+    L2.push('FINANCIADO: '+fm(c.pago)+'/mes');
+    L2.push(fm(c.down)+' de entrada · '+c.plazo+' meses · '+c.apr+'% APR');
+    L2.push('Monto a financiar: '+fm(c.financiar));
+  }
+  L2.push('');
+  L2.push('El número completo, con fees e impuestos incluidos. Sujeto a aprobación de crédito.');
+  if(S.cfg.nombre)L2.push('— '+S.cfg.nombre+', AutoSolution Miami');
+  return L2.join('\n');
+}
+function worksheetWa(){
+  const l=L(); if(!l)return;
+  if(!num(numsWorksheet(l).c.precio)){alert('Todavía no hay precio en la oferta.');return;}
+  openMsg('Mandar la hoja del negocio', l.tel, textoWorksheet(l));
+}
+function worksheetMail(){
+  const l=L(); if(!l)return;
+  if(!num(numsWorksheet(l).c.precio)){alert('Todavía no hay precio en la oferta.');return;}
+  const to=l.email||(l.perfil&&l.perfil.email)||'';
+  const veh=[l.veh&&l.veh.ano,l.veh&&l.veh.marca,l.veh&&l.veh.mod].filter(Boolean).join(' ');
+  const asunto='Tu número para el '+(veh||'vehículo')+' — AutoSolution Miami';
+  window.location.href='mailto:'+encodeURIComponent(to)+
+    '?subject='+encodeURIComponent(asunto)+
+    '&body='+encodeURIComponent(textoWorksheet(l));
+}
+
 /* ═══════════ NAVEGACIÓN ═══════════ */
 let TAB='dashboard', LEADID=null, CLIID=null, STEP=1, Q='', QLIB='';
 let FSRC='Todos', FEST='Todos';
@@ -4994,6 +5240,7 @@ STEPV[7]=function(l,f){
         .map(r=>`<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:3px">${r[0]}</div>
         <div class="mono" style="font-size:15px;font-weight:800;color:${r[2]};letter-spacing:-.02em">${r[1]}</div></div>`).join('')}
     </div></div>
+  ${bloqueWorksheet(l)}
   <div class="grid1" style="grid-template-columns:1fr;gap:10px">
     ${[['finalizado','Trato finalizado','Marcado como cerrado — activa post-venta'],
        ['firmado','Documentos firmados','Contratos, title e insurance completados']]
