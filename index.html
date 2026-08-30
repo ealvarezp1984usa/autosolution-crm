@@ -19,7 +19,7 @@
 :root{
   --bg:#080808;--bg2:#111111;--bg3:#1a1a1a;--bg4:#222222;
   --bd:#2a2a2a;--bd2:#363636;
-  --tx:#efefef;--tx2:#999999;--tx3:#555555;
+  --tx:#f2f2f2;--tx2:#b0b0b0;--tx3:#7d7d7d;
   --p:#e31c1c;--pd:#b91c1c;--ps:rgba(227,28,28,.1);
   --ok:#22c55e;--warn:#eab308;--info:#3b82f6;--dan:#ef4444;
   --vio:#8b5cf6;--ora:#f97316;--wa:#25D366;
@@ -29,7 +29,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);
-  font-size:13px;-webkit-font-smoothing:antialiased;overflow:hidden}
+  font-size:15px;-webkit-font-smoothing:antialiased;overflow:hidden}
 .mono{font-family:'JetBrains Mono','SFMono-Regular',Consolas,monospace;font-feature-settings:'tnum'}
 .bebas{font-family:'Bebas Neue','Archivo Black',sans-serif;letter-spacing:.04em}
 button{cursor:pointer;font-family:inherit;font-size:inherit}
@@ -60,21 +60,21 @@ aside.on{transform:none}
 .sbuser{padding:10px}
 .sbuser .pill{display:flex;align-items:center;gap:8px;padding:8px;border-radius:9px;background:var(--bg3)}
 .sbav{width:28px;height:28px;border-radius:50%;background:var(--p);display:flex;align-items:center;
-  justify-content:center;color:#fff;font-weight:700;font-size:10px;flex-shrink:0;letter-spacing:-.02em}
+  justify-content:center;color:#fff;font-weight:700;font-size:11.5px;flex-shrink:0;letter-spacing:-.02em}
 .sbnav{flex:1;overflow-y:auto;padding:6px}
-.nvi{width:100%;display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;font-size:12px;
+.nvi{width:100%;display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;font-size:14.5px;
   border:none;background:transparent;color:var(--tx3);text-align:left;margin-bottom:1px;position:relative}
 .nvi.on{background:var(--ps);color:var(--p);font-weight:700}
 .nvi .lb{flex:1}
-.nvi .bdg{font-size:9px;font-weight:800;background:var(--p);color:#fff;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center}
-.nvi .soon{font-size:8px;font-weight:800;color:var(--tx3);border:1px solid var(--bd2);border-radius:99px;padding:1px 5px;letter-spacing:.04em}
-.nvsec{font-size:9px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.09em;padding:12px 10px 5px}
+.nvi .bdg{font-size:10px;font-weight:800;background:var(--p);color:#fff;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center}
+.nvi .soon{font-size:10px;font-weight:800;color:var(--tx3);border:1px solid var(--bd2);border-radius:99px;padding:1px 5px;letter-spacing:.04em}
+.nvsec{font-size:10px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.09em;padding:12px 10px 5px}
 .sbfoot{padding:8px;border-top:1px solid var(--bd)}
 
 .main{flex:1;display:flex;flex-direction:column;min-width:0;height:100%}
 .topbar{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--bd);
   background:var(--bg2);flex-shrink:0;min-height:52px}
-.tbtitle{font-size:13px;font-weight:700;color:var(--tx);flex:1;min-width:0;overflow:hidden;
+.tbtitle{font-size:14.5px;font-weight:700;color:var(--tx);flex:1;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .iconbtn{background:none;border:none;color:var(--tx3);padding:6px;border-radius:7px;line-height:0;display:flex}
 .content{flex:1;overflow-y:auto;padding:16px 14px calc(78px + var(--sb));}
@@ -83,7 +83,7 @@ aside.on{transform:none}
 
 .bottomnav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,.96);backdrop-filter:blur(14px);
   border-top:1px solid var(--bd);display:flex;z-index:70;padding-bottom:var(--sb)}
-.bn{flex:1;background:none;border:none;color:var(--tx3);font-size:9px;font-weight:700;letter-spacing:.06em;
+.bn{flex:1;background:none;border:none;color:var(--tx3);font-size:10px;font-weight:700;letter-spacing:.06em;
   text-transform:uppercase;padding:9px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
 .bn svg.ic{width:19px;height:19px}
 .bn.on{color:var(--tx)}
@@ -91,20 +91,20 @@ aside.on{transform:none}
 .bn .dot{position:absolute;top:6px;right:calc(50% - 16px);width:6px;height:6px;border-radius:50%;background:var(--p)}
 
 /* ═══ PRIMITIVES ═══ */
-h2.vh{font-size:18px;font-weight:800;color:var(--tx);letter-spacing:-.02em}
-.vsub{font-size:12px;color:var(--tx3);margin-top:3px;line-height:1.5}
-.stack{display:flex;flex-direction:column;gap:14px}
+h2.vh{font-size:20px;font-weight:800;color:var(--tx);letter-spacing:-.02em}
+.vsub{font-size:14.5px;color:var(--tx3);margin-top:3px;line-height:1.5}
+.stack{display:flex;flex-direction:column;gap:18px}
 .rowb{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:15px 16px}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:18px}
 .card.pad0{padding:0;overflow:hidden}
-.chead{padding:13px 16px;border-bottom:1px solid var(--bd);font-weight:700;font-size:13px;color:var(--tx)}
-.chead .s{font-size:11px;color:var(--tx3);font-weight:400;margin-top:2px}
+.chead{padding:15px 18px;border-bottom:1px solid var(--bd);font-weight:700;font-size:14.5px;color:var(--tx)}
+.chead .s{font-size:13px;color:var(--tx3);font-weight:400;margin-top:2px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid1{display:grid;grid-template-columns:1fr;gap:10px}
 .divider{height:1px;background:var(--bd);margin:12px 0}
 
 .btn{border-radius:8px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  letter-spacing:.01em;white-space:nowrap;font-size:12px;padding:9px 16px;background:var(--p);color:#fff;border:none;transition:opacity .12s}
+  letter-spacing:.01em;white-space:nowrap;font-size:14.5px;padding:9px 16px;background:var(--p);color:#fff;border:none;transition:opacity .12s}
 .btn:active{opacity:.75}
 .btn[disabled]{opacity:.4;cursor:not-allowed}
 .btn.sec{background:transparent;color:var(--tx2);border:1px solid var(--bd2)}
@@ -112,40 +112,40 @@ h2.vh{font-size:18px;font-weight:800;color:var(--tx);letter-spacing:-.02em}
 .btn.ok{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.25)}
 .btn.dan{background:rgba(239,68,68,.1);color:var(--dan);border:1px solid rgba(239,68,68,.25)}
 .btn.wa{background:var(--wa);color:#07130A;font-weight:700}
-.btn.sm{font-size:11px;padding:6px 12px;gap:5px}
-.btn.xs{font-size:10px;padding:5px 9px;gap:4px}
-.btn.lg{font-size:13px;padding:12px 22px}
+.btn.sm{font-size:13px;padding:6px 12px;gap:5px}
+.btn.xs{font-size:11.5px;padding:5px 9px;gap:4px}
+.btn.lg{font-size:14.5px;padding:12px 22px}
 .btn.full{width:100%}
 .btn svg.ic{width:13px;height:13px}
 
-.bdg2{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:99px;font-size:10px;
+.bdg2{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:99px;font-size:11.5px;
   font-weight:700;letter-spacing:.03em;white-space:nowrap;border:1px solid}
-label.f{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);
+label.f{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);
   margin-bottom:5px;display:flex;gap:4px;align-items:center}
-label.f .h{color:var(--tx3);font-weight:400;text-transform:none;letter-spacing:normal;font-size:10px}
+label.f .h{color:var(--tx3);font-weight:400;text-transform:none;letter-spacing:normal;font-size:11.5px}
 .inp,select.inp,textarea.inp{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid var(--bd);
-  background:var(--bg3);color:var(--tx);font-size:14px;outline:none;line-height:1.4;transition:border-color .12s}
+  background:var(--bg3);color:var(--tx);font-size:16.5px;outline:none;line-height:1.4;transition:border-color .12s}
 .inp:focus{border-color:var(--p)}
 .inp::placeholder{color:var(--tx3)}
-textarea.inp{resize:vertical;min-height:88px;font-size:14px;line-height:1.55}
+textarea.inp{resize:vertical;min-height:88px;font-size:16.5px;line-height:1.55}
 select.inp{-webkit-appearance:none;appearance:none;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round'><path d='M3 5l4 4 4-4'/></svg>");
   background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
 .fr{display:flex;flex-direction:column}
-.check{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--tx2);padding:4px 0}
+.check{display:flex;align-items:center;gap:9px;font-size:14.5px;color:var(--tx2);padding:4px 0}
 .check input{accent-color:var(--p);width:16px;height:16px}
 
-.kpi{background:var(--bg2);border-radius:12px;padding:14px;display:flex;align-items:flex-start;gap:11px;border:1px solid var(--bd)}
+.kpi{background:var(--bg2);border-radius:12px;padding:17px;display:flex;align-items:flex-start;gap:13px;border:1px solid var(--bd)}
 .kpi .ib{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.kpi .v{font-size:21px;font-weight:800;color:var(--tx);line-height:1.1;letter-spacing:-.04em}
-.kpi .l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-top:3px}
-.kpi .s{font-size:10px;color:var(--tx3);margin-top:2px}
+.kpi .v{font-size:25px;font-weight:800;color:var(--tx);line-height:1.1;letter-spacing:-.04em}
+.kpi .l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-top:3px}
+.kpi .s{font-size:11.5px;color:var(--tx3);margin-top:2px}
 
 .empty{display:flex;flex-direction:column;align-items:center;padding:40px 20px;text-align:center}
 .empty .eb{width:44px;height:44px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;
   justify-content:center;margin-bottom:12px;color:var(--tx3)}
-.empty .t{font-weight:700;color:var(--tx2);font-size:13px}
-.empty .s{font-size:12px;color:var(--tx3);margin-top:5px;max-width:280px;line-height:1.55}
+.empty .t{font-weight:700;color:var(--tx2);font-size:14.5px}
+.empty .s{font-size:14.5px;color:var(--tx3);margin-top:5px;max-width:280px;line-height:1.55}
 
 /* ═══ LIST ROWS ═══ */
 .lrow{width:100%;display:flex;align-items:stretch;background:none;border:none;border-bottom:1px solid var(--bd);
@@ -153,15 +153,15 @@ select.inp{-webkit-appearance:none;appearance:none;
 .lrow:last-child{border-bottom:none}
 .lrow .heat{width:3px;flex-shrink:0;align-self:stretch;opacity:.75}
 .lrow .body{flex:1;padding:12px 14px;min-width:0;display:flex;align-items:center;gap:10px}
-.lname{font-size:13px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lmeta{font-size:11px;color:var(--tx3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lname{font-size:14.5px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lmeta{font-size:13px;color:var(--tx3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tagrow{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;align-items:center}
 
 /* ═══ ALERTAS ═══ */
 .arow{position:relative;padding-left:16px}
 .arow::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:3px;background:var(--warn)}
 .arow.hot::before{background:var(--p)}
-.atag{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--warn)}
+.atag{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--warn)}
 .arow.hot .atag{color:var(--p)}
 .aact{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
 
@@ -175,18 +175,18 @@ select.inp{-webkit-appearance:none;appearance:none;
 /* ═══ DEAL ROOM ═══ */
 .steps{display:flex;gap:7px;overflow-x:auto;padding:11px 14px;border-bottom:1px solid var(--bd);background:#0d0d0d}
 .stp{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:99px;border:1px solid var(--bd);
-  background:transparent;color:var(--tx3);font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0}
+  background:transparent;color:var(--tx3);font-size:13px;font-weight:700;white-space:nowrap;flex-shrink:0}
 .stp.on{background:var(--ps);border-color:var(--p);color:var(--p)}
 .stp.done{border-color:rgba(34,197,94,.4);color:var(--ok)}
 .stp .n{width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;display:flex;
-  align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+  align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
 .fbar{border-top:1px solid var(--bd);background:#0a0a0a;padding:9px 0;
   position:fixed;bottom:calc(56px + var(--sb));left:0;right:0;z-index:60;
   display:flex;align-items:center;gap:14px;overflow-x:auto}
 .fbar .f{flex-shrink:0;padding-left:14px}
 .fbar .f:last-child{padding-right:14px}
-.fbar .fl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3)}
-.fbar .fv{font-size:14px;font-weight:800;letter-spacing:-.02em;margin-top:1px}
+.fbar .fl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3)}
+.fbar .fv{font-size:16.5px;font-weight:800;letter-spacing:-.02em;margin-top:1px}
 .tl{padding-left:16px;border-left:2px solid var(--bd);margin-top:12px}
 .tli{position:relative;margin-bottom:12px}
 .tli .dot{position:absolute;left:-25px;top:2px;width:18px;height:18px;border-radius:50%;
@@ -194,22 +194,22 @@ select.inp{-webkit-appearance:none;appearance:none;
 .tli .dot svg.ic{width:9px;height:9px}
 .actgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
 .actbtn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:8px;
-  border:1px solid var(--bd);background:transparent;color:var(--tx3);font-size:9px;font-weight:700;text-transform:uppercase}
-.sumrow{display:flex;justify-content:space-between;padding:5px 0;font-size:12px}
+  border:1px solid var(--bd);background:transparent;color:var(--tx3);font-size:10px;font-weight:700;text-transform:uppercase}
+.sumrow{display:flex;justify-content:space-between;padding:7px 0;font-size:14.5px}
 .sumrow.b{border-top:1px solid var(--bd);font-weight:700;color:var(--tx);margin-top:2px;padding-top:7px}
 
 /* ═══ PROGRAMAS ═══ */
 .promo{border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;background:var(--bg2)}
 .phead{background:linear-gradient(135deg,#1a1a1e,#141416);padding:14px 16px;border-bottom:1px solid var(--bd)}
-.pbrand{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--p)}
-.pmodel{font-weight:800;font-size:18px;letter-spacing:-.03em;margin-top:2px}
-.ppay{font-weight:800;font-size:15px;margin-top:3px}
-.ppay small{color:var(--tx3);font-weight:500;font-size:11px}
-.pfine{padding:10px 16px;color:var(--tx3);font-size:11.5px;line-height:1.55;border-bottom:1px solid var(--bd)}
+.pbrand{font-family:'Bebas Neue',sans-serif;font-size:14.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--p)}
+.pmodel{font-weight:800;font-size:20px;letter-spacing:-.03em;margin-top:2px}
+.ppay{font-weight:800;font-size:16.5px;margin-top:3px}
+.ppay small{color:var(--tx3);font-weight:500;font-size:13px}
+.pfine{padding:10px 16px;color:var(--tx3);font-size:13px;line-height:1.55;border-bottom:1px solid var(--bd)}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;
-  border-bottom:1px solid var(--bd);font-size:12.5px;color:var(--tx2)}
+  border-bottom:1px solid var(--bd);font-size:14.5px;color:var(--tx2)}
 .mrow:last-child{border-bottom:none}
-.mlab{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);margin:12px 0 2px}
+.mlab{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);margin:12px 0 2px}
 
 /* ═══ MODAL ═══ */
 .mask{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);backdrop-filter:blur(3px);
@@ -219,12 +219,12 @@ select.inp{-webkit-appearance:none;appearance:none;
   max-width:560px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;animation:slideUp .2s ease}
 .mhead{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;
   border-bottom:1px solid var(--bd);flex-shrink:0}
-.mhead b{font-weight:700;font-size:15px}
+.mhead b{font-weight:700;font-size:16.5px}
 .mbody{padding:16px 18px calc(16px + var(--sb));overflow-y:auto;flex:1}
 .mfoot{padding:12px 18px calc(12px + var(--sb));border-top:1px solid var(--bd);display:flex;gap:8px;flex-shrink:0}
 .mfoot .btn{flex:1}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;background:var(--bg2);
-  border:1px solid rgba(34,197,94,.35);color:var(--ok);font-size:12.5px;font-weight:600;padding:11px 20px;
+  border:1px solid rgba(34,197,94,.35);color:var(--ok);font-size:14.5px;font-weight:600;padding:11px 20px;
   border-radius:99px;z-index:300;opacity:0;pointer-events:none;transition:.22s;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:88vw;text-align:center}
 .toast.on{opacity:1;bottom:106px}
 
@@ -234,21 +234,21 @@ select.inp{-webkit-appearance:none;appearance:none;
 .onbhero .glow{position:absolute;bottom:-90px;right:-60px;width:240px;height:240px;
   background:rgba(227,28,28,.06);border-radius:50%}
 .onbtag{display:inline-flex;align-items:center;gap:6px;background:var(--ps);border:1px solid rgba(227,28,28,.19);
-  border-radius:99px;padding:4px 12px;margin:20px 0 16px;font-size:10px;font-weight:700;color:var(--p);
+  border-radius:99px;padding:4px 12px;margin:20px 0 16px;font-size:11.5px;font-weight:700;color:var(--p);
   text-transform:uppercase;letter-spacing:.08em}
 .onbform{padding:26px 22px calc(30px + var(--sb));max-width:440px;width:100%;margin:0 auto}
 
 /* ═══ ENTRADA (login / registro) ═══ */
-.auh{font-size:23px;font-weight:900;letter-spacing:-.02em;margin-bottom:6px}
-.aup{color:var(--tx3);font-size:13px;margin-bottom:20px;line-height:1.6}
-.aunota{font-size:11px;color:var(--tx3);text-align:center;margin-top:14px;line-height:1.6}
+.auh{font-size:25px;font-weight:900;letter-spacing:-.02em;margin-bottom:6px}
+.aup{color:var(--tx3);font-size:14.5px;margin-bottom:20px;line-height:1.6}
+.aunota{font-size:13px;color:var(--tx3);text-align:center;margin-top:14px;line-height:1.6}
 .aumsg{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:9px;
-  font-size:12px;line-height:1.55;margin-bottom:14px}
+  font-size:14.5px;line-height:1.55;margin-bottom:14px}
 .aumsg.dan{background:rgba(239,68,68,.09);border:1px solid rgba(239,68,68,.25);color:#fca5a5}
 .aumsg.ok{background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.25);color:#86efac}
 .aumsg svg.ic{flex-shrink:0;margin-top:1px}
-.inp.au{font-size:15px;padding:12px 14px}
-.ausep{display:flex;align-items:center;gap:10px;margin:20px 0 12px;color:var(--tx3);font-size:11px}
+.inp.au{font-size:16.5px;padding:12px 14px}
+.ausep{display:flex;align-items:center;gap:10px;margin:20px 0 12px;color:var(--tx3);font-size:13px}
 .ausep:before,.ausep:after{content:'';flex:1;height:1px;background:var(--bd)}
 .sbacc{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:9px;
   background:var(--bg3);margin-bottom:7px}
@@ -257,9 +257,9 @@ select.inp{-webkit-appearance:none;appearance:none;
 .admrow{display:flex;gap:11px;padding:12px 14px;border-bottom:1px solid var(--bd);align-items:flex-start}
 .admrow:last-child{border-bottom:none}
 .admav{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;
-  justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
-.admnom{font-size:13px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.admsub{font-size:11px;color:var(--tx3);line-height:1.5}
+  justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.admnom{font-size:14.5px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.admsub{font-size:13px;color:var(--tx3);line-height:1.5}
 
 /* ═══ DESKTOP ═══ */
 @media(min-width:1000px){
@@ -336,15 +336,15 @@ select.inp{-webkit-appearance:none;appearance:none;
       <div class="pill">
         <div class="sbav" id="sbAv">AS</div>
         <div style="min-width:0;flex:1">
-          <div id="sbName" style="font-size:11.5px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Mi cartera</div>
-          <div id="sbRol" style="font-size:9px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Vendedor</div>
+          <div id="sbName" style="font-size:13px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Mi cartera</div>
+          <div id="sbRol" style="font-size:10px;color:var(--p);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Vendedor</div>
         </div>
       </div>
     </div>
     <nav class="sbnav sh" id="sbNav"></nav>
     <div class="sbfoot">
       <div id="sbAcc"></div>
-      <div style="font-size:9.5px;color:var(--tx3);line-height:1.6;padding:2px 4px">
+      <div style="font-size:10px;color:var(--tx3);line-height:1.6;padding:2px 4px">
         AutoSolution Miami · v1.2<br>Tu cartera se guarda en tu cuenta.
       </div>
     </div>
@@ -1059,17 +1059,17 @@ function resumen(d){
 function modalConflicto(rem){
   window.__CONF=rem;
   openModal('Dos versiones distintas',
-   `<p style="font-size:12.5px;color:var(--tx2);line-height:1.6;margin-bottom:14px">
+   `<p style="font-size:14.5px;color:var(--tx2);line-height:1.6;margin-bottom:14px">
       Este dispositivo y la nube cambiaron por separado. Elige cuál se queda —
       la otra no se pierde: se descarga como respaldo antes de reemplazarla.</p>
     <div class="card" style="background:var(--bg3);margin-bottom:10px">
-      <div style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12.5px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:14.5px;margin-bottom:6px">
         ${ic('Cloud',14,C.info)}En la nube</div>
-      <div style="font-size:12px;color:var(--tx2);line-height:1.6">${resumen(rem.datos)}</div></div>
+      <div style="font-size:14.5px;color:var(--tx2);line-height:1.6">${resumen(rem.datos)}</div></div>
     <div class="card" style="background:var(--bg3)">
-      <div style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12.5px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:14.5px;margin-bottom:6px">
         ${ic('HardDrive',14,C.p)}En este dispositivo (${esc(SYNC.device)})</div>
-      <div style="font-size:12px;color:var(--tx2);line-height:1.6">${resumen(snapshot())}</div></div>`,
+      <div style="font-size:14.5px;color:var(--tx2);line-height:1.6">${resumen(snapshot())}</div></div>`,
    `<button class="btn sec" onclick="resolver('nube')">${ic('Cloud')}Usar la nube</button>
     <button class="btn" onclick="resolver('local')">${ic('HardDrive')}Usar este</button>`);
 }
@@ -1476,13 +1476,13 @@ function pintarAuth(){
       <div style="position:relative;z-index:1">${LOGO}</div>
       <div style="position:relative;z-index:1">
         <div class="onbtag">${ic('Zap',12,C.p)}CRM exclusivo automotriz</div>
-        <h1 style="font-size:34px;font-weight:900;color:#fff;line-height:1.08;text-transform:uppercase;letter-spacing:-.03em;margin-bottom:14px">
+        <h1 style="font-size:38px;font-weight:900;color:#fff;line-height:1.08;text-transform:uppercase;letter-spacing:-.03em;margin-bottom:14px">
           Cierra más.<br><span style="color:var(--p)">Cada turno.</span></h1>
-        <p style="color:var(--tx3);font-size:13px;line-height:1.7;max-width:340px">
+        <p style="color:var(--tx3);font-size:14.5px;line-height:1.7;max-width:340px">
           Motor de urgencia en tiempo real, flujo de 8 pasos con F&amp;I y alertas automáticas de fin de lease,
           refi y aniversario sobre tu propio libro de clientes.</p>
       </div>
-      <div class="dtonly" style="font-size:10px;color:var(--tx3);border-top:1px solid var(--bd);padding-top:16px">
+      <div class="dtonly" style="font-size:11.5px;color:var(--tx3);border-top:1px solid var(--bd);padding-top:16px">
         © 2026 AutoSolution Miami CRM · Tu cartera es tuya y viaja contigo</div>
     </div>
     <div class="onbwrap"><div class="onbform">
@@ -1606,7 +1606,7 @@ function modalClave(){
   openModal('Elige tu nueva contraseña',
     `<div class="fr"><label class="f">Contraseña nueva <span class="h">mínimo 8</span></label>
       <input class="inp" id="pwNueva" type="password" autocomplete="new-password" placeholder="••••••••"></div>
-     <p style="font-size:11.5px;color:var(--tx3);line-height:1.6;margin-top:10px">
+     <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:10px">
        Se guarda ahora mismo. La próxima vez entras con esta.</p>`,
     `<button class="btn sec" onclick="closeModal()">Ahora no</button>
      <button class="btn" onclick="guardarClave()">${ic('Save')}Guardar</button>`);
@@ -1644,8 +1644,8 @@ function bannerPlan(){
   const p=SES&&SES.perfil;if(!p)return '';
   const caja=(color,icon,titulo,texto)=>`<div class="card" style="border-color:${color}38;background:${color}0d;margin-bottom:14px">
     <div style="display:flex;gap:10px;align-items:flex-start">${ic(icon,15,color)}
-      <div><div style="font-weight:800;font-size:12.5px;color:${color}">${esc(titulo)}</div>
-      <div style="font-size:11.5px;color:var(--tx2);line-height:1.6;margin-top:3px">${esc(texto)}</div></div></div></div>`;
+      <div><div style="font-weight:800;font-size:14.5px;color:${color}">${esc(titulo)}</div>
+      <div style="font-size:13px;color:var(--tx2);line-height:1.6;margin-top:3px">${esc(texto)}</div></div></div></div>`;
   if(p.plan==='pausado')
     return caja(C.dan,'AlertCircle','Cuenta pausada',
       'Sigues viendo tu libro, pero la cuenta está pausada. Habla con Eduardo para reactivarla.');
@@ -1705,9 +1705,9 @@ function pintarGestion(){
   const f=GEST.f, dg=GEST.diag;
   const hasta=f.gratis_hasta?String(f.gratis_hasta).slice(0,10):'';
   const diag=dg===null
-    ? `<div style="font-size:11.5px;color:var(--tx3)">Leyendo su sincronización…<span class="spin"></span></div>`
+    ? `<div style="font-size:13px;color:var(--tx3)">Leyendo su sincronización…<span class="spin"></span></div>`
     : dg.err
-      ? `<div style="font-size:11.5px;color:${C.dan}">${esc(dg.err)}</div>`
+      ? `<div style="font-size:13px;color:${C.dan}">${esc(dg.err)}</div>`
       : `<div class="sumrow"><span style="color:var(--tx3)">Versión del libro (rev)</span>
            <span class="mono" style="color:var(--tx2)">${dg.b?dg.b.rev:'—'}</span></div>
          <div class="sumrow"><span style="color:var(--tx3)">Último dispositivo</span>
@@ -1752,7 +1752,7 @@ function pintarGestion(){
       <option value="admin"${f.rol==='admin'?' selected':''}>Administrador</option>
     </select>
 
-    <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:12px">
+    <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:12px">
       Pausar no borra nada: el vendedor sigue viendo su libro pero con el aviso de cuenta pausada.
       Nunca se toca su información.</p>`,
    `<button class="btn sec" onclick="closeModal();GEST=null">Cancelar</button>
@@ -1849,8 +1849,8 @@ function vistaAyuda(){
       <div style="display:flex;gap:10px;align-items:center">
         ${ic('Sparkle',16,C.p)}
         <div style="flex:1;min-width:0">
-          <div style="font-weight:800;font-size:13px">¿Prefieres verlo paso a paso?</div>
-          <div style="font-size:11.5px;color:var(--tx2);margin-top:2px">Te repito el recorrido de bienvenida.</div>
+          <div style="font-weight:800;font-size:14.5px">¿Prefieres verlo paso a paso?</div>
+          <div style="font-size:13px;color:var(--tx2);margin-top:2px">Te repito el recorrido de bienvenida.</div>
         </div>
         <button class="btn sm" onclick="abrirTour(0)">${ic('ChevronRight')}Ver</button>
       </div>
@@ -1858,7 +1858,7 @@ function vistaAyuda(){
     ${AYUDA.map(s=>`<div class="card pad0">
       <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic(s.i,15,C.tx)}${esc(s.t)}</div></div>
       <div style="padding:13px 16px">
-        <ul style="margin:0;padding-left:17px;font-size:12.5px;color:var(--tx2);line-height:1.75">
+        <ul style="margin:0;padding-left:17px;font-size:14.5px;color:var(--tx2);line-height:1.75">
           ${s.p.map(x=>`<li style="margin-bottom:5px">${x}</li>`).join('')}
         </ul>
       </div></div>`).join('')}
@@ -1908,8 +1908,8 @@ function abrirTour(i){
    `<div style="text-align:center;padding:6px 0 2px">
       <div style="width:54px;height:54px;border-radius:15px;background:var(--ps);display:flex;align-items:center;
         justify-content:center;margin:0 auto 16px">${ic(s.i,25,C.p)}</div>
-      <div style="font-size:19px;font-weight:900;letter-spacing:-.02em;margin-bottom:10px">${esc(s.t)}</div>
-      <p style="font-size:13.5px;color:var(--tx2);line-height:1.7;max-width:340px;margin:0 auto">${s.d}</p>
+      <div style="font-size:20px;font-weight:900;letter-spacing:-.02em;margin-bottom:10px">${esc(s.t)}</div>
+      <p style="font-size:16.5px;color:var(--tx2);line-height:1.7;max-width:340px;margin:0 auto">${s.d}</p>
       <div style="display:flex;gap:6px;justify-content:center;margin-top:20px">
         ${TOUR.map((_,k)=>`<span style="width:${k===TPASO?'18px':'6px'};height:6px;border-radius:99px;
           background:${k===TPASO?C.p:'var(--bd2)'};transition:width .2s"></span>`).join('')}
@@ -1987,7 +1987,7 @@ let TEDIT=null;
 function vistaTasas(){
   if(!esAdmin())return soonView('admin');
   if(!TASAS.cargado){setTimeout(async()=>{await bajarTasas();TASAS.cargado=true;if(TAB==='tasas')render();},0);
-    return `<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:12.5px">
+    return `<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:14.5px">
       Leyendo las tasas publicadas…<span class="spin"></span></div>`;}
 
   const lista=TEDIT||TASAS.data;
@@ -2003,14 +2003,14 @@ function vistaTasas(){
         <div class="vsub">Las publicas tú y le llegan solas a todos los vendedores.</div></div>
       <div class="card" style="text-align:center;padding:26px">
         ${ic('Landmark',26,C.tx3)}
-        <div style="font-weight:800;font-size:14px;margin-top:12px">Todavía no has publicado tasas</div>
-        <p style="font-size:12.5px;color:var(--tx2);line-height:1.65;margin:10px auto 16px;max-width:400px">
+        <div style="font-weight:800;font-size:16.5px;margin-top:12px">Todavía no has publicado tasas</div>
+        <p style="font-size:14.5px;color:var(--tx2);line-height:1.65;margin:10px auto 16px;max-width:400px">
           Carga la lista base de bancos (RouteOne, cautivas y credit unions) desde tu Desking,
           ajusta las tasas y publícalas. A partir de ahí, cada vendedor las recibe al entrar.</p>
         <button class="btn" onclick="cargarBaseTasas()">${ic('Download')}Cargar la lista base</button>
       </div>
       ${TASAS.err?`<div class="card" style="border-color:${C.dan}38;background:${C.dan}0d">
-        <div style="font-size:12px;color:var(--tx2)">${esc(TASAS.err)}</div></div>`:''}
+        <div style="font-size:14.5px;color:var(--tx2)">${esc(TASAS.err)}</div></div>`:''}
     </div>`;
   }
 
@@ -2024,9 +2024,9 @@ function vistaTasas(){
           display:flex;align-items:center;justify-content:center;flex-shrink:0">
           ${ic(vencido?'AlertCircle':'CheckCircle2',19,vencido?C.warn:C.ok)}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-weight:800;font-size:14px;color:${vencido?C.warn:C.ok}">
+          <div style="font-weight:800;font-size:16.5px;color:${vencido?C.warn:C.ok}">
             ${d===null?'Sin publicar todavía':vencido?'Toca actualizarlas':'Al día'}</div>
-          <div style="font-size:11.5px;color:var(--tx3);margin-top:2px">
+          <div style="font-size:13px;color:var(--tx3);margin-top:2px">
             ${d===null?'Publica para que los vendedores las reciban'
               :'Publicadas hace '+d+' día'+(d===1?'':'s')+' · etiqueta: '+esc(TASAS.fecha||'sin fecha')}</div>
         </div>
@@ -2037,7 +2037,7 @@ function vistaTasas(){
       <div class="fr"><label class="f">Etiqueta que ve el vendedor</label>
         <input class="inp" id="tFecha" value="${esc(TEDIT?(window.__tFecha||TASAS.fecha):TASAS.fecha)}"
           placeholder="1ra quincena de septiembre 2026"></div>
-      <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:9px">
+      <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:9px">
         Aparece en su Desking como “tasas de referencia (${esc(TASAS.fecha||'…')})”. Ponle algo que le diga
         de cuándo son, no una fecha exacta: son referencia, no el número final del banco.</p>
     </div>
@@ -2056,17 +2056,17 @@ function vistaTasas(){
           </div>
           <div style="display:flex;gap:7px;flex-shrink:0">
             <div class="fr" style="width:78px"><label class="f" style="margin-bottom:3px">Nuevo</label>
-              <input class="inp mono" style="padding:7px 8px;font-size:12px" type="number" step="0.1"
+              <input class="inp mono" style="padding:7px 8px;font-size:14.5px" type="number" step="0.1"
                 value="${esc(b.an)}" oninput="editarTasa(${i},'an',this.value)"></div>
             <div class="fr" style="width:78px"><label class="f" style="margin-bottom:3px">Usado</label>
-              <input class="inp mono" style="padding:7px 8px;font-size:12px" type="number" step="0.1"
+              <input class="inp mono" style="padding:7px 8px;font-size:14.5px" type="number" step="0.1"
                 value="${esc(b.au)}" oninput="editarTasa(${i},'au',this.value)"></div>
           </div>
         </div>`).join('')}</div></div>`;}).join('')}
 
     <div class="card">
       <button class="btn full lg" onclick="publicarTasas()">${ic('Cloud')}Publicar para todo el equipo</button>
-      <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+      <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:10px">
         En cuanto publiques, cada vendedor las recibe la próxima vez que abra el CRM.
         No tienen que hacer nada ni enterarse.</p>
     </div>
@@ -2144,14 +2144,14 @@ async function cargarEquipo(forzar){
 
 function vistaEquipo(){
   if(!EQ.cargado){setTimeout(async()=>{await cargarEquipo();if(TAB==='equipo')render();},0);
-    return `<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:12.5px">
+    return `<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:14.5px">
       Cargando tu equipo…<span class="spin"></span></div>`;}
 
   if(EQ.err) return `<div class="stack">
     <div><h2 class="vh">Equipo</h2></div>
     <div class="card" style="border-color:${C.dan}38;background:${C.dan}0d">
       <div style="display:flex;gap:9px"><div>${ic('AlertCircle',15,C.dan)}</div>
-      <div style="font-size:12px;color:var(--tx2);line-height:1.6">${esc(EQ.err)}</div></div>
+      <div style="font-size:14.5px;color:var(--tx2);line-height:1.6">${esc(EQ.err)}</div></div>
       <button class="btn sec sm full" style="margin-top:12px" onclick="EQ.cargado=false;render()">${ic('RefreshCw')}Reintentar</button>
     </div></div>`;
 
@@ -2165,10 +2165,10 @@ function vistaEquipo(){
         <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px">
           <div style="width:40px;height:40px;border-radius:11px;background:${C.ps};display:flex;
             align-items:center;justify-content:center">${ic('Users',20,C.p)}</div>
-          <div><div style="font-weight:800;font-size:15px">${esc(t.nombre||'Un equipo')}</div>
-            <div style="font-size:11.5px;color:var(--tx3)">quiere que trabajes con ellos</div></div>
+          <div><div style="font-weight:800;font-size:16.5px">${esc(t.nombre||'Un equipo')}</div>
+            <div style="font-size:13px;color:var(--tx3)">quiere que trabajes con ellos</div></div>
         </div>
-        <p style="font-size:12.5px;color:var(--tx2);line-height:1.7">
+        <p style="font-size:14.5px;color:var(--tx2);line-height:1.7">
           Si aceptas, el jefe del equipo verá <b>cuántas unidades vendes, tus leads, tu porcentaje de
           cierre y tus tareas pendientes</b>. <b style="color:var(--tx)">No verá tu dinero</b> ni podrá
           tocar tus clientes. Tu libro sigue siendo tuyo y te lo llevas completo si te sales.</p>
@@ -2186,13 +2186,13 @@ function vistaEquipo(){
         <div class="vsub">Opcional. Tu libro es tuyo con equipo o sin él.</div></div>
       <div class="card" style="text-align:center;padding:28px 22px">
         ${ic('Users',26,C.tx3)}
-        <div style="font-weight:800;font-size:15px;margin-top:12px">Todavía no estás en un equipo</div>
-        <p style="font-size:12.5px;color:var(--tx2);line-height:1.7;margin:10px auto 0;max-width:420px">
+        <div style="font-weight:800;font-size:16.5px;margin-top:12px">Todavía no estás en un equipo</div>
+        <p style="font-size:14.5px;color:var(--tx2);line-height:1.7;margin:10px auto 0;max-width:420px">
           Si trabajas con otros vendedores, pueden asociarse: uno queda de jefe y ve el desempeño
           del grupo — unidades, leads, cierre y tareas. <b style="color:var(--tx)">Nadie ve el dinero
           de nadie</b> y nadie toca los clientes de otro.</p>
         <button class="btn lg" style="margin-top:18px" onclick="modalCrearEquipo()">${ic('Plus')}Crear mi equipo</button>
-        <p style="font-size:11px;color:var(--tx3);margin-top:12px">
+        <p style="font-size:13px;color:var(--tx3);margin-top:12px">
           ¿Te van a invitar? Pídele al jefe que use el correo con el que entras aquí.</p>
       </div></div>`;
   }
@@ -2229,8 +2229,8 @@ function vistaEquipo(){
         const col=i<3?PODIO[i]:'var(--bd2)';
         return `<div class="admrow" style="align-items:center;${yo?'background:'+C.ps:''}">
           <div style="width:26px;text-align:center;flex-shrink:0">
-            ${i<3?`<span style="font-size:15px;font-weight:900;color:${col}">${i+1}</span>`
-                 :`<span style="font-size:12px;color:var(--tx3)">${i+1}</span>`}</div>
+            ${i<3?`<span style="font-size:16.5px;font-weight:900;color:${col}">${i+1}</span>`
+                 :`<span style="font-size:14.5px;color:var(--tx3)">${i+1}</span>`}</div>
           <div class="admav" style="background:${i<3?col+'22':'var(--bg3)'};color:${i<3?col:'var(--tx2)'}">${esc(ini(f.nombre)||'?')}</div>
           <div style="min-width:0;flex:1">
             <div class="admnom">${esc(f.nombre||'(sin nombre)')}
@@ -2287,14 +2287,14 @@ function vistaEquipo(){
             <input class="inp" id="eqWa" inputmode="tel" placeholder="3055551234"></div>
         </div>
         <button class="btn full" style="margin-top:12px" onclick="invitarAlEquipo()">${ic('Send')}Invitar</button>
-        <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+        <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:10px">
           Si pones su WhatsApp, se abre el tuyo con el mensaje listo. Si no, la invitación
           le sale sola al entrar con ese correo.</p>
       </div>
     </div>`:`
     <div class="card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)">
       <div style="display:flex;gap:9px;align-items:flex-start">${ic('Lock',15,C.info)}
-        <p style="font-size:12px;color:var(--tx2);line-height:1.6">
+        <p style="font-size:14.5px;color:var(--tx2);line-height:1.6">
           El jefe ve tus unidades, leads, cierre y tareas <b>desde el día que entraste</b> —
           lo de antes no cuenta. <b>No ve tu dinero</b> ni puede entrar a tus clientes.
           Tu libro es tuyo y te lo llevas completo cuando salgas.</p></div></div>`}
@@ -2302,16 +2302,16 @@ function vistaEquipo(){
     <div class="card">
       ${soyJefe
         ? `<button class="btn dan sm full" onclick="salirDelEquipo()">${ic('LogOut')}Disolver el equipo</button>
-           <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:9px">
+           <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:9px">
              Se disuelve para todos. Cada uno se queda con su libro completo.</p>`
         : (yoPedi
           ? `<div style="display:flex;gap:9px;align-items:flex-start">${ic('Clock',15,C.warn)}
-               <p style="font-size:12px;color:var(--tx2);line-height:1.6">
+               <p style="font-size:14.5px;color:var(--tx2);line-height:1.6">
                  Pediste salir del equipo el ${esc(fDate(String(yoPedi).slice(0,10)))}.
                  Queda en manos del jefe autorizarlo.</p></div>
              <button class="btn sec sm full" style="margin-top:11px" onclick="pedirSalida(true)">Retirar la solicitud</button>`
           : `<button class="btn sec sm full" onclick="pedirSalida(false)">${ic('LogOut')}Pedir salida del equipo</button>
-             <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:9px">
+             <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:9px">
                Del equipo se sale con el visto bueno del jefe. Le llega tu solicitud y él la autoriza.
                Cuando salgas, te llevas tu libro entero.</p>`)}
     </div>
@@ -2322,7 +2322,7 @@ function modalCrearEquipo(){
   openModal('Crear tu equipo',
    `<div class="fr"><label class="f">Nombre del equipo</label>
       <input class="inp" id="eqNombre" placeholder="Equipo Carlos" value="${esc((SES&&SES.perfil&&SES.perfil.nombre)?'Equipo '+SES.perfil.nombre.split(' ')[0]:'Mi equipo')}"></div>
-    <p style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:12px">
+    <p style="font-size:14.5px;color:var(--tx2);line-height:1.7;margin-top:12px">
       Quedas como <b style="color:var(--tx)">jefe de equipo</b>. Podrás ver las unidades, leads,
       cierre y tareas de quien acepte tu invitación — nunca su dinero ni sus clientes.</p>`,
    `<button class="btn sec" onclick="closeModal()">Cancelar</button>
@@ -2629,30 +2629,30 @@ function modalImportar(){
 
     ${(r.yaEnLibro.length||r.repetidosArchivo.length||r.sinDatos.length)?`
     <div class="card" style="background:rgba(234,179,8,.06);border-color:rgba(234,179,8,.22);margin-bottom:14px">
-      <div style="font-weight:700;font-size:12.5px;color:${C.warn};margin-bottom:7px">Se van a saltar</div>
+      <div style="font-weight:700;font-size:14.5px;color:${C.warn};margin-bottom:7px">Se van a saltar</div>
       ${r.yaEnLibro.length?`<div class="sumrow"><span style="color:var(--tx3)">Ya están en tu libro</span>
         <span style="color:var(--tx2)">${r.yaEnLibro.length}</span></div>`:''}
       ${r.repetidosArchivo.length?`<div class="sumrow"><span style="color:var(--tx3)">Repetidos dentro del archivo</span>
         <span style="color:var(--tx2)">${r.repetidosArchivo.length}</span></div>`:''}
       ${r.sinDatos.length?`<div class="sumrow"><span style="color:var(--tx3)">Sin nombre o sin teléfono</span>
         <span style="color:var(--tx2)">${r.sinDatos.length}</span></div>`:''}
-      <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:8px">
+      <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:8px">
         Nadie se duplica: si ya lo tienes, se respeta lo que ya está en tu libro.</p>
     </div>`:''}
 
     <div class="mlab" style="margin-top:0">Cómo quedaron las columnas</div>
-    <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-bottom:9px">
+    <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-bottom:9px">
       Las reconocí solas. Corrige la que esté mal antes de importar.</p>
     <div style="max-height:230px;overflow-y:auto;border:1px solid var(--bd);border-radius:9px">
       ${IMP.cabeceras.map((c,i)=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 10px;
         border-bottom:1px solid var(--bd)">
         <div style="flex:1;min-width:0">
-          <div style="font-size:11.5px;font-weight:700;color:var(--tx);overflow:hidden;
+          <div style="font-size:13px;font-weight:700;color:var(--tx);overflow:hidden;
             text-overflow:ellipsis;white-space:nowrap">${esc(c||'(sin título)')}</div>
-          <div style="font-size:10px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;
+          <div style="font-size:11.5px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;
             white-space:nowrap">${esc(String((IMP.filas[0]||[])[i]||'').slice(0,40))}</div>
         </div>
-        <select class="inp" style="width:170px;padding:6px 8px;font-size:11.5px"
+        <select class="inp" style="width:170px;padding:6px 8px;font-size:13px"
           onchange="IMP.mapa[${i}]=this.value;modalImportar()">
           ${CAMPOS_IMP.map(f=>`<option value="${f.k}" ${IMP.mapa[i]===f.k?'selected':''}>${esc(f.t)}</option>`).join('')}
         </select>
@@ -2661,8 +2661,8 @@ function modalImportar(){
 
     ${ej.length?`<div class="mlab">Así van a entrar los primeros</div>
       ${ej.map(d=>`<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;margin-bottom:6px">
-        <div style="font-size:12.5px;font-weight:700">${esc((d.nom||'')+' '+(d.apellido||''))}</div>
-        <div style="font-size:11px;color:var(--tx3);line-height:1.5">
+        <div style="font-size:14.5px;font-weight:700">${esc((d.nom||'')+' '+(d.apellido||''))}</div>
+        <div style="font-size:13px;color:var(--tx3);line-height:1.5">
           ${esc(d.tel||'sin teléfono')}${d.email?' · '+esc(d.email):''}
           ${d.marca||d.mod?'<br>'+esc([d.ano,d.marca,d.mod].filter(Boolean).join(' ')):''}
           ${d.fecha?' · vendido '+esc(d.fecha):''}</div>
@@ -2749,7 +2749,7 @@ function vistaNovedades(){
   if(!NOV.cargado){setTimeout(async()=>{
       if(!EQ.cargado)await cargarEquipo();
       await cargarNovedades(); if(TAB==='novedades')render();},0);
-    return `<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:12.5px">
+    return `<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:14.5px">
       Cargando novedades…<span class="spin"></span></div>`;}
 
   const hoyD=hoy();
@@ -2772,19 +2772,19 @@ function vistaNovedades(){
             ${n.alcance==='global'?badge('De la oficina',C.info):badge('De tu jefe',C.vio)}
             ${n.vence?badge(viejo?'Vencido':'Hasta '+fDate(String(n.vence).slice(0,10)),viejo?C.tx3:C.warn):''}
           </div>
-          <div style="font-weight:800;font-size:14px;margin-top:7px">${esc(n.titulo||veh||'Sin título')}</div>
-          ${veh&&n.titulo?`<div style="font-size:12px;color:var(--tx2);margin-top:2px">${esc(veh)}</div>`:''}
-          ${d.tipo?`<div class="mono" style="font-size:12.5px;color:var(--tx2);margin-top:6px;line-height:1.6">
+          <div style="font-weight:800;font-size:16.5px;margin-top:7px">${esc(n.titulo||veh||'Sin título')}</div>
+          ${veh&&n.titulo?`<div style="font-size:14.5px;color:var(--tx2);margin-top:2px">${esc(veh)}</div>`:''}
+          ${d.tipo?`<div class="mono" style="font-size:14.5px;color:var(--tx2);margin-top:6px;line-height:1.6">
             ${d.pago?'<b style="color:var(--tx)">'+fm(d.pago)+'</b>/mes':''}
             ${d.alFirmar?' · '+fm(d.alFirmar)+(d.tipo==='lease'?' al firmar':' de entrada'):''}
             ${d.plazo?' · '+d.plazo+' meses':''}
             ${d.millas?' · '+Number(d.millas).toLocaleString('en-US')+' mi/año':''}
             ${d.apr?' · '+d.apr+'% APR':''}</div>`:''}
-          ${d.condiciones?`<div style="font-size:11.5px;color:var(--tx3);margin-top:5px;line-height:1.5">${esc(d.condiciones)}</div>`:''}
-          <div style="font-size:10.5px;color:var(--tx3);margin-top:7px">${fDateTime(n.creado)}</div>
+          ${d.condiciones?`<div style="font-size:13px;color:var(--tx3);margin-top:5px;line-height:1.5">${esc(d.condiciones)}</div>`:''}
+          <div style="font-size:11.5px;color:var(--tx3);margin-top:7px">${fDateTime(n.creado)}</div>
           ${!viejo&&porVencer(n)?`<div style="display:flex;gap:8px;align-items:center;margin-top:9px;
             background:rgba(234,179,8,.09);border:1px solid rgba(234,179,8,.25);border-radius:8px;padding:8px 10px">
-            ${ic('Clock',13,C.warn)}<span style="font-size:11.5px;color:var(--tx2)">
+            ${ic('Clock',13,C.warn)}<span style="font-size:13px;color:var(--tx2)">
               ${porVencer(n)===0?'Vence hoy':'Vence en '+porVencer(n)+' día'+(porVencer(n)>1?'s':'')} — ${mio?'actualízalo o quítalo':'úsalo ya'}</span></div>`:''}
           ${!viejo?`<div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">
             <button class="btn sec sm" onclick="copiarRedes('${esc(n.id)}')">${ic('Copy')}Copiar para mis redes</button>
@@ -2806,12 +2806,12 @@ function vistaNovedades(){
 
     ${puedoPublicar()?`<div class="card">
       <button class="btn full" onclick="modalNovedad()">${ic('Plus')}Publicar un especial para mi equipo</button>
-      <p style="font-size:11px;color:var(--tx3);margin-top:9px;line-height:1.6">
+      <p style="font-size:13px;color:var(--tx3);margin-top:9px;line-height:1.6">
         Lo ve tu equipo con el número completo, listo para que cada uno lo ponga en sus redes con su propio WhatsApp.</p>
     </div>`:''}
 
     ${NOV.err?`<div class="card" style="border-color:${C.dan}38;background:${C.dan}0d">
-      <div style="font-size:12px;color:var(--tx2)">${esc(NOV.err)}</div></div>`:''}
+      <div style="font-size:14.5px;color:var(--tx2)">${esc(NOV.err)}</div></div>`:''}
 
     ${vivos.length?vivos.map(n=>tarjeta(n,false)).join('')
       :`<div class="card">${empty('Tag','Todavía no hay novedades',
@@ -2840,7 +2840,7 @@ function mandarNovedad(id){
 function pedirWa(seguir){
   window.__traswa=seguir;
   openModal('Falta tu WhatsApp',
-   `<p style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:14px">
+   `<p style="font-size:14.5px;color:var(--tx2);line-height:1.7;margin-bottom:14px">
       El anuncio termina con <b style="color:var(--tx)">"escríbeme"</b> y ahí va tu número.
       Sin él, quien lo vea no tiene cómo contactarte.</p>
     <div class="fr"><label class="f">Tu WhatsApp</label>
@@ -2882,7 +2882,7 @@ function modalNovedad(base){
 
     <div class="mlab">Vence</div>
     <input class="inp" id="nvVence" type="date">
-    <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+    <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:10px">
       Pon siempre el <b>número completo</b>: pago, al firmar, plazo y millas.
       Es la regla de la casa y es lo que hace que el cliente confíe.</p>`,
    `<button class="btn sec" onclick="closeModal();NOVBASE=null">Cancelar</button>
@@ -3014,7 +3014,7 @@ function vistaBoletin(){
   if(!NOV.cargado){setTimeout(async()=>{
       if(!EQ.cargado)await cargarEquipo();
       await cargarNovedades(); if(TAB==='boletin')render();},0);
-    return `<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:12.5px">
+    return `<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:14.5px">
       Cargando el boletín…<span class="spin"></span></div>`;}
 
   const lista=boletines();
@@ -3034,11 +3034,11 @@ function vistaBoletin(){
           ${!leido?`<span class="bdg2" style="color:${C.p};background:${C.ps};border-color:${C.p}40">NUEVO</span>`:''}
           ${n.vence?badge('Hasta '+fDate(String(n.vence).slice(0,10)),C.warn):''}
         </div>
-        <div class="s" style="margin-top:6px;font-size:14px;font-weight:800;color:var(--tx)">${esc(n.titulo||'Sin título')}</div>
+        <div class="s" style="margin-top:6px;font-size:16.5px;font-weight:800;color:var(--tx)">${esc(n.titulo||'Sin título')}</div>
         <div class="s">${fDateTime(n.creado)}</div>
       </div>
       <div style="padding:14px 16px">
-        ${d.cuerpo?`<div style="font-size:13px;color:var(--tx2);line-height:1.75;white-space:pre-wrap">${esc(d.cuerpo)}</div>`:''}
+        ${d.cuerpo?`<div style="font-size:14.5px;color:var(--tx2);line-height:1.75;white-space:pre-wrap">${esc(d.cuerpo)}</div>`:''}
         <div style="display:flex;gap:7px;margin-top:13px;flex-wrap:wrap">
           <button class="btn sec sm" onclick="copiarBoletin('${esc(n.id)}')">${ic('Copy')}Copiar</button>
           ${mio?`<button class="btn ghost sm" onclick="borrarNovedad('${esc(n.id)}')">${ic('Trash2')}Quitar</button>`:''}
@@ -3056,12 +3056,12 @@ function vistaBoletin(){
 
     ${esAdmin()?`<div class="card">
       <button class="btn full" onclick="modalBoletin()">${ic('Send')}Publicar al boletín</button>
-      <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:9px">
+      <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:9px">
         Le llega a <b>todos</b> los que usan la app. Es interno: para que trabajen mejor,
         no material para el cliente.</p></div>`:''}
 
     ${NOV.err?`<div class="card" style="border-color:${C.dan}38;background:${C.dan}0d">
-      <div style="font-size:12px;color:var(--tx2)">${esc(NOV.err)}</div></div>`:''}
+      <div style="font-size:14.5px;color:var(--tx2)">${esc(NOV.err)}</div></div>`:''}
 
     ${lista.length?lista.map(nota).join('')
       :`<div class="card">${empty('Megaphone','Todavía no hay boletines',
@@ -3093,7 +3093,7 @@ function modalBoletin(){
 
     <div class="mlab">Vence <span class="h">opcional</span></div>
     <input class="inp" id="blVence" type="date">
-    <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+    <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:10px">
       Esto es <b>interno</b>: lo ven todos los vendedores del sistema, de todos los equipos.
       Si alguno lo quiere reenviar a un cliente, es decisión suya.</p>`,
    `<button class="btn sec" onclick="closeModal()">Cancelar</button>
@@ -3143,12 +3143,12 @@ function bloqueCredito(l){
       <div style="display:flex;gap:9px;align-items:flex-start;background:rgba(239,68,68,.07);
         border:1px solid rgba(239,68,68,.22);border-radius:9px;padding:11px 12px;margin-bottom:13px">
         ${ic('Lock',15,C.dan)}
-        <p style="font-size:11.5px;color:var(--tx2);line-height:1.65">
+        <p style="font-size:13px;color:var(--tx2);line-height:1.65">
           El <b style="color:var(--tx)">Social</b> se escribe al imprimir y <b style="color:var(--tx)">no se
           guarda en ningún lado</b> — ni aquí, ni en el teléfono, ni en la nube.
           Este documento <b style="color:var(--tx)">solo se imprime</b>: no se manda por correo ni por WhatsApp.</p>
       </div>
-      ${listo?'':`<div style="font-size:11.5px;color:${C.warn};line-height:1.6;margin-bottom:11px">
+      ${listo?'':`<div style="font-size:13px;color:${C.warn};line-height:1.6;margin-bottom:11px">
         Faltan datos para una aplicación completa: ${[!l.nom?'nombre':'',!p.dir?'dirección':'',
           !p.empleador?'empleador':'',!num(p.ingreso)?'ingreso':''].filter(Boolean).join(', ')}.</div>`}
       <button class="btn full" onclick="modalImprimirCredito()">${ic('FileText')}Imprimir aplicación</button>
@@ -3163,7 +3163,7 @@ function modalImprimirCredito(){
    `<div style="display:flex;gap:9px;align-items:flex-start;background:rgba(239,68,68,.07);
       border:1px solid rgba(239,68,68,.22);border-radius:9px;padding:11px 12px;margin-bottom:15px">
       ${ic('Lock',15,C.dan)}
-      <p style="font-size:12px;color:var(--tx2);line-height:1.65">
+      <p style="font-size:14.5px;color:var(--tx2);line-height:1.65">
         Escríbelo aquí, imprime y hazlo firmar. <b style="color:var(--tx)">No se guarda.</b>
         Si necesitas reimprimir, lo vuelves a escribir.</p>
     </div>
@@ -3175,7 +3175,7 @@ function modalImprimirCredito(){
         placeholder="000-00-0000" oninput="formatoSSN(this)"></div>`:''}
     <div class="fr" style="margin-top:11px"><label class="f">Fecha de nacimiento del cliente</label>
       <input class="inp" id="dob1" type="date" value="${esc((l.perfil&&l.perfil.nacimiento)||'')}"></div>
-    <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:12px">
+    <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:12px">
       La fecha de nacimiento sí se guarda con el cliente. El Social no.</p>`,
    `<button class="btn sec" onclick="closeModal()">Cancelar</button>
     <button class="btn" onclick="imprimirCredito()">${ic('FileText')}Imprimir</button>`);
@@ -3428,12 +3428,12 @@ function bloqueWorksheet(l){
           ${cots.map((q,i)=>`<option value="${i}">${esc(q.fecha)} · ${esc(q.w.tipo==='lease'?'Lease':q.w.tipo==='cash'?'Contado':'Financiado')} · ${esc([q.w.ano,q.w.marca,q.w.modelo].filter(Boolean).join(' '))}</option>`).join('')}
           <option value="-1">Los números de este Deal Room</option>
         </select>
-        <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:8px">
+        <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:8px">
           Las de Desking traen el cálculo bueno de lease (money factor y residual).</p>`
        :(esLease?`<div style="display:flex;gap:9px;align-items:flex-start;background:rgba(234,179,8,.07);
           border:1px solid rgba(234,179,8,.22);border-radius:9px;padding:11px 12px;margin-bottom:12px">
           ${ic('AlertCircle',15,C.warn)}
-          <p style="font-size:11.5px;color:var(--tx2);line-height:1.65">
+          <p style="font-size:13px;color:var(--tx2);line-height:1.65">
             Este negocio es <b>lease</b> y todavía no lo armaste en Desking. El pago que sale aquí
             se calcula como préstamo, que <b>no es el pago real de un lease</b>. Ármalo en Desking
             y vuelve — la hoja saldrá con el número bueno.</p></div>`:'')}
@@ -3669,7 +3669,7 @@ function renderNav(){
   $('sbName').textContent=S.cfg.nombre||'Mi cartera';
   if($('sbRol'))$('sbRol').textContent=esAdmin()?'Administrador':'Vendedor';
   if($('sbAcc'))$('sbAcc').innerHTML=SES?`<div class="sbacc">
-      <div style="min-width:0;flex:1;font-size:10px;color:var(--tx3);overflow:hidden;
+      <div style="min-width:0;flex:1;font-size:11.5px;color:var(--tx3);overflow:hidden;
         text-overflow:ellipsis;white-space:nowrap">${esc((SES.user&&SES.user.email)||'')}</div>
       <button class="btn ghost xs" onclick="salir()" title="Cerrar sesión">${ic('LogOut')}Salir</button>
     </div>`:'';
@@ -3716,7 +3716,7 @@ function openMsg(titulo,tel,texto){
   openModal(titulo,
     `<label class="f">Mensaje — edítalo si quieres</label>
      <textarea class="inp" id="msgTxt" rows="7">${esc(texto)}</textarea>
-     <p style="font-size:11px;color:var(--tx3);margin-top:10px;line-height:1.6">
+     <p style="font-size:13px;color:var(--tx3);margin-top:10px;line-height:1.6">
      ${t?`Se abre TU WhatsApp con el mensaje listo para <b style="color:var(--tx2)">+${esc(t)}</b>. Uno por uno, natural — sin riesgo de bloqueo.`
         :'<span style="color:#eab308">Este contacto no tiene teléfono válido.</span> Agrégalo en su ficha para poder escribirle.'}</p>`,
     `<button class="btn sec" onclick="copiarTexto(document.getElementById('msgTxt').value)">${ic('Copy')}Copiar</button>
@@ -3764,9 +3764,9 @@ VIEWS.dashboard=function(){
   let out=`<div class="stack">
     <div class="rowb">
       <div>
-        <div style="font-size:10.5px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.08em">${saludo},</div>
+        <div style="font-size:11.5px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.08em">${saludo},</div>
         <h1 style="font-size:25px;font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-top:3px">${esc((S.cfg.nombre||'Bienvenido').split(' ')[0])}</h1>
-        <div style="font-size:11.5px;color:var(--tx3);margin-top:4px">${SYNC.modo==='supabase'?'Tu cartera es tuya y viaja contigo: teléfono, tablet y PC.':'Tu cartera es privada. Vive en este dispositivo.'}</div>
+        <div style="font-size:13px;color:var(--tx3);margin-top:4px">${SYNC.modo==='supabase'?'Tu cartera es tuya y viaja contigo: teléfono, tablet y PC.':'Tu cartera es privada. Vive en este dispositivo.'}</div>
       </div>
     </div>
 
@@ -3779,8 +3779,8 @@ VIEWS.dashboard=function(){
 
   if(venc.length) out+=`<div class="card" style="background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.2)">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;color:var(--dan)">
-        ${ic('AlertCircle',15)}<b style="font-size:12.5px">${venc.length} tarea(s) vencida(s)</b></div>
-      <p style="font-size:11.5px;color:var(--tx3);line-height:1.55">Responder en los primeros 15 minutos multiplica el cierre. Atiende ahora.</p>
+        ${ic('AlertCircle',15)}<b style="font-size:14.5px">${venc.length} tarea(s) vencida(s)</b></div>
+      <p style="font-size:13px;color:var(--tx3);line-height:1.55">Responder en los primeros 15 minutos multiplica el cierre. Atiende ahora.</p>
       <button class="btn dan sm" style="margin-top:10px" onclick="go('tasks')">Ver tareas →</button>
     </div>`;
 
@@ -3799,8 +3799,8 @@ VIEWS.dashboard=function(){
             <div class="lmeta">${esc(vehLead(l))} · <span style="color:var(--tx2)">${fm(l.veh&&l.veh.pres)}</span></div>
           </div>
           <div style="text-align:right;flex-shrink:0">
-            <div style="font-size:10px;font-weight:800;color:${u.color}">${u.label}</div>
-            <div class="mono" style="font-size:10px;color:var(--tx3);margin-top:2px">Score ${u.score}</div>
+            <div style="font-size:11.5px;font-weight:800;color:${u.color}">${u.label}</div>
+            <div class="mono" style="font-size:11.5px;color:var(--tx3);margin-top:2px">Score ${u.score}</div>
           </div>${ic('ChevronRight',14,C.tx3)}
         </div></button>`;}).join('')
     : empty('CheckCircle2','Sin acciones urgentes',
@@ -3822,22 +3822,22 @@ VIEWS.dashboard=function(){
         <button class="btn ghost xs" style="color:var(--tx3)" onclick="go('tasks')">Ver todos</button></div>
       ${pend.length? pend.slice(0,4).map(t=>`<div style="display:flex;align-items:center;gap:9px;padding:11px 16px;border-bottom:1px solid var(--bd)">
           <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:${t.vence&&t.vence<today()?C.dan:t.prio==='Alta'?C.p:t.prio==='Media'?C.warn:C.tx3}"></div>
-          <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.titulo)}</div>
-          <div style="font-size:10.5px;color:${t.vence&&t.vence<today()?C.dan:C.tx3}">${esc(t.leadNom||'General')} · ${fDate(t.vence)}</div></div>
+          <div style="flex:1;min-width:0"><div style="font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.titulo)}</div>
+          <div style="font-size:11.5px;color:${t.vence&&t.vence<today()?C.dan:C.tx3}">${esc(t.leadNom||'General')} · ${fDate(t.vence)}</div></div>
         </div>`).join('')
-        : `<div style="font-size:12px;color:var(--tx3);text-align:center;padding:22px 0">✓ Sin compromisos pendientes</div>`}
+        : `<div style="font-size:14.5px;color:var(--tx3);text-align:center;padding:22px 0">✓ Sin compromisos pendientes</div>`}
     </div>
   </div>`;
 
   out+=`<div class="card">
-    <div style="font-weight:700;font-size:13px;margin-bottom:12px">Pipeline por etapa</div>
+    <div style="font-weight:700;font-size:14.5px;margin-bottom:12px">Pipeline por etapa</div>
     ${ETAPAS.slice(0,5).map(e=>{
       const n=S.leads.filter(l=>ETAPAS[l.etapa]===e).length;
       const pct=activos.length?Math.min(100,n/Math.max(1,activos.length)*100):0;
       return `<div style="margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span style="font-size:11.5px;color:var(--tx2)">${e}</span>
-          <span style="font-size:11.5px;font-weight:700;color:${ETAPA_C[e]}">${n}</span></div>
+          <span style="font-size:13px;color:var(--tx2)">${e}</span>
+          <span style="font-size:13px;font-weight:700;color:${ETAPA_C[e]}">${n}</span></div>
         <div style="height:5px;border-radius:99px;background:var(--bg3);overflow:hidden">
           <div style="height:100%;border-radius:99px;background:${ETAPA_C[e]};width:${pct}%"></div></div></div>`;}).join('')}
   </div></div>`;
@@ -3955,7 +3955,7 @@ function openCliente(id){
       <div class="fr" style="grid-column:1/-1"><label class="f">Notas</label>
         <input class="inp" id="cNotas" value="${g('notas')}" placeholder="Referido de…, prefiere que le llamen por la tarde…"></div>
     </div>
-    <p style="font-size:11px;color:var(--tx3);line-height:1.55;margin-top:10px">
+    <p style="font-size:13px;color:var(--tx3);line-height:1.55;margin-top:10px">
       El <b style="color:var(--tx2)">mes de venta</b> y el <b style="color:var(--tx2)">plazo</b> son los que generan
       las alertas de fin de lease, refi y aniversario.</p>
     ${c?`<button class="btn dan full" style="margin-top:16px" onclick="delCliente('${c.id}')">${ic('Trash2')}Eliminar cliente</button>`:''}`,
@@ -4012,13 +4012,13 @@ function openFicha(id){
     <button class="btn full" style="margin-top:12px" onclick="armarNegocio('cliente','${c.id}')">
       🧮 Armar negocio</button>
     ${negs.length?`<div class="card" style="background:var(--bg3);margin-top:10px">
-      <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-bottom:7px">
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-bottom:7px">
         Negocios armados (${negs.length})</div>
       ${negs.slice(0,3).map(q=>`<div class="sumrow" style="border-bottom:1px solid var(--bd);padding:6px 0">
         <span style="color:var(--tx2)">${esc(q.fecha||'—')} · ${esc(tipoDesk(q.w&&q.w.tipo))}</span>
         <span style="color:var(--tx3);text-align:right;max-width:55%">${esc([q.w&&q.w.marca,q.w&&q.w.modelo].filter(Boolean).join(' ')||'—')}</span>
       </div>`).join('')}
-      ${negs.length>3?`<div style="font-size:10.5px;color:var(--tx3);margin-top:7px">+${negs.length-3} más — se ven en Desking</div>`:''}
+      ${negs.length>3?`<div style="font-size:11.5px;color:var(--tx3);margin-top:7px">+${negs.length-3} más — se ven en Desking</div>`:''}
     </div>`:''}
     ${mine.length?`<div class="mlab">Alertas activas</div>`+mine.map(a=>`<div class="card arow ${a.hot?'hot':''}" style="margin-top:8px">
         <div class="atag">${esc(a.tag)}</div>
@@ -4096,13 +4096,13 @@ function leadList(){
           <span class="lname">${esc(l.nom)}</span>${badge(ETAPAS[l.etapa],ETAPA_C[ETAPAS[l.etapa]])}</div>
         <div class="lmeta">${esc(vehLead(l))}</div>
         <div class="tagrow">
-          <span style="font-size:10.5px;color:var(--p);font-weight:700">${fm(f.precio||num(l.veh&&l.veh.pres))}</span>
-          <span style="font-size:10px;color:var(--tx3)">${esc(l.origen)}</span>
+          <span style="font-size:11.5px;color:var(--p);font-weight:700">${fm(f.precio||num(l.veh&&l.veh.pres))}</span>
+          <span style="font-size:11.5px;color:var(--tx3)">${esc(l.origen)}</span>
           ${tar?badge(tar+' tarea'+(tar>1?'s':''),C.warn):''}
           ${l.trade&&l.trade.has?badge('Trade-In',C.info):''}
         </div></div>
-      <div style="text-align:right;flex-shrink:0"><div style="font-size:10px;font-weight:800;color:${u.color}">${u.label}</div>
-        <div class="mono" style="font-size:10px;color:var(--tx3);margin-top:2px">${u.score}</div></div>
+      <div style="text-align:right;flex-shrink:0"><div style="font-size:11.5px;font-weight:800;color:${u.color}">${u.label}</div>
+        <div class="mono" style="font-size:11.5px;color:var(--tx3);margin-top:2px">${u.score}</div></div>
       ${ic('ChevronRight',14,C.tx3)}</div></button>`;}).join('')+`</div>`;
 }
 
@@ -4146,22 +4146,22 @@ VIEWS.pipeline=function(){
     const st=items.reduce((s,l)=>s+(finanzas(l).precio||num(l.veh&&l.veh.pres)),0);
     return `<div class="kcol">
       <div class="khead" style="border-top:3px solid ${col}">
-        <div class="rowb"><span style="font-size:12px;font-weight:700">${e}</span>
-          <span style="font-size:10px;font-weight:800;background:${col}22;color:${col};padding:2px 7px;border-radius:99px">${items.length}</span></div>
-        <div class="mono" style="font-size:10px;color:var(--tx3);margin-top:2px">${fm(st)}</div></div>
+        <div class="rowb"><span style="font-size:14.5px;font-weight:700">${e}</span>
+          <span style="font-size:11.5px;font-weight:800;background:${col}22;color:${col};padding:2px 7px;border-radius:99px">${items.length}</span></div>
+        <div class="mono" style="font-size:11.5px;color:var(--tx3);margin-top:2px">${fm(st)}</div></div>
       <div style="display:flex;flex-direction:column;gap:8px;min-height:120px">
         ${items.length?items.map(l=>{const u=getUrgency(l);return `<div class="kcard">
           <div class="hb" style="background:${u.color}"></div>
           <div style="padding:10px 12px" onclick="openDeal('${l.id}')">
-            <div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.nom)}</div>
-            <div style="font-size:11px;color:var(--tx3);margin-top:2px">${esc(vehLead(l))}</div>
-            <div class="mono" style="font-size:12px;font-weight:700;color:var(--p);margin-top:4px">${fm(finanzas(l).precio||num(l.veh&&l.veh.pres))}</div>
+            <div style="font-size:14.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.nom)}</div>
+            <div style="font-size:13px;color:var(--tx3);margin-top:2px">${esc(vehLead(l))}</div>
+            <div class="mono" style="font-size:14.5px;font-weight:700;color:var(--p);margin-top:4px">${fm(finanzas(l).precio||num(l.veh&&l.veh.pres))}</div>
           </div>
           <div style="display:flex;gap:5px;padding:6px 10px;border-top:1px solid var(--bd);justify-content:flex-end">
             <button class="btn ghost xs" style="border:1px solid var(--bd);background:var(--bg3)" onclick="mover('${l.id}',-1)">◀</button>
             <button class="btn ghost xs" style="border:1px solid var(--bd);background:var(--bg3)" onclick="mover('${l.id}',1)">▶</button>
           </div></div>`;}).join('')
-        :`<div style="text-align:center;color:var(--tx3);font-size:11px;padding:22px 0;border:1px dashed var(--bd);border-radius:10px">Sin tratos</div>`}
+        :`<div style="text-align:center;color:var(--tx3);font-size:13px;padding:22px 0;border:1px dashed var(--bd);border-radius:10px">Sin tratos</div>`}
       </div></div>`;}).join('')+`</div></div>`;
   return out;
 };
@@ -4183,7 +4183,7 @@ function pasarAlLibro(id){
   const tipoDeal=(l.deal&&l.deal.tipo)||'Financiado';
   const tipo=tipoDeal==='Lease'?'lease':tipoDeal==='Contado'?'cash':'finance';
   openModal('🎉 ¡Cerrado!',
-   `<p style="font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:14px">
+   `<p style="font-size:14.5px;color:var(--tx2);line-height:1.6;margin-bottom:14px">
       Pasa a <b style="color:var(--tx)">${esc(l.nom)}</b> a tu libro de clientes. Con estos dos datos, las alertas de fin de lease, refi y aniversario se calculan solas.</p>
     <div class="grid2" style="grid-template-columns:1fr 1fr;gap:11px">
       <div class="fr"><label class="f">Tipo</label><select class="inp" id="pbTipo">
@@ -4221,9 +4221,9 @@ VIEWS.tasks=function(){
         <input type="checkbox" ${t.hecha?'checked':''} onchange="toggleTarea('${t.id}')" style="accent-color:${C.ok};width:17px;height:17px;flex-shrink:0">
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
-            <span style="font-size:13px;font-weight:600;color:${t.hecha?C.tx3:C.tx};${t.hecha?'text-decoration:line-through':''}">${esc(t.titulo)}</span>
+            <span style="font-size:14.5px;font-weight:600;color:${t.hecha?C.tx3:C.tx};${t.hecha?'text-decoration:line-through':''}">${esc(t.titulo)}</span>
             ${ov?badge('Vencida',C.dan):''}${badge(t.prio,t.prio==='Alta'?C.p:t.prio==='Media'?C.warn:C.tx3)}</div>
-          <div style="font-size:11px;color:var(--tx3);margin-top:3px">${esc(t.leadNom||'General')} · ${fDate(t.vence)}</div></div>
+          <div style="font-size:13px;color:var(--tx3);margin-top:3px">${esc(t.leadNom||'General')} · ${fDate(t.vence)}</div></div>
         <button class="iconbtn" onclick="delTarea('${t.id}')">${ic('Trash2',14,C.tx3)}</button>
       </div>`;}).join('')+`</div>`
     :`<div class="card pad0">${empty('CheckSquare','Sin tareas','Agrega compromisos de seguimiento — o créalos desde el paso <b style="color:var(--tx2)">Workspace</b> de cada lead.')}</div>`}
@@ -4269,17 +4269,17 @@ VIEWS.tradeins=function(){
   else out+=`<div class="grid1">`+vis.map(l=>{const t=l.trade,eq=num(t.allowance)-num(t.payoff);
     return `<div class="card">
       <div class="rowb" style="margin-bottom:10px">${badge('Trade-In',C.info)}
-        <span class="mono" style="font-size:9.5px;color:var(--tx3)">${esc((t.vin||'').slice(-8)||'—')}</span></div>
-      <div style="font-size:15px;font-weight:800">${esc([t.ano,t.marca,t.mod].filter(Boolean).join(' ')||'Vehículo sin datos')}</div>
-      <div style="font-size:11px;color:var(--tx3);margin-top:2px">Propietario: <span style="color:var(--tx2)">${esc(l.nom)}</span></div>
+        <span class="mono" style="font-size:10px;color:var(--tx3)">${esc((t.vin||'').slice(-8)||'—')}</span></div>
+      <div style="font-size:16.5px;font-weight:800">${esc([t.ano,t.marca,t.mod].filter(Boolean).join(' ')||'Vehículo sin datos')}</div>
+      <div style="font-size:13px;color:var(--tx3);margin-top:2px">Propietario: <span style="color:var(--tx2)">${esc(l.nom)}</span></div>
       <div class="grid2" style="grid-template-columns:1fr 1fr;gap:9px;margin-top:12px">
         ${[['ACV',fm(t.acv),C.ok],['Allowance',fm(t.allowance),C.tx2],['Payoff',fm(t.payoff),C.warn],['Millaje',fmN(t.millas)+' mi',C.tx3]]
-          .map(r=>`<div><div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">${r[0]}</div>
-          <div class="mono" style="font-size:13px;font-weight:700;color:${r[2]}">${r[1]}</div></div>`).join('')}
+          .map(r=>`<div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">${r[0]}</div>
+          <div class="mono" style="font-size:14.5px;font-weight:700;color:${r[2]}">${r[1]}</div></div>`).join('')}
       </div>
       <div class="rowb" style="margin-top:12px;padding-top:11px;border-top:1px solid var(--bd)">
-        <div><div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em">Equity</div>
-          <div class="mono" style="font-size:15px;font-weight:800;color:${eq>=0?C.ok:C.dan}">${fm(eq)}</div></div>
+        <div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em">Equity</div>
+          <div class="mono" style="font-size:16.5px;font-weight:800;color:${eq>=0?C.ok:C.dan}">${fm(eq)}</div></div>
         <button class="btn sec sm" onclick="openDeal('${l.id}',4)">Ver →</button></div>
     </div>`;}).join('')+`</div>`;
   return out+'</div>';
@@ -4327,7 +4327,7 @@ VIEWS.promos=function(){
           ${mismos.length?`<div class="mlab">Tienen ${esc(p.marca)}</div>`+mismos.map(c=>
             `<div class="mrow"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.nom)} · ${esc(vehCli(c))}</span>
              <button class="btn wa xs" onclick="promoMsg('${c.id}','${p.id}',1)">${ic('Wa')}WA</button></div>`).join('')
-            :`<p style="font-size:12px;color:var(--tx3);margin-top:10px">Nadie con esta marca en tu libro todavía.</p>`}
+            :`<p style="font-size:14.5px;color:var(--tx3);margin-top:10px">Nadie con esta marca en tu libro todavía.</p>`}
           ${otros.length?`<div class="mlab">Otras marcas — ofrecer cambio</div>`+otros.slice(0,15).map(c=>
             `<div class="mrow"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.nom)} · ${esc(c.marca)}</span>
              <button class="btn wa xs" onclick="promoMsg('${c.id}','${p.id}',0)">${ic('Wa')}WA</button></div>`).join(''):''}
@@ -4407,35 +4407,35 @@ VIEWS.reports=function(){
     </div>
     <div class="grid1">
       <div class="card">
-        <div style="font-weight:700;font-size:13px;margin-bottom:13px">Conversión por canal de origen</div>
+        <div style="font-weight:700;font-size:14.5px;margin-bottom:13px">Conversión por canal de origen</div>
         ${src.length?src.map(x=>`<div style="margin-bottom:12px">
-          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+          <div style="display:flex;justify-content:space-between;font-size:14.5px;margin-bottom:5px">
             <span style="color:var(--tx2)">${x.o}</span>
             <span><span style="color:var(--tx3)">${x.sc}/${x.c}</span> · <span style="color:var(--p);font-weight:700">${x.r}%</span></span></div>
           <div style="height:6px;border-radius:99px;background:var(--bg3);overflow:hidden">
             <div style="height:100%;background:var(--p);border-radius:99px;width:${Math.max(2,x.r)}%"></div></div></div>`).join('')
-          :`<div style="color:var(--tx3);font-size:12px">Sin datos todavía. Aparece cuando registres leads.</div>`}
+          :`<div style="color:var(--tx3);font-size:14.5px">Sin datos todavía. Aparece cuando registres leads.</div>`}
       </div>
       <div class="card">
-        <div style="font-weight:700;font-size:13px;margin-bottom:13px">Embudo de conversión</div>
+        <div style="font-weight:700;font-size:14.5px;margin-bottom:13px">Embudo de conversión</div>
         ${ETAPAS.map(e=>{const n=vis.filter(l=>ETAPAS[l.etapa]===e).length;
           return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
             <div style="width:9px;height:9px;border-radius:50%;background:${ETAPA_C[e]};flex-shrink:0"></div>
-            <span style="font-size:12px;color:var(--tx2);min-width:78px">${e}</span>
+            <span style="font-size:14.5px;color:var(--tx2);min-width:78px">${e}</span>
             <div style="flex:1;height:6px;background:var(--bg3);border-radius:99px;overflow:hidden">
               <div style="height:100%;background:${ETAPA_C[e]};border-radius:99px;width:${vis.length?n/vis.length*100:0}%"></div></div>
-            <span style="font-size:11px;font-weight:700;color:${ETAPA_C[e]};min-width:18px;text-align:right">${n}</span></div>`;}).join('')}
+            <span style="font-size:13px;font-weight:700;color:${ETAPA_C[e]};min-width:18px;text-align:right">${n}</span></div>`;}).join('')}
       </div>
     </div>
     <div class="card">
-      <div style="font-weight:700;font-size:13px;margin-bottom:13px">Composición de tu libro</div>
+      <div style="font-weight:700;font-size:14.5px;margin-bottom:13px">Composición de tu libro</div>
       ${S.clientes.length?[['Lease',lease,'#F87171'],['Financiado',fin,C.warn],['Cash',cash,C.ok]].map(r=>
         `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <span style="font-size:12px;color:var(--tx2);min-width:78px">${r[0]}</span>
+          <span style="font-size:14.5px;color:var(--tx2);min-width:78px">${r[0]}</span>
           <div style="flex:1;height:6px;background:var(--bg3);border-radius:99px;overflow:hidden">
             <div style="height:100%;background:${r[2]};border-radius:99px;width:${r[1]/S.clientes.length*100}%"></div></div>
-          <span style="font-size:11px;font-weight:700;color:${r[2]};min-width:18px;text-align:right">${r[1]}</span></div>`).join('')
-        :`<div style="color:var(--tx3);font-size:12px">Tu libro está vacío.</div>`}
+          <span style="font-size:13px;font-weight:700;color:${r[2]};min-width:18px;text-align:right">${r[1]}</span></div>`).join('')
+        :`<div style="color:var(--tx3);font-size:14.5px">Tu libro está vacío.</div>`}
     </div>
   </div>`;
 };
@@ -4451,13 +4451,13 @@ function soonView(id){
         justify-content:center;margin:0 auto 16px;color:var(--p)">${ic(s.icon,22,C.p)}</div>
       <div style="font-size:20px;font-weight:900;letter-spacing:-.02em">${esc(s.t)}</div>
       <div class="bdg2" style="color:var(--warn);background:rgba(234,179,8,.1);border-color:rgba(234,179,8,.3);margin-top:10px">PRÓXIMAMENTE</div>
-      <p style="color:var(--tx2);font-size:13px;line-height:1.65;margin:16px auto 0;max-width:420px">${esc(s.d)}</p>
-      <p style="color:var(--tx3);font-size:12px;line-height:1.65;margin:12px auto 0;max-width:420px">${esc(s.n)}</p>
+      <p style="color:var(--tx2);font-size:14.5px;line-height:1.65;margin:16px auto 0;max-width:420px">${esc(s.d)}</p>
+      <p style="color:var(--tx3);font-size:14.5px;line-height:1.65;margin:12px auto 0;max-width:420px">${esc(s.n)}</p>
     </div>
     <div class="card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)">
       <div style="display:flex;gap:9px;align-items:flex-start">
         ${ic('AlertCircle',15,C.info)}
-        <p style="font-size:12px;color:var(--tx2);line-height:1.6">Este módulo está en el diseño pero <b>todavía no tiene motor</b>. Preferimos dejarlo vacío antes que mostrarte números inventados.</p>
+        <p style="font-size:14.5px;color:var(--tx2);line-height:1.6">Este módulo está en el diseño pero <b>todavía no tiene motor</b>. Preferimos dejarlo vacío antes que mostrarte números inventados.</p>
       </div></div>
   </div>`;
 }
@@ -4537,7 +4537,7 @@ VIEWS.performance=function(){
 
     ${sinMeta?`<div class="card" style="background:rgba(234,179,8,.06);border-color:rgba(234,179,8,.22)">
       <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.warn)}
-        <p style="font-size:12px;color:var(--tx2);line-height:1.6">
+        <p style="font-size:14.5px;color:var(--tx2);line-height:1.6">
           Todavía no pusiste meta del mes. Sin meta esto solo cuenta lo que ya pasó;
           con meta te dice si vas en ritmo y cuánto te falta por día.</p></div></div>`:`
     <div class="card" style="border-color:${enRitmo?C.ok:C.warn}38;background:${enRitmo?C.ok:C.warn}0d">
@@ -4546,29 +4546,29 @@ VIEWS.performance=function(){
           display:flex;align-items:center;justify-content:center;flex-shrink:0">
           ${ic(enRitmo?'TrendingUp':'AlertCircle',19,enRitmo?C.ok:C.warn)}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-weight:800;font-size:14px;color:${enRitmo?C.ok:C.warn}">
+          <div style="font-weight:800;font-size:16.5px;color:${enRitmo?C.ok:C.warn}">
             ${enRitmo?'Vas en ritmo':'Vas por debajo del ritmo'}</div>
-          <div style="font-size:11.5px;color:var(--tx3);margin-top:2px">
+          <div style="font-size:13px;color:var(--tx3);margin-top:2px">
             Día ${diaActual} de ${diasMes} · ${restan} día${restan===1?'':'s'} para cerrar el mes</div>
         </div>
       </div>
       ${meta.u?`<div style="margin-bottom:13px">
-        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+        <div style="display:flex;justify-content:space-between;font-size:14.5px;margin-bottom:5px">
           <span style="color:var(--tx2)">Unidades</span>
           <span><span style="color:var(--tx)">${uHoy}</span><span style="color:var(--tx3)"> / ${meta.u}</span>
           · <span style="color:${enRitmo?C.ok:C.warn};font-weight:700">${pctU}%</span></span></div>
         ${barra(pctU,enRitmo?C.ok:C.warn)}
-        <div style="font-size:11px;color:var(--tx3);margin-top:5px">
+        <div style="font-size:13px;color:var(--tx3);margin-top:5px">
           ${faltanU?`Faltan <b style="color:var(--tx2)">${faltanU}</b> · proyección al cierre: <b style="color:var(--tx2)">${proy}</b>`
                    :'<b style="color:'+C.ok+'">Meta cumplida.</b> Lo que entre ahora es de más.'}</div>
       </div>`:''}
       ${meta.g?`<div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+        <div style="display:flex;justify-content:space-between;font-size:14.5px;margin-bottom:5px">
           <span style="color:var(--tx2)">Gross</span>
           <span><span style="color:var(--tx)">${fm(gHoy)}</span><span style="color:var(--tx3)"> / ${fm(meta.g)}</span>
           · <span style="color:${C.p};font-weight:700">${pctG}%</span></span></div>
         ${barra(pctG,C.p)}
-        ${faltanG?`<div style="font-size:11px;color:var(--tx3);margin-top:5px">
+        ${faltanG?`<div style="font-size:13px;color:var(--tx3);margin-top:5px">
           Faltan <b style="color:var(--tx2)">${fm(faltanG)}</b></div>`:''}
       </div>`:''}
     </div>`}
@@ -4587,11 +4587,11 @@ VIEWS.performance=function(){
         ${totalAno?hist.map(x=>{
           const act=x.ym===ym;
           return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
-            <span style="font-size:11px;color:${act?C.p:'var(--tx3)'};min-width:62px;${act?'font-weight:700':''}">${fmtM(x.d)}</span>
+            <span style="font-size:13px;color:${act?C.p:'var(--tx3)'};min-width:62px;${act?'font-weight:700':''}">${fmtM(x.d)}</span>
             <div style="flex:1;height:8px;background:var(--bg3);border-radius:99px;overflow:hidden">
               <div style="height:100%;background:${act?C.p:C.info};border-radius:99px;width:${x.u/maxU*100}%"></div></div>
-            <span class="mono" style="font-size:11px;font-weight:700;color:${act?C.p:'var(--tx2)'};min-width:20px;text-align:right">${x.u}</span>
-            <span class="mono" style="font-size:10px;color:var(--tx3);min-width:56px;text-align:right">${x.g?fm(x.g):''}</span>
+            <span class="mono" style="font-size:13px;font-weight:700;color:${act?C.p:'var(--tx2)'};min-width:20px;text-align:right">${x.u}</span>
+            <span class="mono" style="font-size:11.5px;color:var(--tx3);min-width:56px;text-align:right">${x.g?fm(x.g):''}</span>
           </div>`;}).join('')
         :empty('BarChart2','Sin historial todavía',
           'Aparece solo, en cuanto tus clientes del libro tengan fecha de venta.')}
@@ -4599,7 +4599,7 @@ VIEWS.performance=function(){
     </div>
 
     ${mejor&&mejor.u>0?`<div class="card">
-      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px;margin-bottom:10px">
         ${ic('Trophy',14,C.warn)}Tu mejor mes</div>
       <div class="sumrow"><span style="color:var(--tx3)">Mes</span>
         <span style="color:var(--tx2)">${fmtM(mejor.d)}</span></div>
@@ -4612,7 +4612,7 @@ VIEWS.performance=function(){
     </div>`:''}
 
     <div class="card">
-      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px;margin-bottom:10px">
         ${ic('Activity',14,C.info)}Cómo estás trabajando</div>
       <div class="sumrow"><span style="color:var(--tx3)">Leads en juego</span>
         <span style="color:var(--tx2)">${abiertos} de ${totalLeads}</span></div>
@@ -4636,7 +4636,7 @@ VIEWS.performance=function(){
             <input class="inp" id="metaG" inputmode="numeric" placeholder="30000" value="${meta.g||''}"></div>
         </div>
         <button class="btn full" style="margin-top:12px" onclick="guardarMetaMes()">${ic('Save')}Guardar meta</button>
-        <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+        <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:10px">
           Deja un campo en cero si no quieres medir esa parte.</p>
       </div>
     </div>
@@ -4667,13 +4667,13 @@ VIEWS.admin=function(){
 
   let cuerpo;
   if(ADM.estado==='cargando'||ADM.estado===''){
-    cuerpo=`<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:12.5px">
+    cuerpo=`<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:14.5px">
       Cargando cuentas…<span class="spin"></span></div>`;
   }else if(ADM.estado==='error'){
     cuerpo=`<div class="card" style="border-color:${C.dan}38;background:${C.dan}0d">
       <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.dan)}
-        <div><div style="font-weight:800;font-size:12.5px;color:${C.dan}">No se pudo leer el resumen</div>
-        <div style="font-size:11.5px;color:var(--tx2);line-height:1.6;margin-top:3px">${esc(ADM.err)}</div></div></div>
+        <div><div style="font-weight:800;font-size:14.5px;color:${C.dan}">No se pudo leer el resumen</div>
+        <div style="font-size:13px;color:var(--tx2);line-height:1.6;margin-top:3px">${esc(ADM.err)}</div></div></div>
       <button class="btn sec sm full" style="margin-top:12px" onclick="cargarAdmin(true)">${ic('RefreshCw')}Reintentar</button></div>`;
   }else if(!F.length){
     cuerpo=`<div class="card">${empty('Users','Todavía no hay cuentas','Cuando un vendedor se registre aparece aquí.')}</div>`;
@@ -4733,7 +4733,7 @@ VIEWS.admin=function(){
 
     <div class="card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)">
       <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.info)}
-        <p style="font-size:12px;color:var(--tx2);line-height:1.6">
+        <p style="font-size:14.5px;color:var(--tx2);line-height:1.6">
           Desde <b>Gestionar</b> cambias plan, período de prueba y rol de cada vendedor, y ves si su
           sincronización está al día. Es lo primero que hay que mirar cuando alguien dice que "no le carga".</p></div></div>
   </div>`;
@@ -4775,8 +4775,8 @@ VIEWS.nube=function(){
         <div style="width:38px;height:38px;border-radius:10px;background:${u.c}18;display:flex;
           align-items:center;justify-content:center;flex-shrink:0">${ic(u.i,19,u.c)}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-weight:800;font-size:14px;color:${u.c}">${u.t}</div>
-          <div style="font-size:11.5px;color:var(--tx3);margin-top:2px">
+          <div style="font-weight:800;font-size:16.5px;color:${u.c}">${u.t}</div>
+          <div style="font-size:13px;color:var(--tx3);margin-top:2px">
             ${SYNC.modo==='supabase'?`Tu cuenta · ${esc((SES&&SES.user&&SES.user.email)||'')}`
              :SYNC.modo==='github'?`${esc(g.owner)}/${esc(g.repo)} · ${esc(g.path)}`
              :SYNC.modo==='archivo'?esc(SYNC.archivo.nombre||'archivo local')
@@ -4784,7 +4784,7 @@ VIEWS.nube=function(){
           </div>
         </div>
       </div>
-      ${SYNCEST.msg?`<p style="font-size:11.5px;color:${C.dan};line-height:1.55;margin-top:11px">${esc(SYNCEST.msg)}</p>`:''}
+      ${SYNCEST.msg?`<p style="font-size:13px;color:${C.dan};line-height:1.55;margin-top:11px">${esc(SYNCEST.msg)}</p>`:''}
       ${SYNC.modo!=='local'?`
         <div class="sumrow" style="margin-top:12px;border-top:1px solid var(--bd);padding-top:10px">
           <span style="color:var(--tx3)">Última sincronización</span>
@@ -4804,7 +4804,7 @@ VIEWS.nube=function(){
   if(SYNC.modo==='local'){
     out+=`<div class="card" style="background:rgba(234,179,8,.06);border-color:rgba(234,179,8,.22)">
       <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.warn)}
-        <p style="font-size:12px;color:var(--tx2);line-height:1.6">
+        <p style="font-size:14.5px;color:var(--tx2);line-height:1.6">
           Ahora mismo tus datos viven solo en este navegador. Si borras la caché del sitio,
           cambias de teléfono o entras desde otra computadora, <b>no están</b>.
           Conecta una de las dos opciones de abajo.</p></div></div>
@@ -4814,7 +4814,7 @@ VIEWS.nube=function(){
         <div class="s">Funciona en el teléfono y en la PC a la vez. Guarda historial: cada cambio es una versión que puedes recuperar.</div></div>
       <div style="padding:15px 16px">
         <div class="mlab" style="margin-top:0">Qué necesitas</div>
-        <ol style="font-size:12px;color:var(--tx2);line-height:1.75;padding-left:18px;margin-bottom:14px">
+        <ol style="font-size:14.5px;color:var(--tx2);line-height:1.75;padding-left:18px;margin-bottom:14px">
           <li>Un repo <b>privado</b> en GitHub (ej. <span class="mono">crm-datos</span>).</li>
           <li>Un token de acceso: GitHub › Settings › Developer settings ›
               <b>Fine-grained tokens</b> › Generate new token.</li>
@@ -4834,7 +4834,7 @@ VIEWS.nube=function(){
             <input class="inp" id="ghToken" type="password" value="${esc(g.token)}" placeholder="github_pat_…" autocapitalize="off" spellcheck="false"></div>
         </div>
         <button class="btn full" style="margin-top:12px" onclick="conectarGitHub()">${ic('Cloud')}Conectar con GitHub</button>
-        <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+        <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:10px">
           El token se guarda aparte de tus datos y <b>nunca</b> entra en el respaldo JSON.
           Si lo pierdes o lo revocas, generas otro y reconectas — los datos no se tocan.</p>
       </div>
@@ -4849,10 +4849,10 @@ VIEWS.nube=function(){
             <button class="btn sm" style="flex:1" onclick="crearArchivo()">${ic('Save')}Crear archivo nuevo</button>
             <button class="btn sec sm" style="flex:1" onclick="abrirArchivo()">${ic('Upload')}Usar uno existente</button>
           </div>
-          <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+          <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:10px">
             El navegador te pedirá permiso una vez por sesión. No funciona en iPhone —
             si usas iPhone, ve por GitHub.</p>`
-        :`<p style="font-size:12px;color:var(--tx3);line-height:1.6">
+        :`<p style="font-size:14.5px;color:var(--tx3);line-height:1.6">
             Este navegador no permite escribir archivos directamente
             (Safari y Firefox todavía no lo soportan). Usa <b>Chrome</b> o <b>Edge</b> en la PC,
             o conecta GitHub — que funciona en todos.</p>`}
@@ -4871,9 +4871,9 @@ VIEWS.nube=function(){
 
   if(SYNC.modo==='github'){
     out+=`<div class="card">
-      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px;margin-bottom:8px">
         ${ic('History',14,C.info)}Historial de versiones</div>
-      <p style="font-size:12px;color:var(--tx3);line-height:1.6;margin-bottom:11px">
+      <p style="font-size:14.5px;color:var(--tx3);line-height:1.6;margin-bottom:11px">
         Cada guardado queda como un commit. Si algo se borra por error, ahí está el estado anterior.</p>
       <button class="btn sec sm full" onclick="window.open('https://github.com/${encodeURIComponent(g.owner)}/${encodeURIComponent(g.repo)}/commits/${encodeURIComponent(g.branch)}','_blank')">
         ${ic('Github')}Ver historial en GitHub</button></div>`;
@@ -4945,7 +4945,7 @@ VIEWS.settings=function(){
   return `<div class="stack">
     <h2 class="vh">Configuración</h2>
     <div class="card">
-      <div style="font-weight:700;font-size:14px;margin-bottom:13px">Perfil comercial</div>
+      <div style="font-weight:700;font-size:16.5px;margin-bottom:13px">Perfil comercial</div>
       <div class="fr" style="margin-bottom:11px"><label class="f">Tu nombre <span class="h">va en los mensajes</span></label>
         <input class="inp" id="cfgNombre" value="${esc(S.cfg.nombre)}" placeholder="Diana"></div>
       <div class="fr" style="margin-bottom:11px"><label class="f">Tu WhatsApp <span class="h">para el post de redes</span></label>
@@ -4955,8 +4955,8 @@ VIEWS.settings=function(){
       <button class="btn full" onclick="saveCfg()">${ic('Save')}Guardar</button>
     </div>
     <div class="card">
-      <div style="font-weight:700;font-size:14px">Tu libro es tuyo</div>
-      <p style="font-size:12px;color:var(--tx3);line-height:1.6;margin:6px 0 13px">
+      <div style="font-weight:700;font-size:16.5px">Tu libro es tuyo</div>
+      <p style="font-size:14.5px;color:var(--tx3);line-height:1.6;margin:6px 0 13px">
         ${SYNC.modo==='github'?`Sincronizado con <b style="color:var(--tx2)">${esc(SYNC.gh.owner)}/${esc(SYNC.gh.repo)}</b>. Se abre igual desde el teléfono y desde la PC.`
          :SYNC.modo==='archivo'?`Guardándose en <b style="color:var(--tx2)">${esc(SYNC.archivo.nombre)}</b> en esta computadora.`
          :SYNC.modo==='supabase'?`En tu cuenta <b style="color:var(--tx2)">${esc((SES&&SES.user&&SES.user.email)||'')}</b>. Se abre igual desde el teléfono y desde la PC.`
@@ -4964,21 +4964,21 @@ VIEWS.settings=function(){
       <button class="btn ${SYNC.modo==='local'?'':'sec'} full" onclick="go('nube')">${ic('Cloud')}Nube y respaldo</button>
     </div>
     <div class="card">
-      <div style="font-weight:700;font-size:13px;margin-bottom:10px">Los 20 módulos del sistema</div>
+      <div style="font-weight:700;font-size:14.5px;margin-bottom:10px">Los 20 módulos del sistema</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">
         ${NAV.map(n=>`<span class="bdg2" style="color:${n.soon?C.tx3:C.tx2};background:transparent;border-color:var(--bd2)">${esc(n.label)}${n.soon?' · pronto':''}</span>`).join('')}
         ${FLOW.map(f=>`<span class="bdg2" style="color:${f.color};background:${f.color}15;border-color:${f.color}30">${f.id}. ${esc(f.label)}</span>`).join('')}
       </div>
-      <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:12px">
+      <p style="font-size:13px;color:var(--tx3);line-height:1.6;margin-top:12px">
         Deal Room de 8 pasos · Motor de urgencia · Alertas automáticas de lease, refi y aniversario · Mensajes por WhatsApp uno a uno.</p>
     </div>
     <div class="card" style="background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.18)">
-      <div style="font-weight:700;font-size:12px;color:var(--dan);margin-bottom:8px">Zona peligrosa</div>
-      <p style="font-size:11.5px;color:var(--tx3);line-height:1.55;margin-bottom:12px">
+      <div style="font-weight:700;font-size:14.5px;color:var(--dan);margin-bottom:8px">Zona peligrosa</div>
+      <p style="font-size:13px;color:var(--tx3);line-height:1.55;margin-bottom:12px">
         Borra clientes, leads, programas y tareas${SYNC.modo==='supabase'?' de tu cuenta — también en la nube':' de este dispositivo'}. Exporta un respaldo antes.</p>
       <button class="btn dan sm" onclick="borrarTodo()">${ic('Trash2')}Borrar todo</button>
     </div>
-    <p style="font-size:11px;color:var(--tx3);text-align:center;line-height:1.6;padding:4px 0 10px">
+    <p style="font-size:13px;color:var(--tx3);text-align:center;line-height:1.6;padding:4px 0 10px">
       ${SYNC.modo==='supabase'?'Tus datos viajan cifrados a tu cuenta. Ningún otro vendedor los ve.'
         :'Los datos viven solo en este navegador. Nadie más los ve.'}<br>AutoSolution Miami · CRM v1.2</p>
   </div>`;
@@ -5063,11 +5063,11 @@ VIEWS.deal=function(){
   let out=`<div style="padding:11px 14px;border-bottom:1px solid var(--bd);background:var(--bg2)">
     <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
       <button class="btn ghost xs" style="padding:4px 0" onclick="go('leads')">${ic('ArrowLeft',13)}Leads</button>
-      <span style="font-size:13px;font-weight:700">${esc(l.nom)}</span>
+      <span style="font-size:14.5px;font-weight:700">${esc(l.nom)}</span>
       ${badge(et,ETAPA_C[et])}${badge(u.label,u.color)}
     </div>
     <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-      <select class="inp" style="flex:1;padding:7px 10px;font-size:12px" onchange="cambiarEtapa(this.value)">
+      <select class="inp" style="flex:1;padding:7px 10px;font-size:14.5px" onchange="cambiarEtapa(this.value)">
         ${ETAPAS.map((e,i)=>`<option value="${i}"${i===l.etapa?' selected':''}>${e}</option>`).join('')}</select>
       <button class="btn sm" onclick="armarNegocio('lead','${l.id}')" title="Armar negocio en Desking">🧮 Armar</button>
       <button class="btn wa sm" onclick="leadWa()">${ic('Wa')}WA</button>
@@ -5108,7 +5108,7 @@ function leadWa(){
   const v=vehLead(l);
   openMsg(l.nom,l.tel,`Hola ${l.nom}${firma()} 👋 ${(l.veh&&l.veh.marca)?'Te escribo por el '+v+'.':'Vi que andas buscando carro.'} Trabajo con todas las marcas y te consigo el número completo — con la letra chica, sin sorpresas al firmar. ¿Qué buscas y cuánto quieres pagar al mes?`);
 }
-const secTit=(icon,color,txt)=>`<div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:12px">${ic(icon,14,color)}${txt}</div>`;
+const secTit=(icon,color,txt)=>`<div style="display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;color:var(--tx2);margin-bottom:12px">${ic(icon,14,color)}${txt}</div>`;
 const fld=(lab,inner,help)=>`<div class="fr"><label class="f">${lab}${help?`<span class="h">· ${help}</span>`:''}</label>${inner}</div>`;
 const inpT=(v,oninput,ph,type)=>`<input class="inp"${type?` type="${type}"`:''} value="${esc(v==null?'':v)}" placeholder="${esc(ph||'')}" onchange="${oninput}">`;
 const inpN=(v,oninput,ph)=>`<input class="inp" inputmode="decimal" value="${esc(v||0)}" placeholder="${esc(ph||'0')}" onchange="${oninput}">`;
@@ -5135,7 +5135,7 @@ STEPV[1]=function(l){
       <textarea class="inp" style="min-height:70px" onchange="upd({notas:this.value})" placeholder="Observaciones iniciales…">${esc(l.notas)}</textarea></div>
   </div>
   <div class="card" style="background:var(--bg3)">
-    <div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Trazabilidad</div>
+    <div style="font-size:11.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Trazabilidad</div>
     <div class="sumrow"><span style="color:var(--tx3)">Capturado</span><span style="color:var(--tx2)">${fDateTime(l.createdAt)}</span></div>
     <div class="sumrow"><span style="color:var(--tx3)">Última actividad</span><span style="color:var(--tx2)">${fDateTime(l.updatedAt)}</span></div>
     <div class="sumrow"><span style="color:var(--tx3)">Urgencia</span><span style="color:${getUrgency(l).color};font-weight:700">${getUrgency(l).label} · ${getUrgency(l).score}</span></div>
@@ -5166,25 +5166,25 @@ STEPV[2]=function(l){
       <div class="dot" style="background:${col}18;border-color:${col}40;color:${col}">${ic(ACT_I[a.tipo]||'FileText',9)}</div>
       <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:10px 12px">
         <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:4px">
-          <span style="font-size:9px;font-weight:800;color:${col};text-transform:uppercase;letter-spacing:.07em">${esc(String(a.tipo).replace('_',' '))} · ${esc(a.autor)}</span>
-          <span style="font-size:9px;color:var(--tx3);white-space:nowrap">${fDateTime(a.fecha)}</span></div>
-        <p style="font-size:12px;color:var(--tx2);line-height:1.55">${esc(a.txt)}</p>
-        ${a.dur?`<div style="font-size:10px;color:var(--p);font-weight:700;margin-top:5px">⏱ ${esc(a.dur)}</div>`:''}
+          <span style="font-size:10px;font-weight:800;color:${col};text-transform:uppercase;letter-spacing:.07em">${esc(String(a.tipo).replace('_',' '))} · ${esc(a.autor)}</span>
+          <span style="font-size:10px;color:var(--tx3);white-space:nowrap">${fDateTime(a.fecha)}</span></div>
+        <p style="font-size:14.5px;color:var(--tx2);line-height:1.55">${esc(a.txt)}</p>
+        ${a.dur?`<div style="font-size:11.5px;color:var(--p);font-weight:700;margin-top:5px">⏱ ${esc(a.dur)}</div>`:''}
       </div></div>`;}).join('')+`</div>`
-   :`<div style="font-size:12px;color:var(--tx3);padding:6px 2px">Sin interacciones aún. La primera define el ritmo del trato.</div>`}
+   :`<div style="font-size:14.5px;color:var(--tx3);padding:6px 2px">Sin interacciones aún. La primera define el ritmo del trato.</div>`}
   <div>
     <div class="rowb" style="margin-bottom:9px">
-      <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--tx2)">
+      <div style="display:flex;align-items:center;gap:7px;font-size:14.5px;font-weight:700;color:var(--tx2)">
         ${ic('CheckSquare',13,C.warn)}Tareas asociadas (${tar.length})</div>
       <button class="btn sec xs" onclick="openTarea('${l.id}')">${ic('Plus')}Nueva</button></div>
     ${tar.length?tar.map(t=>{const ov=!t.hecha&&t.vence&&t.vence<today();
       return `<div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;margin-bottom:6px;
         background:${ov?'rgba(239,68,68,.04)':'var(--bg3)'};border:1px solid ${ov?'rgba(239,68,68,.3)':'var(--bd)'}">
         <input type="checkbox" ${t.hecha?'checked':''} onchange="toggleTarea('${t.id}')" style="accent-color:${C.ok};width:15px;height:15px">
-        <span style="flex:1;font-size:12px;color:${t.hecha?C.tx3:C.tx};${t.hecha?'text-decoration:line-through':''}">${esc(t.titulo)}</span>
-        <span style="font-size:10px;color:${ov?C.dan:C.tx3};white-space:nowrap">${fDate(t.vence)}</span>
+        <span style="flex:1;font-size:14.5px;color:${t.hecha?C.tx3:C.tx};${t.hecha?'text-decoration:line-through':''}">${esc(t.titulo)}</span>
+        <span style="font-size:11.5px;color:${ov?C.dan:C.tx3};white-space:nowrap">${fDate(t.vence)}</span>
       </div>`;}).join('')
-     :`<div style="font-size:12px;color:var(--tx3)">Sin tareas para este lead.</div>`}
+     :`<div style="font-size:14.5px;color:var(--tx3)">Sin tareas para este lead.</div>`}
   </div></div>`;
 };
 function addAct(){
@@ -5213,7 +5213,7 @@ STEPV[3]=function(l,f){
     ${fld('Down payment $',inpN(l.oferta.down,"updNum('oferta','down',this.value);render()"))}
   </div>
   <div class="card" style="background:var(--bg3)">
-    <div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Resumen en tiempo real</div>
+    <div style="font-size:11.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Resumen en tiempo real</div>
     ${rows.map(r=>`<div class="sumrow"><span style="color:var(--tx2)">${r[0]}</span>
       <span class="mono" style="color:${r[2]&&r[1]>0?C.dan:C.tx2}">${r[2]&&r[1]>0?'− ':''}${fm(Math.abs(r[1]))}</span></div>`).join('')}
     <div class="sumrow b"><span>= Total a pagar</span><span class="mono">${fm(Math.max(0,f.totalDue))}</span></div>
@@ -5241,8 +5241,8 @@ STEPV[4]=function(l,f){
   </div>
   <div class="card" style="background:var(--bg3);display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
     ${[['Equity del cliente',f.equity,f.equity>=0?C.ok:C.dan],['Overallowance',f.over,f.over>0?C.dan:C.tx3],['Payoff pendiente',f.payoff,C.tx2]]
-      .map(r=>`<div><div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">${r[0]}</div>
-      <div class="mono" style="font-size:18px;font-weight:800;color:${r[2]}">${fm(r[1])}</div></div>`).join('')}
+      .map(r=>`<div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">${r[0]}</div>
+      <div class="mono" style="font-size:20px;font-weight:800;color:${r[2]}">${fm(r[1])}</div></div>`).join('')}
   </div></div>`;
   return out;
 };
@@ -5290,39 +5290,39 @@ STEPV[6]=function(l,f){
     ${fld('Millas al año',inpN(l.deal.millas,"updNum('deal','millas',this.value);render()"))}
     ${fld('Tax % <span class="h">FL: 6</span>',inpT(l.deal.taxPct==null?TAX_FL:l.deal.taxPct,"updNum('deal','taxPct',this.value);render()",'6'))}
   </div>
-  ${f.mf?`<div style="font-size:11px;color:var(--tx3);margin:-4px 0 4px">
+  ${f.mf?`<div style="font-size:13px;color:var(--tx3);margin:-4px 0 4px">
     Money factor ${esc(f.mf)} ≈ <b style="color:var(--tx2)">${f.aprEq}% APR</b> equivalente${f.residual?` · residual ${fm(f.residual)}`:''}</div>`:''}
   ${cotsDe('lead',l.id).length?`<button class="btn sec sm full" style="margin-bottom:4px"
     onclick="traerDeDesking()">${ic('Download')}Traer los números de Desking</button>`:''}`:''}
   <div class="card" style="background:#0c0c0c;border-color:var(--bd2)">
     <div class="rowb" style="align-items:flex-end">
-      <div style="min-width:0"><div style="font-size:9px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">
+      <div style="min-width:0"><div style="font-size:10px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">
         ${f.esLease?'Pago mensual con tax':'Pago mensual estimado'}</div>
         ${f.pagoOk!==false
           ? `<div class="mono" style="font-size:38px;font-weight:900;color:var(--p);letter-spacing:-.04em;line-height:1">${fm(f.pago)}</div>
-             <div style="font-size:11px;color:var(--tx3);margin-top:6px">${f.esLease
+             <div style="font-size:13px;color:var(--tx3);margin-top:6px">${f.esLease
                ? f.plazo+' meses'+(f.millas?' · '+fmN(f.millas)+' mi/año':'')+' · '+fm(f.alFirmar)+' al firmar'
                : f.plazo+' meses · '+f.apr+'% APR · '+fm(f.amtFin)+' financiado'}</div>`
-          : `<div class="mono" style="font-size:34px;font-weight:900;color:var(--tx3);letter-spacing:-.04em;line-height:1">—</div>
-             <div style="font-size:11px;color:${C.warn};margin-top:6px;line-height:1.5;max-width:230px">
+          : `<div class="mono" style="font-size:38px;font-weight:900;color:var(--tx3);letter-spacing:-.04em;line-height:1">—</div>
+             <div style="font-size:13px;color:${C.warn};margin-top:6px;line-height:1.5;max-width:230px">
                Un lease no se calcula como préstamo. Falta ${esc((f.faltan||[]).join(' y '))}.</div>`}
       </div>
-      <div style="text-align:right"><div style="font-size:9px;color:var(--tx3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Backend</div>
+      <div style="text-align:right"><div style="font-size:10px;color:var(--tx3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Backend</div>
         <div class="mono" style="font-size:20px;font-weight:800;color:${C.ok}">${fm(f.backGross)}</div></div>
     </div></div>
   <div>
-    <div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Productos F&amp;I / Backend</div>
+    <div style="font-size:11.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Productos F&amp;I / Backend</div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <select class="inp" id="fniProd" style="flex:1">${FNI.map(p=>`<option>${p}</option>`).join('')}</select>
       <input class="inp" id="fniProfit" inputmode="numeric" placeholder="Profit $" style="width:110px">
       <button class="btn sm" onclick="addFni()">${ic('Plus')}</button>
     </div>
     ${(l.recap.fni||[]).length?l.recap.fni.map(p=>`<div class="rowb" style="background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:9px 12px;margin-bottom:6px">
-      <span style="font-size:12px;color:var(--tx2)">${esc(p.name)}</span>
+      <span style="font-size:14.5px;color:var(--tx2)">${esc(p.name)}</span>
       <div style="display:flex;align-items:center;gap:10px">
-        <span class="mono" style="font-size:13px;font-weight:700;color:${C.ok}">${fm(p.profit)}</span>
+        <span class="mono" style="font-size:14.5px;font-weight:700;color:${C.ok}">${fm(p.profit)}</span>
         <button class="iconbtn" onclick="rmFni('${p.id}')">${ic('X',14,C.tx3)}</button></div></div>`).join('')
-     :`<div style="font-size:12px;color:var(--tx3)">Sin productos F&amp;I agregados.</div>`}
+     :`<div style="font-size:14.5px;color:var(--tx3)">Sin productos F&amp;I agregados.</div>`}
   </div></div>`;
 };
 function addFni(){
@@ -5340,14 +5340,14 @@ STEPV[7]=function(l,f){
   return `<div class="stack">
   <div class="card" style="background:#0b0b0b;border-color:var(--bd2);position:relative;overflow:hidden">
     <div style="position:absolute;top:0;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,${C.p} 0 14px,transparent 14px 24px)"></div>
-    <div style="font-size:9px;font-weight:800;color:var(--p);text-transform:uppercase;letter-spacing:.12em;margin:6px 0 14px">Deal Recap — resumen del negocio</div>
+    <div style="font-size:10px;font-weight:800;color:var(--p);text-transform:uppercase;letter-spacing:.12em;margin:6px 0 14px">Deal Recap — resumen del negocio</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
       ${[['Precio venta',fm(f.precio),C.tx],['A financiar',fm(f.amtFin),C.info],
          ['Front Gross',fm(f.frontGross),f.frontGross>=0?C.ok:C.dan],['Back Gross',fm(f.backGross),C.ok],
          ['GROSS TOTAL',fm(f.totalGross),f.totalGross>=0?C.ok:C.dan],['Pago/mes',fm(f.pago),C.p],
          ['Banco',esc(l.deal.banco||'—'),C.tx2],[f.apr+'% APR',f.plazo+' meses',C.tx3]]
-        .map(r=>`<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:3px">${r[0]}</div>
-        <div class="mono" style="font-size:15px;font-weight:800;color:${r[2]};letter-spacing:-.02em">${r[1]}</div></div>`).join('')}
+        .map(r=>`<div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:3px">${r[0]}</div>
+        <div class="mono" style="font-size:16.5px;font-weight:800;color:${r[2]};letter-spacing:-.02em">${r[1]}</div></div>`).join('')}
     </div></div>
   ${bloqueWorksheet(l)}
   <div class="grid1" style="grid-template-columns:1fr;gap:10px">
@@ -5356,10 +5356,10 @@ STEPV[7]=function(l,f){
       .map(r=>`<div style="display:flex;align-items:center;gap:11px;background:var(--bg3);border-radius:10px;padding:14px;
         border:1px solid ${l.recap[r[0]]?C.ok+'40':'var(--bd)'}">
         <input type="checkbox" ${l.recap[r[0]]?'checked':''} onchange="updN('recap','${r[0]}',this.checked);render()" style="accent-color:${C.ok};width:17px;height:17px">
-        <div><div style="font-size:12.5px;font-weight:700">${r[1]}</div>
-          <div style="font-size:10.5px;color:var(--tx3);margin-top:2px">${r[2]}</div></div></div>`).join('')}
+        <div><div style="font-size:14.5px;font-weight:700">${r[1]}</div>
+          <div style="font-size:11.5px;color:var(--tx3);margin-top:2px">${r[2]}</div></div></div>`).join('')}
   </div>
-  ${l.recap.finalizado?`<div class="card" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3);text-align:center;color:${C.ok};font-size:12.5px;font-weight:600;line-height:1.6">
+  ${l.recap.finalizado?`<div class="card" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3);text-align:center;color:${C.ok};font-size:14.5px;font-weight:600;line-height:1.6">
       ✅ Trato cerrado y procesado.<br>Marca la etapa como <b>Vendido</b> para pasarlo a tu libro y activar las alertas.</div>
     ${ETAPAS[l.etapa]!=='Vendido'?`<button class="btn ok full" onclick="cambiarEtapa(${ETAPAS.indexOf('Vendido')})">${ic('BookOpen')}Marcar Vendido y pasar al libro</button>`:''}`:''}
   </div>`;
@@ -5371,30 +5371,30 @@ STEPV[8]=function(l){
   return `<div class="stack">${secTit('Bell','#fb923c','Alertas CRM de post-venta')}
   <div class="card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)">
     <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.info)}
-      <p style="font-size:11.5px;color:var(--tx2);line-height:1.6">Las fechas que cargues aquí aparecen solas en <b>Alertas</b> 45 días antes, con el mensaje de WhatsApp ya escrito.</p></div>
+      <p style="font-size:13px;color:var(--tx2);line-height:1.6">Las fechas que cargues aquí aparecen solas en <b>Alertas</b> 45 días antes, con el mensaje de WhatsApp ya escrito.</p></div>
   </div>
   <div class="card">
-    <div style="font-weight:700;font-size:12.5px;margin-bottom:9px">⭐ Google Review</div>
+    <div style="font-weight:700;font-size:14.5px;margin-bottom:9px">⭐ Google Review</div>
     <label class="check"><input type="checkbox" ${l.post.resena?'checked':''} onchange="updN('post','resena',this.checked);render()">Reseña solicitada al cliente</label>
   </div>
   <div class="card">
-    <div style="font-weight:700;font-size:12.5px;margin-bottom:9px">👥 Referidos</div>
+    <div style="font-weight:700;font-size:14.5px;margin-bottom:9px">👥 Referidos</div>
     <div style="display:flex;gap:8px;margin-bottom:9px">
       <input class="inp" id="refTxt" placeholder="Nombre y teléfono…" style="flex:1">
       <button class="btn sm" onclick="addRef()">${ic('Plus')}</button></div>
     ${(l.post.referidos||[]).length?l.post.referidos.map((r,i)=>
       `<div class="mrow"><span>${esc(r)}</span><button class="iconbtn" onclick="rmRef(${i})">${ic('X',13,C.tx3)}</button></div>`).join('')
-     :`<div style="font-size:11.5px;color:var(--tx3)">Sin referidos.</div>`}
+     :`<div style="font-size:13px;color:var(--tx3)">Sin referidos.</div>`}
   </div>
   ${[['equityDate','TrendingUp',C.ok,'Alerta de Equity','Fecha para revisar el equity del cliente'],
      ['refiDate','TrendingUp',C.vio,'Alerta de Refinanciamiento','Fecha para ofrecer mejor tasa'],
      ['renewDate','RefreshCw',C.p,'Alerta de Renovación','Fecha para hablar de renovar']]
     .map(r=>{const d=dl(l.post[r[0]]);
     return `<div class="card">
-      <div style="font-weight:700;font-size:12.5px;display:flex;align-items:center;gap:7px;margin-bottom:5px">${ic(r[1],13,r[2])}${r[3]}</div>
-      <div style="font-size:10.5px;color:var(--tx3);margin-bottom:8px">${r[4]}</div>
+      <div style="font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:7px;margin-bottom:5px">${ic(r[1],13,r[2])}${r[3]}</div>
+      <div style="font-size:11.5px;color:var(--tx3);margin-bottom:8px">${r[4]}</div>
       <input class="inp" type="date" value="${esc(l.post[r[0]]||'')}" onchange="updN('post','${r[0]}',this.value);render()">
-      ${d!==null?`<div style="font-size:10.5px;color:${r[2]};font-weight:700;margin-top:7px">
+      ${d!==null?`<div style="font-size:11.5px;color:${r[2]};font-weight:700;margin-top:7px">
         ${d<0?'Pasó hace '+Math.abs(d)+' días':d===0?'Es hoy':'Faltan '+d+' días'}${d<=45?' · ya está en Alertas':''}</div>`:''}
     </div>`;}).join('')}
   </div>`;
@@ -5419,24 +5419,24 @@ function showOnb(){
       <div style="position:relative;z-index:1">${LOGO}</div>
       <div style="position:relative;z-index:1">
         <div class="onbtag">${ic('Zap',12,C.p)}CRM exclusivo automotriz</div>
-        <h1 style="font-size:34px;font-weight:900;color:#fff;line-height:1.08;text-transform:uppercase;letter-spacing:-.03em;margin-bottom:14px">
+        <h1 style="font-size:38px;font-weight:900;color:#fff;line-height:1.08;text-transform:uppercase;letter-spacing:-.03em;margin-bottom:14px">
           Cierra más.<br><span style="color:var(--p)">Cada turno.</span></h1>
-        <p style="color:var(--tx3);font-size:13px;line-height:1.7;max-width:340px">
+        <p style="color:var(--tx3);font-size:14.5px;line-height:1.7;max-width:340px">
           Motor de urgencia en tiempo real, flujo de 8 pasos con F&amp;I, y alertas automáticas de fin de lease, refi y aniversario sobre tu propio libro de clientes.</p>
       </div>
-      <div class="dtonly" style="font-size:10px;color:var(--tx3);border-top:1px solid var(--bd);padding-top:16px">
+      <div class="dtonly" style="font-size:11.5px;color:var(--tx3);border-top:1px solid var(--bd);padding-top:16px">
         © 2026 AutoSolution Miami CRM · Tu cartera es tuya y viaja contigo</div>
     </div>
     <div class="onbwrap"><div class="onbform">
-      <h2 style="font-size:23px;font-weight:900;letter-spacing:-.02em;margin-bottom:6px">Empecemos</h2>
-      <p style="color:var(--tx3);font-size:13px;margin-bottom:22px;line-height:1.6">
+      <h2 style="font-size:25px;font-weight:900;letter-spacing:-.02em;margin-bottom:6px">Empecemos</h2>
+      <p style="color:var(--tx3);font-size:14.5px;margin-bottom:22px;line-height:1.6">
         Solo dos datos. Tu nombre firma los mensajes de WhatsApp y tu número va en los posts de redes.</p>
       <div class="fr" style="margin-bottom:12px"><label class="f">Tu nombre</label>
-        <input class="inp" id="obNom" placeholder="Diana" style="font-size:15px;padding:12px 14px"></div>
+        <input class="inp" id="obNom" placeholder="Diana" style="font-size:16.5px;padding:12px 14px"></div>
       <div class="fr" style="margin-bottom:18px"><label class="f">Tu WhatsApp</label>
-        <input class="inp" id="obWa" inputmode="tel" placeholder="3055551234" style="font-size:15px;padding:12px 14px"></div>
+        <input class="inp" id="obWa" inputmode="tel" placeholder="3055551234" style="font-size:16.5px;padding:12px 14px"></div>
       <button class="btn lg full" onclick="doOnb()">${ic('ChevronRight')}Entrar al workspace</button>
-      <p style="font-size:11px;color:var(--tx3);text-align:center;margin-top:16px;line-height:1.6">
+      <p style="font-size:13px;color:var(--tx3);text-align:center;margin-top:16px;line-height:1.6">
         Puedes cambiarlos cuando quieras en <b style="color:var(--tx2)">Config</b>.<br>
         La app arranca vacía: todo lo que veas sale de lo que tú cargues.</p>
       <button class="btn ghost sm full" style="margin-top:14px" onclick="document.getElementById('impFile').click()">
