@@ -393,12 +393,13 @@ const NAV=[
   {id:'reports',icon:'BarChart2',label:'Reportes',sec:'Análisis'},
   {id:'campaigns',icon:'Megaphone',label:'Campañas',soon:1},
   {id:'performance',icon:'TrendingUp',label:'Rendimiento'},
-  {id:'novedades',icon:'Megaphone',label:'Novedades',sec:'Equipo'},
+  {id:'novedades',icon:'Tag',label:'Especiales',sec:'Equipo'},
   {id:'equipo',icon:'Share2',label:'Equipo'},
   {id:'nextup',icon:'RotateCcw',label:'Next-Up',soon:1},
   {id:'admin',icon:'Shield',label:'Admin',soon:1},
   {id:'tasas',icon:'Landmark',label:'Tasas',soloAdmin:1},
-  {id:'ayuda',icon:'Sparkle',label:'Ayuda',sec:'Sistema'},
+  {id:'boletin',icon:'Megaphone',label:'Boletín',sec:'Sistema'},
+  {id:'ayuda',icon:'Sparkle',label:'Ayuda'},
   {id:'nube',icon:'Cloud',label:'Nube'},
   {id:'settings',icon:'Settings',label:'Config'},
 ];
@@ -2636,7 +2637,7 @@ async function cargarNovedades(forzar){
   }catch(e){NOV.err=e&&e.message?e.message:String(e);}
   NOV.cargado=true;
 }
-const puedoPublicar=()=>esAdmin()||(EQ.equipo&&EQ.miRol==='manager');
+const puedoPublicar=()=>!!(EQ.equipo&&EQ.miRol==='manager');
 
 /* El texto que el vendedor pega en sus redes, con SU número */
 function textoRedes(n){
@@ -2673,8 +2674,9 @@ function vistaNovedades(){
       Cargando novedades…<span class="spin"></span></div>`;}
 
   const hoyD=hoy();
-  const vivos=NOV.lista.filter(n=>!n.vence||dias(new Date(String(n.vence).slice(0,10)+'T00:00:00'),hoyD)>=0);
-  const vencidos=NOV.lista.filter(n=>n.vence&&dias(new Date(String(n.vence).slice(0,10)+'T00:00:00'),hoyD)<0);
+  const soloEquipo=especialesEquipo();
+  const vivos=soloEquipo.filter(n=>!n.vence||dias(new Date(String(n.vence).slice(0,10)+'T00:00:00'),hoyD)>=0);
+  const vencidos=soloEquipo.filter(n=>n.vence&&dias(new Date(String(n.vence).slice(0,10)+'T00:00:00'),hoyD)<0);
 
   const tarjeta=(n,viejo)=>{
     const u=TIPO_NOV[n.tipo]||TIPO_NOV.aviso;
@@ -2721,9 +2723,9 @@ function vistaNovedades(){
           Pon tu WhatsApp en <b>Config</b> para que el texto de redes salga con tu número.</p></div></div>`:''}
 
     ${puedoPublicar()?`<div class="card">
-      <button class="btn full" onclick="modalNovedad()">${ic('Plus')}Publicar ${esAdmin()&&!EQ.equipo?'para todos':'para mi equipo'}</button>
-      ${esAdmin()&&EQ.equipo&&EQ.miRol==='manager'?`<p style="font-size:11px;color:var(--tx3);margin-top:8px;line-height:1.6">
-        Puedes publicar para todo el sistema o solo para tu equipo — lo eliges al publicar.</p>`:''}
+      <button class="btn full" onclick="modalNovedad()">${ic('Plus')}Publicar un especial para mi equipo</button>
+      <p style="font-size:11px;color:var(--tx3);margin-top:9px;line-height:1.6">
+        Lo ve tu equipo con el número completo, listo para que cada uno lo ponga en sus redes con su propio WhatsApp.</p>
     </div>`:''}
 
     ${NOV.err?`<div class="card" style="border-color:${C.dan}38;background:${C.dan}0d">
@@ -2754,19 +2756,13 @@ async function borrarNovedad(id){
 }
 
 function modalNovedad(){
-  const puedeGlobal=esAdmin();
-  const puedeEquipo=EQ.equipo&&EQ.miRol==='manager';
   openModal('Publicar novedad',
    `<div class="mlab" style="margin-top:0">Qué es</div>
     <select class="inp" id="nvTipo" onchange="pintarCamposNovedad()">
       ${Object.keys(TIPO_NOV).map(k=>`<option value="${k}">${TIPO_NOV[k].t}</option>`).join('')}
     </select>
 
-    ${(puedeGlobal&&puedeEquipo)?`<div class="mlab">Para quién</div>
-      <select class="inp" id="nvAlcance">
-        <option value="equipo">Solo mi equipo</option>
-        <option value="global">Todos los vendedores del sistema</option>
-      </select>`:`<input type="hidden" id="nvAlcance" value="${puedeGlobal?'global':'equipo'}">`}
+    <input type="hidden" id="nvAlcance" value="equipo">
 
     <div class="mlab">Título</div>
     <input class="inp" id="nvTitulo" placeholder="Corolla LE — especial de septiembre">
@@ -2864,6 +2860,135 @@ async function publicarNovedad(){
   }
 }
 
+/* ═══ BOLETÍN ═══
+   Es de Eduardo (admin) para TODOS los que usan la app. Interno:
+   tasas, programas de lease, incentivos, avisos. Sirve para que el
+   vendedor trabaje mejor — no es material para el cliente.
+   Si alguien lo quiere reenviar, es cosa suya. */
+const boletines=()=>(NOV.lista||[]).filter(n=>n.alcance==='global');
+const especialesEquipo=()=>(NOV.lista||[]).filter(n=>n.alcance==='equipo');
+function sinLeer(){
+  const v=S.cfg.boletinVistos||[];
+  return boletines().filter(n=>v.indexOf(n.id)<0).length;
+}
+function marcarLeido(id){
+  S.cfg.boletinVistos=(S.cfg.boletinVistos||[]).concat([id]);
+  saveLocal();
+}
+function marcarTodoLeido(){
+  S.cfg.boletinVistos=boletines().map(n=>n.id);
+  saveLocal();render();
+}
+
+function vistaBoletin(){
+  if(!NOV.cargado){setTimeout(async()=>{
+      if(!EQ.cargado)await cargarEquipo();
+      await cargarNovedades(); if(TAB==='boletin')render();},0);
+    return `<div class="card" style="text-align:center;padding:28px;color:var(--tx3);font-size:12.5px">
+      Cargando el boletín…<span class="spin"></span></div>`;}
+
+  const lista=boletines();
+  const vistos=S.cfg.boletinVistos||[];
+  const nuevos=sinLeer();
+
+  const nota=n=>{
+    const u=TIPO_NOV[n.tipo]||TIPO_NOV.aviso;
+    const d=n.data||{};
+    const leido=vistos.indexOf(n.id)>=0;
+    const mio=n.autor===miId();
+    if(!leido)setTimeout(()=>marcarLeido(n.id),2500);
+    return `<div class="card pad0" style="border-color:${leido?'var(--bd)':u.c+'38'}">
+      <div class="chead" style="border-bottom-color:${leido?'var(--bd)':u.c+'22'}">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          ${badge(u.t,u.c)}
+          ${!leido?`<span class="bdg2" style="color:${C.p};background:${C.ps};border-color:${C.p}40">NUEVO</span>`:''}
+          ${n.vence?badge('Hasta '+fDate(String(n.vence).slice(0,10)),C.warn):''}
+        </div>
+        <div class="s" style="margin-top:6px;font-size:14px;font-weight:800;color:var(--tx)">${esc(n.titulo||'Sin título')}</div>
+        <div class="s">${fDateTime(n.creado)}</div>
+      </div>
+      <div style="padding:14px 16px">
+        ${d.cuerpo?`<div style="font-size:13px;color:var(--tx2);line-height:1.75;white-space:pre-wrap">${esc(d.cuerpo)}</div>`:''}
+        <div style="display:flex;gap:7px;margin-top:13px;flex-wrap:wrap">
+          <button class="btn sec sm" onclick="copiarBoletin('${esc(n.id)}')">${ic('Copy')}Copiar</button>
+          ${mio?`<button class="btn ghost sm" onclick="borrarNovedad('${esc(n.id)}')">${ic('Trash2')}Quitar</button>`:''}
+        </div>
+      </div></div>`;
+  };
+
+  return `<div class="stack">
+    <div class="rowb"><div><h2 class="vh">Boletín</h2>
+      <div class="vsub">Tasas, programas e incentivos de la oficina. Para que trabajes con lo último.</div></div>
+      <div style="display:flex;gap:6px">
+        ${nuevos?`<button class="btn ghost sm" onclick="marcarTodoLeido()">Marcar leído</button>`:''}
+        <button class="btn ghost sm" onclick="NOV.cargado=false;render()">${ic('RefreshCw')}</button>
+      </div></div>
+
+    ${esAdmin()?`<div class="card">
+      <button class="btn full" onclick="modalBoletin()">${ic('Send')}Publicar al boletín</button>
+      <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:9px">
+        Le llega a <b>todos</b> los que usan la app. Es interno: para que trabajen mejor,
+        no material para el cliente.</p></div>`:''}
+
+    ${NOV.err?`<div class="card" style="border-color:${C.dan}38;background:${C.dan}0d">
+      <div style="font-size:12px;color:var(--tx2)">${esc(NOV.err)}</div></div>`:''}
+
+    ${lista.length?lista.map(nota).join('')
+      :`<div class="card">${empty('Megaphone','Todavía no hay boletines',
+        esAdmin()?'Publica el primero: tasas del mes, un programa de lease nuevo, un incentivo.'
+        :'Cuando la oficina publique algo, te sale aquí.')}</div>`}
+  </div>`;
+}
+function copiarBoletin(id){
+  const n=(NOV.lista||[]).find(x=>x.id===id); if(!n)return;
+  const d=n.data||{};
+  copiarTexto([n.titulo,'',d.cuerpo||''].filter(x=>x!==undefined).join('\n'));
+}
+
+function modalBoletin(){
+  openModal('Publicar al boletín',
+   `<div class="mlab" style="margin-top:0">Qué es</div>
+    <select class="inp" id="blTipo">
+      <option value="tasas">Tasas del mes</option>
+      <option value="lease">Programa de lease</option>
+      <option value="incentivo">Incentivo</option>
+      <option value="aviso">Aviso general</option>
+    </select>
+
+    <div class="mlab">Título</div>
+    <input class="inp" id="blTitulo" placeholder="Tasas y programas — septiembre 2026">
+
+    <div class="mlab">El contenido</div>
+    <textarea class="inp" id="blCuerpo" rows="9" placeholder="Toyota: Corolla LE 36 meses, MF .00125, residual 62%&#10;Honda: Civic LX con $500 de lealtad hasta el 30&#10;Credit unions: Dade County bajó a 5.4% en nuevo&#10;&#10;Escríbelo como se lo dirías a tu gente."></textarea>
+
+    <div class="mlab">Vence <span class="h">opcional</span></div>
+    <input class="inp" id="blVence" type="date">
+    <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
+      Esto es <b>interno</b>: lo ven todos los vendedores del sistema, de todos los equipos.
+      Si alguno lo quiere reenviar a un cliente, es decisión suya.</p>`,
+   `<button class="btn sec" onclick="closeModal()">Cancelar</button>
+    <button class="btn" onclick="publicarBoletin()">${ic('Send')}Publicar a todos</button>`);
+}
+async function publicarBoletin(){
+  const titulo=$('blTitulo').value.trim();
+  const cuerpo=$('blCuerpo').value.trim();
+  if(!titulo){alert('Ponle un título.');return;}
+  if(!cuerpo){alert('Escribe el contenido.');return;}
+  try{
+    const r=await sbRest('/comunicados',{method:'POST',prefer:'return=representation',
+      body:{alcance:'global', team_id:null, autor:miId(), tipo:$('blTipo').value,
+            titulo:titulo, data:{cuerpo:cuerpo}, vence:$('blVence').value||null}});
+    if(!r||!r.length)throw new Error('El servidor no aceptó la publicación.');
+    closeModal();NOV.cargado=false;
+    /* lo mio ya lo lei */
+    S.cfg.boletinVistos=(S.cfg.boletinVistos||[]).concat([r[0].id]);saveLocal();
+    toast('Publicado — lo ven todos');render();
+  }catch(e){
+    alert('No se pudo publicar:\n\n'+(e&&e.message?e.message:e)+
+      '\n\nSi dice 403: el boletín solo lo publica el admin.');
+  }
+}
+
 /* ═══════════ NAVEGACIÓN ═══════════ */
 let TAB='dashboard', LEADID=null, CLIID=null, STEP=1, Q='', QLIB='';
 let FSRC='Todos', FEST='Todos';
@@ -2915,6 +3040,7 @@ function renderNav(){
     let bdg=0;
     if(n.id==='alertas')bdg=calcAlertas().length;
     if(n.id==='tasks')bdg=S.tareas.filter(t=>!t.hecha&&t.vence&&t.vence<today()).length;
+    if(n.id==='boletin'&&NOV.cargado)bdg=sinLeer();
     h+=`<button class="nvi ${TAB===n.id?'on':''}" onclick="go('${n.id}')">
       ${ic(n.icon,15,TAB===n.id?C.p:C.tx3)}<span class="lb">${esc(n.label)}</span>
       ${n.soon&&!(n.id==='admin'&&esAdmin())?'<span class="soon">PRONTO</span>':bdg>0?`<span class="bdg">${bdg}</span>`:''}
@@ -3722,6 +3848,7 @@ VIEWS.ayuda=vistaAyuda;
 VIEWS.tasas=vistaTasas;
 VIEWS.equipo=vistaEquipo;
 VIEWS.novedades=vistaNovedades;
+VIEWS.boletin=vistaBoletin;
 VIEWS.campaigns=()=>soonView('campaigns');
 /* ═══ VISTA · RENDIMIENTO ═══
    Tu mes contra tu meta, y tu historial real. Todo sale de lo que
