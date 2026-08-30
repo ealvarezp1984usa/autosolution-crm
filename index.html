@@ -1951,7 +1951,8 @@ function bloqueSugerencias(){
       ${SUG.lista.length?SUG.lista.map(s=>`
         <div class="sumrow" style="align-items:flex-start;gap:10px;${s.visto?'opacity:.55':''}">
           <div style="flex:1;min-width:0">
-            <div style="color:var(--tx);line-height:1.6;white-space:pre-wrap">${esc(s.texto||'')}</div>
+            <div style="color:var(--tx);line-height:1.6;white-space:pre-wrap;
+              overflow-wrap:anywhere">${esc(s.texto||'')}</div>
             <div style="color:var(--tx3);font-size:11px;margin-top:5px">
               ${esc(s.nombre||'sin nombre')} · ${fDateTime(s.creado)}${s.version?' · v'+esc(s.version):''}</div>
           </div>
