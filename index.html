@@ -545,8 +545,12 @@ const $=id=>document.getElementById(id);
 const uid=p=>(p||'x')+Math.random().toString(36).slice(2,7)+Date.now().toString(36).slice(-4);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nowISO=()=>new Date().toISOString();
-const today=()=>new Date().toISOString().slice(0,10);
-const thisMonth=()=>new Date().toISOString().slice(0,7);
+const fechaLocal=d=>{d=d||new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const mesLocal=d=>{d=d||new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');};
+const today=()=>fechaLocal();
+const thisMonth=()=>mesLocal();
 const num=v=>{const n=Number(String(v==null?'':v).replace(/[^0-9.\-]/g,''));return isNaN(n)?0:n;};
 const fm=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(num(n));
 const fmN=n=>new Intl.NumberFormat('en-US').format(Math.round(num(n)));
@@ -1694,7 +1698,7 @@ function sumarDias(n){
   const i=$('gHasta'); if(!i)return;
   const base=n===0?new Date():(i.value?new Date(i.value+'T00:00:00'):new Date());
   if(n>0)base.setDate(base.getDate()+n);
-  i.value=base.toISOString().slice(0,10);
+  i.value=fechaLocal(base);
 }
 async function guardarVendedor(){
   if(!GEST)return;
@@ -2514,7 +2518,7 @@ function aMesVenta(v){
   m=s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);   if(m)return m[3]+'-'+String(m[1]).padStart(2,'0');
   m=s.match(/^(\d{1,2})[-/](\d{4})$/);               if(m)return m[2]+'-'+String(m[1]).padStart(2,'0');
   const d=new Date(s);
-  return isNaN(d)?'':d.toISOString().slice(0,7);
+  return isNaN(d)?'':mesLocal(d);
 }
 function aFechaISO(v){
   const s=String(v).trim();
@@ -2523,7 +2527,7 @@ function aFechaISO(v){
   m=s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
   if(m)return m[3]+'-'+String(m[1]).padStart(2,'0')+'-'+String(m[2]).padStart(2,'0');
   const d=new Date(s);
-  return isNaN(d)?'':d.toISOString().slice(0,10);
+  return isNaN(d)?'':fechaLocal(d);
 }
 
 function analizarImport(){
@@ -2621,6 +2625,13 @@ function confirmarImport(){
    Reglas de la casa: número completo siempre (pago + al firmar + plazo +
    millas), sin urgencia falsa, y el CTA va a WhatsApp. */
 let NOV={cargado:false,lista:[],err:''};
+let NOVVER=false;
+/* dias que le quedan; null si no vence o si faltan mas de 7 */
+function porVencer(n){
+  if(!n.vence)return null;
+  const d=dias(new Date(String(n.vence).slice(0,10)+'T00:00:00'),hoy());
+  return (d>=0&&d<=7)?d:null;
+}
 const TIPO_NOV={
   especial :{t:'Especial',      c:'#e31c1c', i:'Tag'},
   incentivo:{t:'Incentivo',     c:'#8b5cf6', i:'Trophy'},
@@ -2639,11 +2650,16 @@ async function cargarNovedades(forzar){
 }
 const puedoPublicar=()=>!!(EQ.equipo&&EQ.miRol==='manager');
 
+/* Su WhatsApp: el de Config y, si no, el del perfil del servidor
+   (es obligatorio al registrarse, asi que casi nunca falta). */
+function miWa(){
+  return tel10(S.cfg.wa || (SES&&SES.perfil&&SES.perfil.whatsapp) || '');
+}
 /* El texto que el vendedor pega en sus redes, con SU número */
 function textoRedes(n){
   const d=n.data||{};
   const veh=[d.ano,d.marca,d.modelo,d.trim].filter(Boolean).join(' ');
-  const wa=tel10(S.cfg.wa||'');
+  const wa=miWa();
   const L=[];
   L.push('🚗 '+(veh||n.titulo));
   if(d.tipo==='lease'){
@@ -2661,8 +2677,7 @@ function textoRedes(n){
   if(d.condiciones)L.push(d.condiciones);
   if(n.vence)L.push('Hasta el '+fDate(String(n.vence).slice(0,10)));
   L.push('');
-  L.push(wa?'Escríbeme y te digo si calificas 👉 wa.me/'+wa
-           :'Escríbeme y te digo si calificas (pon tu WhatsApp en Config)');
+  L.push('Escríbeme y te digo si calificas 👉 wa.me/'+wa);
   return L.join('\n');
 }
 
@@ -2703,11 +2718,18 @@ function vistaNovedades(){
             ${d.apr?' · '+d.apr+'% APR':''}</div>`:''}
           ${d.condiciones?`<div style="font-size:11.5px;color:var(--tx3);margin-top:5px;line-height:1.5">${esc(d.condiciones)}</div>`:''}
           <div style="font-size:10.5px;color:var(--tx3);margin-top:7px">${fDateTime(n.creado)}</div>
+          ${!viejo&&porVencer(n)?`<div style="display:flex;gap:8px;align-items:center;margin-top:9px;
+            background:rgba(234,179,8,.09);border:1px solid rgba(234,179,8,.25);border-radius:8px;padding:8px 10px">
+            ${ic('Clock',13,C.warn)}<span style="font-size:11.5px;color:var(--tx2)">
+              ${porVencer(n)===0?'Vence hoy':'Vence en '+porVencer(n)+' día'+(porVencer(n)>1?'s':'')} — ${mio?'actualízalo o quítalo':'úsalo ya'}</span></div>`:''}
           ${!viejo?`<div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">
             <button class="btn sec sm" onclick="copiarRedes('${esc(n.id)}')">${ic('Copy')}Copiar para mis redes</button>
             <button class="btn wa sm" onclick="mandarNovedad('${esc(n.id)}')">${ic('Wa')}Mandar a un cliente</button>
-            ${mio?`<button class="btn ghost sm" onclick="borrarNovedad('${esc(n.id)}')">${ic('Trash2')}Quitar</button>`:''}
-          </div>`:(mio?`<button class="btn ghost xs" style="margin-top:9px" onclick="borrarNovedad('${esc(n.id)}')">Quitar</button>`:'')}
+            ${mio?`<button class="btn ghost sm" onclick="repetirNovedad('${esc(n.id)}')">${ic('RefreshCw')}Repetir</button>
+              <button class="btn ghost sm" onclick="borrarNovedad('${esc(n.id)}')">${ic('Trash2')}Quitar</button>`:''}
+          </div>`:(mio?`<div style="display:flex;gap:7px;margin-top:9px">
+            <button class="btn sec xs" onclick="repetirNovedad('${esc(n.id)}')">${ic('RefreshCw')}Repetir para este mes</button>
+            <button class="btn ghost xs" onclick="borrarNovedad('${esc(n.id)}')">Quitar</button></div>`:'')}
         </div>
       </div></div>`;
   };
@@ -2717,10 +2739,6 @@ function vistaNovedades(){
       <div class="vsub">Especiales, incentivos y programas. Listos para tus redes con tu número.</div></div>
       <button class="btn ghost sm" onclick="NOV.cargado=false;render()">${ic('RefreshCw')}Actualizar</button></div>
 
-    ${!S.cfg.wa?`<div class="card" style="background:rgba(234,179,8,.06);border-color:rgba(234,179,8,.22)">
-      <div style="display:flex;gap:9px;align-items:flex-start">${ic('AlertCircle',15,C.warn)}
-        <p style="font-size:12px;color:var(--tx2);line-height:1.6">
-          Pon tu WhatsApp en <b>Config</b> para que el texto de redes salga con tu número.</p></div></div>`:''}
 
     ${puedoPublicar()?`<div class="card">
       <button class="btn full" onclick="modalNovedad()">${ic('Plus')}Publicar un especial para mi equipo</button>
@@ -2736,17 +2754,44 @@ function vistaNovedades(){
         puedoPublicar()?'Publica el primer especial para tu equipo.'
         :'Cuando tu jefe o la oficina publiquen algo, te sale aquí.')}</div>`}
 
-    ${vencidos.length?`<div class="mlab">Ya vencidos</div>${vencidos.slice(0,5).map(n=>tarjeta(n,true)).join('')}`:''}
+    ${vencidos.length?`<div class="card" style="padding:0">
+      <button class="btn ghost sm full" style="padding:12px" onclick="NOVVER=!NOVVER;render()">
+        ${NOVVER?'Ocultar':'Ver'} los ${vencidos.length} vencido${vencidos.length>1?'s':''}</button></div>
+      ${NOVVER?vencidos.slice(0,10).map(n=>tarjeta(n,true)).join(''):''}`:''}
   </div>`;
 };
 
 function copiarRedes(id){
   const n=NOV.lista.find(x=>x.id===id); if(!n)return;
+  if(!miWa())return pedirWa(()=>copiarRedes(id));
   copiarTexto(textoRedes(n));
 }
 function mandarNovedad(id){
   const n=NOV.lista.find(x=>x.id===id); if(!n)return;
+  if(!miWa())return pedirWa(()=>mandarNovedad(id));
   openMsg('Mandar el especial','',textoRedes(n));
+}
+/* Sin numero no se copia: un anuncio sin WhatsApp es un lead perdido.
+   Se lo pedimos aqui mismo, no lo mandamos a buscarlo a Config. */
+function pedirWa(seguir){
+  window.__traswa=seguir;
+  openModal('Falta tu WhatsApp',
+   `<p style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:14px">
+      El anuncio termina con <b style="color:var(--tx)">"escríbeme"</b> y ahí va tu número.
+      Sin él, quien lo vea no tiene cómo contactarte.</p>
+    <div class="fr"><label class="f">Tu WhatsApp</label>
+      <input class="inp" id="waRapido" inputmode="tel" placeholder="3055551234"
+        value="${esc((SES&&SES.perfil&&SES.perfil.whatsapp)||'')}"></div>`,
+   `<button class="btn sec" onclick="closeModal()">Ahora no</button>
+    <button class="btn" onclick="guardarWaRapido()">${ic('Save')}Guardar y seguir</button>`);
+}
+function guardarWaRapido(){
+  const v=$('waRapido').value.trim();
+  if(tel10(v).length<11){alert('Necesita 10 dígitos con área. Ej: 3055551234');return;}
+  S.cfg.wa=v; save();
+  const f=window.__traswa; window.__traswa=null;
+  closeModal();
+  if(f)setTimeout(f,150);
 }
 async function borrarNovedad(id){
   if(!confirm('¿Quitar esta novedad? Deja de verla todo el equipo.'))return;
@@ -2755,7 +2800,9 @@ async function borrarNovedad(id){
   }catch(e){alert('No se pudo: '+(e&&e.message?e.message:e));}
 }
 
-function modalNovedad(){
+let NOVBASE=null;
+function modalNovedad(base){
+  NOVBASE=base||null;
   openModal('Publicar novedad',
    `<div class="mlab" style="margin-top:0">Qué es</div>
     <select class="inp" id="nvTipo" onchange="pintarCamposNovedad()">
@@ -2774,9 +2821,23 @@ function modalNovedad(){
     <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:10px">
       Pon siempre el <b>número completo</b>: pago, al firmar, plazo y millas.
       Es la regla de la casa y es lo que hace que el cliente confíe.</p>`,
-   `<button class="btn sec" onclick="closeModal()">Cancelar</button>
+   `<button class="btn sec" onclick="closeModal();NOVBASE=null">Cancelar</button>
     <button class="btn" onclick="publicarNovedad()">${ic('Send')}Publicar</button>`);
+  if(NOVBASE){
+    if($('nvTipo'))$('nvTipo').value=NOVBASE.tipo||'especial';
+    if($('nvTitulo'))$('nvTitulo').value=NOVBASE.titulo||'';
+  }
   pintarCamposNovedad();
+  if(NOVBASE&&$('nvVence')){
+    /* mismo dia del mes que viene, para relanzarlo sin pensar */
+    const f=new Date(); f.setMonth(f.getMonth()+1);
+    $('nvVence').value=fechaLocal(f);
+  }
+}
+function repetirNovedad(id){
+  const n=(NOV.lista||[]).find(x=>x.id===id); if(!n)return;
+  modalNovedad({tipo:n.tipo,titulo:n.titulo,data:n.data||{}});
+  toast('Revisa los números antes de publicar');
 }
 function pintarCamposNovedad(){
   const t=$('nvTipo')?$('nvTipo').value:'especial';
@@ -2786,38 +2847,43 @@ function pintarCamposNovedad(){
       <textarea class="inp" id="nvCond" rows="4" placeholder="Escríbelo tal cual quieres que lo lean…"></textarea>`;
     return;
   }
+  const B=(NOVBASE&&NOVBASE.data)||{};
+  const g=k=>esc(B[k]==null?'':B[k]);
   c.innerHTML=`<div class="mlab">El vehículo</div>
     <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">
-      <div class="fr"><label class="f">Año</label><input class="inp" id="nvAno" inputmode="numeric" placeholder="2025"></div>
-      <div class="fr"><label class="f">Marca</label><input class="inp" id="nvMarca" placeholder="Toyota"></div>
-      <div class="fr"><label class="f">Modelo</label><input class="inp" id="nvModelo" placeholder="Corolla"></div>
-      <div class="fr"><label class="f">Versión</label><input class="inp" id="nvTrim" placeholder="LE"></div>
+      <div class="fr"><label class="f">Año</label><input class="inp" id="nvAno" inputmode="numeric" placeholder="2025" value="${g('ano')}"></div>
+      <div class="fr"><label class="f">Marca</label><input class="inp" id="nvMarca" placeholder="Toyota" value="${g('marca')}"></div>
+      <div class="fr"><label class="f">Modelo</label><input class="inp" id="nvModelo" placeholder="Corolla" value="${g('modelo')}"></div>
+      <div class="fr"><label class="f">Versión</label><input class="inp" id="nvTrim" placeholder="LE" value="${g('trim')}"></div>
     </div>
     <div class="mlab">El número</div>
     <select class="inp" id="nvNeg" onchange="pintarCamposNovedad2()">
-      <option value="lease">Lease</option><option value="finance">Financiado</option><option value="cash">Contado</option>
+      ${[['lease','Lease'],['finance','Financiado'],['cash','Contado']].map(o=>
+        `<option value="${o[0]}" ${B.tipo===o[0]?'selected':''}>${o[1]}</option>`).join('')}
     </select>
     <div id="nvNums"></div>
     <div class="mlab">Condiciones <span class="h">tal cual se las dices al cliente</span></div>
-    <textarea class="inp" id="nvCond" rows="2" placeholder="Con crédito aprobado. Más tax y tag."></textarea>`;
+    <textarea class="inp" id="nvCond" rows="2" placeholder="Con crédito aprobado. Más tax y tag.">${g('condiciones')}</textarea>`;
   pintarCamposNovedad2();
 }
 function pintarCamposNovedad2(){
   const n=$('nvNeg')?$('nvNeg').value:'lease';
   const c=$('nvNums'); if(!c)return;
+  const B=(NOVBASE&&NOVBASE.data)||{};
+  const b=k=>esc(B[k]==null?'':B[k]);
   if(n==='cash'){
     c.innerHTML=`<div class="fr" style="margin-top:8px"><label class="f">Precio de contado</label>
-      <input class="inp" id="nvPrecio" inputmode="numeric" placeholder="18995"></div>`;return;
+      <input class="inp" id="nvPrecio" inputmode="numeric" placeholder="18995" value="${b('precio')}"></div>`;return;
   }
   c.innerHTML=`<div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
-    <div class="fr"><label class="f">Pago al mes</label><input class="inp" id="nvPago" inputmode="numeric" placeholder="199"></div>
+    <div class="fr"><label class="f">Pago al mes</label><input class="inp" id="nvPago" inputmode="numeric" placeholder="199" value="${b('pago')}"></div>
     <div class="fr"><label class="f">${n==='lease'?'Al firmar':'De entrada'}</label>
-      <input class="inp" id="nvFirmar" inputmode="numeric" placeholder="3999"></div>
+      <input class="inp" id="nvFirmar" inputmode="numeric" placeholder="3999" value="${b('alFirmar')}"></div>
     <div class="fr"><label class="f">Plazo <span class="h">meses</span></label>
-      <input class="inp" id="nvPlazo" inputmode="numeric" placeholder="${n==='lease'?'36':'72'}"></div>
+      <input class="inp" id="nvPlazo" inputmode="numeric" placeholder="${n==='lease'?'36':'72'}" value="${b('plazo')}"></div>
     ${n==='lease'?`<div class="fr"><label class="f">Millas al año</label>
-      <input class="inp" id="nvMillas" inputmode="numeric" placeholder="10000"></div>`
-     :`<div class="fr"><label class="f">APR %</label><input class="inp" id="nvApr" inputmode="numeric" placeholder="6.9"></div>`}
+      <input class="inp" id="nvMillas" inputmode="numeric" placeholder="10000" value="${b('millas')}"></div>`
+     :`<div class="fr"><label class="f">APR %</label><input class="inp" id="nvApr" inputmode="numeric" placeholder="6.9" value="${b('apr')}"></div>`}
   </div>`;
 }
 async function publicarNovedad(){
@@ -2853,7 +2919,7 @@ async function publicarNovedad(){
   try{
     const r=await sbRest('/comunicados',{method:'POST',prefer:'return=representation',body:body});
     if(!r||!r.length)throw new Error('El servidor no aceptó la publicación.');
-    closeModal();NOV.cargado=false;toast('Publicado — ya lo ve tu gente');render();
+    closeModal();NOVBASE=null;NOV.cargado=false;toast('Publicado — ya lo ve tu gente');render();
   }catch(e){
     alert('No se pudo publicar:\n\n'+(e&&e.message?e.message:e)+
       '\n\nSi dice 403: solo el jefe de equipo publica para su equipo, y solo el admin para todos.');
@@ -3861,7 +3927,7 @@ function guardarMetaMes(){
 function mesesAtras(n){
   const d=new Date(), out=[];
   for(let i=n-1;i>=0;i--){const x=new Date(d.getFullYear(),d.getMonth()-i,1);
-    out.push({ym:x.toISOString().slice(0,7),d:x});}
+    out.push({ym:mesLocal(x),d:x});}
   return out;
 }
 VIEWS.performance=function(){
