@@ -282,6 +282,36 @@ select.inp{-webkit-appearance:none;appearance:none;
   .onbwrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px}
 }
 @media(max-width:999px){ .dtonly{display:none!important} }
+
+/* ═══ IMPRESIÓN ═══ */
+#impresion{display:none}
+@media print{
+  @page{margin:12mm}
+  html,body{height:auto!important;overflow:visible!important;background:#fff!important;color:#000!important}
+  body>*{display:none!important}
+  #impresion{display:block!important;background:#fff;color:#000;
+    font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:10.5pt;line-height:1.45}
+  #impresion .hoja{max-width:100%}
+  #impresion .cab{display:flex;justify-content:space-between;align-items:flex-end;
+    border-bottom:2.5px solid #000;padding-bottom:7px;margin-bottom:14px}
+  #impresion .marca{font-size:16pt;font-weight:900;letter-spacing:.06em}
+  #impresion .sub{font-size:9pt;color:#444;margin-top:2px}
+  #impresion .fechad{font-size:9pt;color:#444}
+  #impresion .sec{font-size:8.5pt;font-weight:800;text-transform:uppercase;letter-spacing:.1em;
+    background:#eee;padding:4px 7px;margin:13px 0 6px;border-left:3px solid #000}
+  #impresion table.t{width:100%;border-collapse:collapse;margin-bottom:2px}
+  #impresion table.t td{border-bottom:1px solid #ccc;padding:4.5px 6px;vertical-align:top}
+  #impresion td.et{width:38%;color:#555;font-size:9pt}
+  #impresion td.va{font-weight:600}
+  #impresion .legal{font-size:8.5pt;line-height:1.5;margin:7px 0;text-align:justify}
+  #impresion .legal.en{color:#444;font-style:italic}
+  #impresion .firmas{display:flex;gap:22px;margin-top:26px;page-break-inside:avoid}
+  #impresion .fi{flex:1;font-size:8.5pt;color:#333}
+  #impresion .linea{border-bottom:1px solid #000;height:34px;margin-bottom:4px}
+  #impresion .fecha{color:#666}
+  #impresion .pie{margin-top:20px;padding-top:8px;border-top:1px solid #ccc;
+    font-size:7.5pt;color:#666;line-height:1.4}
+}
 </style>
 </head>
 <body>
@@ -348,6 +378,7 @@ select.inp{-webkit-appearance:none;appearance:none;
 <div class="onb" id="auth" style="display:none"></div>
 <div class="onb" id="onb" style="display:none"></div>
 <div class="toast" id="toast"></div>
+<div id="impresion" aria-hidden="true"></div>
 <input type="file" id="impFile" accept=".json,application/json" style="display:none" onchange="importar(event)">
 <input type="file" id="impCsv" accept=".csv,.tsv,.txt,.xlsx,.xls" style="display:none" onchange="importarArchivo(event)">
 
@@ -3055,6 +3086,190 @@ async function publicarBoletin(){
   }
 }
 
+/* ═══ APLICACIÓN DE CRÉDITO ═══
+   REGLA QUE NO SE ROMPE: el Social NUNCA se guarda. Ni en el libro, ni en
+   el teléfono, ni en la nube, ni en el respaldo JSON. Se teclea en el
+   momento de imprimir, sale en el papel, y al cerrar desaparece.
+   Por eso este documento SOLO se imprime: nada de correo ni WhatsApp.
+   Todo lo demás (dirección, empleo, ingreso) sí se guarda como siempre. */
+
+const VIVIENDA=['Renta','Propia','Con familia','Otra'];
+function setNacimiento(v){ updN('perfil','nacimiento',v); }
+const mesesATexto=m=>{m=num(m);if(!m)return '—';
+  const a=Math.floor(m/12),r=m%12;
+  return (a?a+' año'+(a>1?'s':''):'')+(a&&r?' ':'')+(r?r+' mes'+(r>1?'es':''):'');};
+
+/* ── Botón y aviso dentro del paso Perfil ── */
+function bloqueCredito(l){
+  const p=l.perfil||{};
+  const listo=!!(l.nom&&p.dir&&p.empleador&&num(p.ingreso));
+  return `<div class="card pad0" style="margin-top:4px">
+    <div class="chead"><div style="display:flex;align-items:center;gap:8px">${ic('FileText',15,C.tx)}Aplicación de crédito</div>
+      <div class="s">Para sacar el payoff y correr el crédito con el dealer.</div></div>
+    <div style="padding:14px 16px">
+      <div style="display:flex;gap:9px;align-items:flex-start;background:rgba(239,68,68,.07);
+        border:1px solid rgba(239,68,68,.22);border-radius:9px;padding:11px 12px;margin-bottom:13px">
+        ${ic('Lock',15,C.dan)}
+        <p style="font-size:11.5px;color:var(--tx2);line-height:1.65">
+          El <b style="color:var(--tx)">Social</b> se escribe al imprimir y <b style="color:var(--tx)">no se
+          guarda en ningún lado</b> — ni aquí, ni en el teléfono, ni en la nube.
+          Este documento <b style="color:var(--tx)">solo se imprime</b>: no se manda por correo ni por WhatsApp.</p>
+      </div>
+      ${listo?'':`<div style="font-size:11.5px;color:${C.warn};line-height:1.6;margin-bottom:11px">
+        Faltan datos para una aplicación completa: ${[!l.nom?'nombre':'',!p.dir?'dirección':'',
+          !p.empleador?'empleador':'',!num(p.ingreso)?'ingreso':''].filter(Boolean).join(', ')}.</div>`}
+      <button class="btn full" onclick="modalImprimirCredito()">${ic('FileText')}Imprimir aplicación</button>
+    </div></div>`;
+}
+
+/* ── Pedir el Social justo antes de imprimir ── */
+function modalImprimirCredito(){
+  const l=L(); if(!l)return;
+  const hayCo=!!(l.perfil&&l.perfil.co&&l.perfil.co.nom);
+  openModal('Imprimir la aplicación',
+   `<div style="display:flex;gap:9px;align-items:flex-start;background:rgba(239,68,68,.07);
+      border:1px solid rgba(239,68,68,.22);border-radius:9px;padding:11px 12px;margin-bottom:15px">
+      ${ic('Lock',15,C.dan)}
+      <p style="font-size:12px;color:var(--tx2);line-height:1.65">
+        Escríbelo aquí, imprime y hazlo firmar. <b style="color:var(--tx)">No se guarda.</b>
+        Si necesitas reimprimir, lo vuelves a escribir.</p>
+    </div>
+    <div class="fr"><label class="f">Social del cliente <span class="h">solo para este papel</span></label>
+      <input class="inp mono" id="ssn1" inputmode="numeric" autocomplete="off" maxlength="11"
+        placeholder="000-00-0000" oninput="formatoSSN(this)"></div>
+    ${hayCo?`<div class="fr" style="margin-top:11px"><label class="f">Social del co-solicitante</label>
+      <input class="inp mono" id="ssn2" inputmode="numeric" autocomplete="off" maxlength="11"
+        placeholder="000-00-0000" oninput="formatoSSN(this)"></div>`:''}
+    <div class="fr" style="margin-top:11px"><label class="f">Fecha de nacimiento del cliente</label>
+      <input class="inp" id="dob1" type="date" value="${esc((l.perfil&&l.perfil.nacimiento)||'')}"></div>
+    <p style="font-size:11px;color:var(--tx3);line-height:1.6;margin-top:12px">
+      La fecha de nacimiento sí se guarda con el cliente. El Social no.</p>`,
+   `<button class="btn sec" onclick="closeModal()">Cancelar</button>
+    <button class="btn" onclick="imprimirCredito()">${ic('FileText')}Imprimir</button>`);
+  setTimeout(()=>{if($('ssn1'))$('ssn1').focus();},250);
+}
+function formatoSSN(i){
+  let d=String(i.value||'').replace(/\D/g,'').slice(0,9);
+  i.value = d.length>5 ? d.slice(0,3)+'-'+d.slice(3,5)+'-'+d.slice(5)
+          : d.length>3 ? d.slice(0,3)+'-'+d.slice(3)
+          : d;
+}
+
+/* ── El documento ── */
+function imprimirCredito(){
+  const l=L(); if(!l)return;
+  const ssn1=$('ssn1')?$('ssn1').value.trim():'';
+  const ssn2=$('ssn2')?$('ssn2').value.trim():'';
+  const dob=$('dob1')?$('dob1').value:'';
+  if(ssn1&&ssn1.replace(/\D/g,'').length!==9){
+    alert('El Social necesita 9 dígitos, o déjalo en blanco para llenarlo a mano.');return;}
+  /* la fecha de nacimiento sí se guarda; el Social no toca S en ningún momento */
+  if(dob&&(!l.perfil.nacimiento||l.perfil.nacimiento!==dob)){
+    l.perfil.nacimiento=dob; l.updatedAt=nowISO(); save();
+  }
+  const html=docCredito(l,ssn1,ssn2);
+  const cont=$('impresion');
+  cont.innerHTML=html;
+  closeModal();
+  const limpiar=()=>{cont.innerHTML='';window.removeEventListener('afterprint',limpiar);};
+  window.addEventListener('afterprint',limpiar);
+  setTimeout(()=>{window.print();
+    /* por si el navegador no dispara afterprint (iOS a veces) */
+    setTimeout(limpiar,60000);},120);
+}
+
+function docCredito(l,ssn1,ssn2){
+  const p=l.perfil||{}, co=p.co||{}, f=finanzas(l);
+  const veh=[l.veh&&l.veh.ano,l.veh&&l.veh.marca,l.veh&&l.veh.mod].filter(Boolean).join(' ');
+  const hoyTxt=new Date().toLocaleDateString('es-US',{year:'numeric',month:'long',day:'numeric'});
+  const fila=(a,b)=>`<tr><td class="et">${esc(a)}</td><td class="va">${b==null||b===''?'&nbsp;':esc(String(b))}</td></tr>`;
+  const persona=(nom,ape,ssn,dob,tel,mail,lic)=>`
+    <table class="t">
+      ${fila('Nombre completo',[nom,ape].filter(Boolean).join(' '))}
+      ${fila('Social Security #',ssn)}
+      ${fila('Fecha de nacimiento',dob?fDate(dob):'')}
+      ${fila('Teléfono',tel)}
+      ${fila('Correo',mail)}
+      ${fila('Licencia de conducir',lic)}
+    </table>`;
+  const hayCo=!!co.nom;
+  return `
+  <div class="hoja">
+    <div class="cab">
+      <div>
+        <div class="marca">AUTOSOLUTION MIAMI</div>
+        <div class="sub">Solicitud de financiamiento · Credit Application</div>
+      </div>
+      <div class="fechad">${esc(hoyTxt)}</div>
+    </div>
+
+    <div class="sec">Solicitante</div>
+    ${persona(l.nom,p.apellido,ssn1,p.nacimiento,l.tel,l.email||p.email,p.licencia)}
+
+    <div class="sec">Domicilio</div>
+    <table class="t">
+      ${fila('Dirección',[p.dir,p.ciudad,p.estado,p.zip].filter(Boolean).join(', '))}
+      ${fila('Tiempo ahí',mesesATexto(p.tiempoDir))}
+      ${fila('Vivienda',p.vivienda||'')}
+      ${fila('Pago mensual de vivienda',p.pagoVivienda?fm(p.pagoVivienda):'')}
+      ${num(p.tiempoDir)&&num(p.tiempoDir)<24?fila('Dirección anterior',p.dirAnterior||''):''}
+    </table>
+
+    <div class="sec">Empleo e ingresos</div>
+    <table class="t">
+      ${fila('Empleador',p.empleador)}
+      ${fila('Cargo',p.cargo)}
+      ${fila('Teléfono del trabajo',p.telTrabajo)}
+      ${fila('Tiempo en el empleo',mesesATexto(p.tiempoEmpleo))}
+      ${fila('Ingreso mensual',p.ingreso?fm(p.ingreso):'')}
+      ${fila('Otros ingresos',p.otrosIngresos?fm(p.otrosIngresos):'')}
+    </table>
+
+    ${hayCo?`<div class="sec">Co-solicitante</div>
+      ${persona(co.nom,co.apellido,ssn2,co.nacimiento,co.tel,co.email,co.licencia)}
+      <table class="t">
+        ${fila('Empleador',co.empleador)}
+        ${fila('Ingreso mensual',co.ingreso?fm(co.ingreso):'')}
+      </table>`:''}
+
+    <div class="sec">El vehículo y el negocio</div>
+    <table class="t">
+      ${fila('Vehículo',veh)}
+      ${fila('Stock #',(l.oferta&&l.oferta.stock)||'')}
+      ${fila('VIN',(l.oferta&&l.oferta.vin)||'')}
+      ${fila('Tipo de negocio',(l.deal&&l.deal.tipo)||'')}
+      ${fila('Precio de venta',f.precio?fm(f.precio):'')}
+      ${fila('Entrada',f.down?fm(f.down):'')}
+      ${fila('Trade-in',(l.trade&&l.trade.has)?fm(f.allowance)+(f.payoff?'  ·  payoff '+fm(f.payoff):''):'')}
+      ${fila('Monto a financiar',f.amtFin?fm(f.amtFin):'')}
+      ${fila('Plazo / APR',(f.plazo?f.plazo+' meses':'')+(f.apr?'  ·  '+f.apr+'%':''))}
+      ${fila('Banco',(l.deal&&l.deal.banco)||'')}
+    </table>
+
+    <div class="sec">Autorización</div>
+    <p class="legal">
+      Autorizo a <b>AutoSolution Miami</b> y a las instituciones financieras con las que trabaje a
+      obtener mi reporte de crédito y a verificar la información aquí declarada, con el único
+      propósito de evaluar esta solicitud de financiamiento. Declaro que la información que doy es
+      verdadera y completa.
+    </p>
+    <p class="legal en">
+      I authorize <b>AutoSolution Miami</b> and the financial institutions it works with to obtain my
+      credit report and to verify the information stated here, for the sole purpose of evaluating this
+      financing application. I certify that the information provided is true and complete.
+    </p>
+
+    <div class="firmas">
+      <div class="fi"><div class="linea"></div>Firma del solicitante · Applicant signature<br><span class="fecha">Fecha / Date: ____________</span></div>
+      ${hayCo?`<div class="fi"><div class="linea"></div>Firma del co-solicitante · Co-applicant<br><span class="fecha">Fecha / Date: ____________</span></div>`:''}
+      <div class="fi"><div class="linea"></div>Asesor · ${esc(S.cfg.nombre||'')}<br><span class="fecha">${esc(S.cfg.dealer||'AutoSolution Miami')}</span></div>
+    </div>
+
+    <div class="pie">Documento confidencial. Contiene información personal — entrégalo en mano y guárdalo
+      según las normas de tu concesionario. No lo envíes por correo electrónico ni por mensajería.</div>
+  </div>`;
+}
+
 /* ═══════════ NAVEGACIÓN ═══════════ */
 let TAB='dashboard', LEADID=null, CLIID=null, STEP=1, Q='', QLIB='';
 let FSRC='Todos', FEST='Todos';
@@ -4710,7 +4925,17 @@ STEPV[5]=function(l){
     ${fld('Cargo',inpT(l.perfil.cargo,"updN('perfil','cargo',this.value)",'Manager…'))}
     ${fld('Ingreso mensual $',inpN(l.perfil.ingreso,"updNum('perfil','ingreso',this.value)"))}
     <div style="grid-column:1/-1">${fld('# Licencia de conducir',inpT(l.perfil.licencia,"updN('perfil','licencia',this.value)"))}</div>
-  </div></div>`;
+    ${fld('Apellidos',inpT(l.perfil.apellido,"updN('perfil','apellido',this.value)"))}
+    ${fld('Fecha de nacimiento','<input class="inp" type="date" value="'+esc(l.perfil.nacimiento||'')+'" onchange="setNacimiento(this.value)">')}
+    ${fld('Tiempo en la dirección',inpN(l.perfil.tiempoDir,"updNum('perfil','tiempoDir',this.value);render()"),'meses')}
+    ${fld('Vivienda',selT(VIVIENDA,l.perfil.vivienda,"updN('perfil','vivienda',this.value)"))}
+    ${fld('Pago de vivienda $',inpN(l.perfil.pagoVivienda,"updNum('perfil','pagoVivienda',this.value)"))}
+    ${num(l.perfil.tiempoDir)&&num(l.perfil.tiempoDir)<24?`<div style="grid-column:1/-1">${fld('Dirección anterior <span class="h">menos de 2 años en la actual</span>',inpT(l.perfil.dirAnterior,"updN('perfil','dirAnterior',this.value)"))}</div>`:''}
+    ${fld('Teléfono del trabajo',inpT(l.perfil.telTrabajo,"updN('perfil','telTrabajo',this.value)"))}
+    ${fld('Tiempo en el empleo',inpN(l.perfil.tiempoEmpleo,"updNum('perfil','tiempoEmpleo',this.value)"),'meses')}
+    ${fld('Otros ingresos $',inpN(l.perfil.otrosIngresos,"updNum('perfil','otrosIngresos',this.value)"))}
+  </div>
+  ${bloqueCredito(l)}</div>`;
 };
 
 /* ── 6 · CIERRE F&I ── */
